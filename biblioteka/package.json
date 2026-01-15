@@ -15,8 +15,11 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
+        "@fontsource/roboto": "^5.2.9",
+        "@mdi/font": "^7.4.47",
         "@vitejs/plugin-vue": "^6.0.3",
         "vue": "^3.5.26",
-        "vue-router": "^4.6.4"
+        "vue-router": "^4.6.4",
+        "vuetify": "^3.11.6"
     }
 }
