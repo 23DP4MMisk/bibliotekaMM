@@ -8,4 +8,17 @@ export const vuetify = createVuetify({
   ssr: true,
   components,
   directives,
+  theme: {
+    defaultTheme: 'customTheme',
+    themes: {
+      customTheme: {
+        dark: false,
+        colors: {
+          primary: '#003D3A', // Основной цвет кнопок
+          secondary: '#FDFBED', // Фон
+          background: '#FDFBED',
+        }
+      }
+    }
+  }
 })
