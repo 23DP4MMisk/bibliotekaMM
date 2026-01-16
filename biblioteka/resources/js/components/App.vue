@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-main class="pa-4">
-      <v-btn color="primary">Кнопка</v-btn>
+      <router-view />
     </v-main>
   </v-app>
 </template>
@@ -11,3 +11,4 @@ export default {
   name: 'App',
 }
 </script>
+
