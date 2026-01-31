@@ -3,6 +3,8 @@ import './bootstrap';
 import App from './components/App.vue';
 import router from './router';
 import { vuetify } from './plugins/vuetify'
+import '../css/library-pages.css'
+
 
 const fontLink = document.createElement('link')
 fontLink.href = 'https://fonts.googleapis.com/css2?family=Tenor+Sans&display=swap'

@@ -10,10 +10,10 @@ export default defineConfig({
         }),
         vue(),
     ],
-     assetsInclude: ['**/*.gif'], // Говорим Vite что GIF - это ассеты
+     assetsInclude: ['**/*.gif'], 
     server: {
         fs: {
-            // Разрешаем доступ к public папке
+            
             allow: ['..', '../public']
         }
     }

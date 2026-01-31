@@ -13,7 +13,7 @@ return new class extends Migration
     {
        // Nodaļa 
         Schema::create('Nodala', function (Blueprint $table) {
-            $table->integer('Nodala_ID')->autoIncrement(); // ID для связи с Zanrs
+            $table->integer('Nodala_ID')->autoIncrement(); 
             $table->enum('tips', ['akademiska', 'izglitojosa'])->default('akademiska');
             $table->timestamps();
         });
@@ -39,10 +39,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-         // Zanrs uz Nodaļa
-        Schema::table('Zanrs', function (Blueprint $table) {
-            $table->foreign('Nodala')->references('Nodala_ID')->on('Nodala');
-        });
+        
 
         // Gramata 
         Schema::create('Gramata', function (Blueprint $table) {
@@ -53,14 +50,16 @@ return new class extends Migration
             $table->integer('lapu_skaits')->nullable();
             $table->string('faila_pdf', 250)->nullable();
             $table->string('vaku_attels', 250)->nullable();
-            $table->string('autors', 20);
+            $table->string('autors', 255);
             $table->integer('Zanra_ID')->nullable();
+            $table->integer('Nodala_ID'); 
             $table->timestamps();
         });
 
          //Arejas atslegas   Gramata UZ Zanrs
         Schema::table('Gramata', function (Blueprint $table) {
             $table->foreign('Zanra_ID')->references('Zanra_ID')->on('Zanrs');
+            $table->foreign('Nodala_ID')->references('Nodala_ID')->on('Nodala');
         });
 
 
