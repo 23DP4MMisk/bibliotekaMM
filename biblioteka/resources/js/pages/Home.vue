@@ -35,7 +35,7 @@
               backgroundRepeat: 'no-repeat'
             }"
           >
-            <v-btn color="#003D3A" size="x-large" class="hero-btn" @click="scrollToSection('about')">
+            <v-btn color="#003D3A" size="x-large" class="hero-btn" @click="goToLibrary">
               Ieiet bibliotekā
             </v-btn>
           </div>
@@ -123,6 +123,10 @@ export default {
     };
   },
   methods: {
+    goToLibrary() {
+      // novirzīt uz biblioteku lapu
+      this.$router.push('/library');
+    },
     scrollToSection(sectionId) {
       const element = document.getElementById(sectionId);
       if (element) {

@@ -1,4 +1,6 @@
-*
-!private/
-!public/
-!.gitignore
+*.log
+*.tmp
+*.cache
+framework/cache/*
+framework/sessions/*
+framework/views/*
