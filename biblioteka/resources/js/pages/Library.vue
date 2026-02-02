@@ -407,7 +407,7 @@ export default {
     },
     
     goToLogin() {
-      window.location.href = '/login';
+      this.$router.push('/login');
     },
     
     viewBook(isbn) {

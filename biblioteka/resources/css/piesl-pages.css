@@ -1,0 +1,210 @@
+.fill-height {
+  height: 100vh;
+  background-color: #FDFBED;
+}
+
+/* Карточка входа */
+.login-card {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  margin-top: 100px;
+}
+
+/* Заголовок */
+.login-header {
+  background-color: #FFFFFF;
+}
+
+.login-title {
+  font-size: 24px;
+  font-weight: 500;
+  color: #000000;
+  letter-spacing: 0.5px;
+}
+
+/* Поля ввода */
+.input-field {
+  background-color: #FFFFFF;
+}
+
+.input-label {
+  font-size: 14px;
+  color: #000000;
+  font-weight: 400;
+}
+
+.custom-text-field {
+  background-color: #FFFFFF !important;
+  border: 2px solid #003D3A !important;
+  border-radius: 4px !important;
+}
+
+.custom-text-field :deep(.v-field__field) {
+  background-color: #FFFFFF !important;
+}
+
+.custom-text-field :deep(.v-field__input) {
+  color: #FDFBED !important;
+  padding-left: 12px !important;
+  min-height: 48px !important;
+  font-size: 16px;
+  background-color: #003D3A !important;
+}
+
+.custom-text-field :deep(.v-field) {
+  background-color: #003D3A !important;
+}
+
+.custom-text-field :deep(.v-field__outline) {
+  display: none !important;
+}
+
+/* Контейнер кнопок */
+.button-container {
+  background-color: #FFFFFF;
+}
+
+/* Кнопка Iejiet */
+.login-button {
+  background-color: #003D3A !important;
+  border-radius: 4px !important;
+  text-transform: none !important;
+}
+
+.login-button:hover {
+  background-color: #002c29 !important;
+}
+
+/* Кнопка REGISTRACIJA */
+.register-button {
+  background-color: #FFFFFF !important;
+  border: 2px solid #003D3A !important;
+  border-radius: 4px !important;
+  text-transform: none !important;
+}
+
+.register-button:hover {
+  background-color: #f5f5f5 !important;
+}
+
+/* Текст кнопок */
+.button-text {
+  color: #FDFBED;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.register-button .button-text {
+  color: #003D3A !important;
+}
+
+/* Ошибки */
+.error-container {
+  background-color: #FFFFFF;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 14px;
+  text-align: center;
+  padding: 12px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  border: 1px solid #ffcdd2;
+}
+
+/* Убираем все лишние отступы и эффекты Vuetify */
+:deep(.v-field--variant-solo) {
+  box-shadow: none !important;
+}
+
+:deep(.v-field--active) {
+  box-shadow: none !important;
+}
+
+@media (max-width: 960px) {
+  .search-container {
+    max-width: 400px;  /* Ограничиваем ширину поиска */
+    margin: 0 20px;    /* Добавляем отступы по бокам */
+  }
+  
+  .library-name {
+    font-size: 1.8rem; /* Уменьшаем размер названия библиотеки */
+  }
+  
+  .category-title {
+    font-size: 2.2rem; /* Уменьшаем заголовок категории */
+  }
+  
+  .error-title, .no-books-title {
+    font-size: 1.8rem; /* Уменьшаем заголовки ошибок */
+  }
+  
+  .book-title {
+    font-size: 1.15rem; /* Уменьшаем заголовки книг */
+  }
+  
+  .book-author {
+    font-size: 1rem;    /* Уменьшаем имена авторов */
+  }
+}
+
+@media (max-width: 768px) {
+  .category-menu {
+    flex-direction: column;    /* Меню категорий в колонку */
+    gap: 15px;                 /* Расстояние между элементами */
+    align-items: center;       /* Центрируем по горизонтали */
+  }
+  
+  .subcategory-menu {
+    flex-direction: column;    /* Подкатегории в колонку */
+    align-items: center;       /* Центрируем */
+    gap: 10px;                 /* Отступы между элементами */
+  }
+  
+  .subcategory-btn {
+    width: 250px;             /* Фиксированная ширина кнопок */
+  }
+  
+  .nodala-menu {
+    left: 50%;                /* Центрируем выпадающее меню */
+    transform: translateX(-50%);
+  }
+  
+  .book-cover-wrapper {
+    padding-top: 140%;        /* Увеличиваем пропорции обложек */
+  }
+}
+
+@media (max-width: 600px) {
+  .search-container {
+    display: none;            /* Скрываем поиск на маленьких экранах */
+  }
+  
+  .login-btn {
+    min-width: 100px;        /* Минимальная ширина кнопки входа */
+    font-size: 0.9rem;       /* Уменьшаем шрифт */
+    height: 40px;            /* Уменьшаем высоту */
+  }
+  
+  .library-name {
+    font-size: 1.5rem;       /* Еще уменьшаем название библиотеки */
+  }
+  
+  .category-title {
+    font-size: 1.8rem;       /* Уменьшаем заголовок категории */
+  }
+  
+  .book-title {
+    font-size: 1.1rem;       /* Уменьшаем заголовки книг */
+  }
+  
+  .error-container, .no-books-container {
+    padding: 30px 20px;      /* Уменьшаем отступы контейнеров ошибок */
+  }
+  
+  .error-title, .no-books-title {
+    font-size: 1.6rem;       /* Уменьшаем заголовки ошибок */
+  }
+}
