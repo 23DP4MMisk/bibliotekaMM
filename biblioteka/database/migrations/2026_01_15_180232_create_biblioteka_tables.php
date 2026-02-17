@@ -21,8 +21,8 @@ return new class extends Migration
         // Lietotajs 
         Schema::create('Lietotajs', function (Blueprint $table) {
             $table->integer('kodsID')->autoIncrement();
-            $table->string('lietotaja_vards', 10);
-            $table->string('epasts', 20)->unique();
+            $table->string('lietotaja_vards', 50);
+            $table->string('epasts', 100)->unique();
             $table->string('parole', 255);
             $table->enum('loma', ['admins', 'registretajsklients', 'viesis'])->default('viesis');
             $table->date('registresanas_datums');

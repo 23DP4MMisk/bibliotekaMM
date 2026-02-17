@@ -281,6 +281,63 @@
   padding-top: 20px;
 }
 
+/* В library-pages.css добавьте: */
+.user-info {
+  padding: 8px 0;
+  min-width: 180px;
+}
+
+.user-name {
+  font-size: 0.95rem;
+  margin-bottom: 2px;
+  color: #003D3A;
+}
+
+.user-email {
+  font-size: 0.8rem;
+  color: #666;
+  word-break: break-all;
+}
+
+/* Стили для пунктов меню */
+.v-list-item {
+  min-height: 40px !important;
+  padding: 0 16px !important;
+}
+
+.v-list-item span {
+  font-size: 0.9rem;
+  margin-left: 8px;
+}
+
+.v-icon.left {
+  margin-right: 12px;
+}
+
+.user-initial-btn {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  padding: 0 !important;
+  background-color: #003D3A !important; 
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 8px rgba(0, 61, 58, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2); 
+}
+
+.user-initial {
+  font-size: 22px; 
+  font-weight: 700; 
+  color: #FFFFFF; 
+  text-transform: uppercase;
+  line-height: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); 
+}
+
+
 @media (max-width: 960px) {
   .search-container {
     max-width: 400px;

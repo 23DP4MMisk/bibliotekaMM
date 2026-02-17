@@ -12,7 +12,25 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        
+        $middleware->validateCsrfTokens([
+            'http://localhost:5173',
+        ]);
+
+        $middleware->api(prepend: [
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        ]);
+        
+       
+        $middleware->validateCsrfTokens(except: [
+            'api/*',
+            'reģistrēties',
+            'pieslēgties',
+            'izrakstīties',
+            'check-auth'
+        ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

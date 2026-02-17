@@ -123,6 +123,60 @@
   box-shadow: none !important;
 }
 
+@media(min-width: 2560px){
+  .login-card {
+    width: 600px;
+  }
+
+  .login-title {
+    font-size: 34px;
+    padding: 50px 0 30px 0;
+  }
+
+  .input-field {
+    padding: 32px 60px 14px 60px;
+  }
+
+  .custom-text-field :deep(.v-field_input){
+    min-height: 64px !important;
+    font-size: 20px;
+    padding-left: 20px !important;
+  }
+
+  .login-button, .register-button {
+    height: 68px !important;
+    font-size: 20px;
+  }
+
+  .button-text{
+    font-size: 20px;
+  }
+
+  .error-message{
+    font-size: 18px;
+    padding: 18px;
+  }
+}
+
+@media (min-width: 1200px) and (orientation: landscape) and (max-height: 700px){
+  .fill-height{
+    height: auto;
+    min-height: 100vh;
+    padding: 40px 0;
+  }
+
+  .login-card{
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+@media(max-width: 1200px) and (min-height: 1000px){
+  .login-card{
+    margin-top: 100px;
+  }
+}
+
 @media (max-width: 960px) {
   .search-container {
     max-width: 400px;  /* Ограничиваем ширину поиска */

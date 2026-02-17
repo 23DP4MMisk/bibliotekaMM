@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <!-- Верхняя панель -->
+  
     <v-app-bar 
       app 
       flat 
@@ -9,7 +9,7 @@
       fixed
     >
       <v-container class="d-flex align-center justify-space-between px-8">
-        <!-- Кнопка "MYLIBRARY" -->
+        
         <v-btn 
           @click="showAllBooks" 
           variant="text" 
@@ -18,7 +18,7 @@
           <h1 class="library-name">MYLIBRARY</h1>
         </v-btn>
         
-        <!-- Поиск по центру -->
+       
         <div class="search-container">
           <v-text-field
             v-model="searchQuery"
@@ -33,27 +33,75 @@
             @input="handleSearchInput"
           ></v-text-field>
         </div>
-        
-        <!-- Кнопка "Pieslēgties" -->
-        <v-btn 
-          color="#003D3A" 
-          class="login-btn"
-          @click="goToLogin"
-          rounded
-        >
-          Pieslēgties
-        </v-btn>
+
+       
+        <div class="user-container">
+          <div v-if="isLoggedIn && user" class="d-flex align-center">
+           
+            <v-menu offset-y>
+              <template v-slot:activator="{ props }">
+                <v-btn 
+                  color="#003D3A" 
+                  class="user-initial-btn"
+                  rounded
+                  v-bind="props"
+                >
+                  <span class="user-initial">{{ userInitial }}</span>
+                </v-btn>
+              </template>
+      
+             
+              <v-list>
+                <v-list-item>
+                  <v-list-item-content>
+                    <v-list-item-title class="font-weight-bold">
+                      {{ userName }}
+                    </v-list-item-title>
+                    <v-list-item-subtitle>
+                      {{ userEmail }}
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-divider></v-divider>
+                <v-list-item @click="goToMyLibrary">
+                  <v-list-item-icon>
+                    <v-icon>mdi-book-multiple</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-title>Mana bibliotēka</v-list-item-title>
+                </v-list-item>
+                <v-divider></v-divider>
+                <v-list-item @click="logout">
+                  <v-list-item-icon>
+                    <v-icon>mdi-logout</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-title>Iziet</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+        </div>
+  
+          <v-btn 
+            v-else
+            color="#003D3A" 
+            class="login-btn"
+            @click="goToLogin"
+            rounded
+          >
+            Pieslēgties
+          </v-btn>
+        </div>
+      
       </v-container>
     </v-app-bar>
 
-    <!-- Основной контент -->
+   
     <v-main style="margin-top: 80px;">
       <v-container fluid class="main-content pa-8">
-        <!-- Меню категорий -->
+       
         <v-row class="mb-6">
           <v-col cols="12" class="d-flex justify-center">
             <div class="category-menu">
-              <!-- Кнопка "Nodaļas" с выпадающим меню -->
+              
               <div class="nodala-dropdown">
                 <v-btn 
                   variant="text"
@@ -65,7 +113,7 @@
                   <v-icon right>mdi-chevron-down</v-icon>
                 </v-btn>
                 
-                <!-- Выпадающее меню -->
+               
                 <div 
                   v-if="showNodalaMenu" 
                   class="nodala-menu"
@@ -94,7 +142,7 @@
                 </div>
               </div>
               
-              <!-- Кнопка "Mana biblioteka" -->
+              
               <v-btn 
                 @click="showMyLibrary" 
                 variant="text"
@@ -106,7 +154,7 @@
           </v-col>
         </v-row>
         
-        <!-- Заголовок категории -->
+       
         <v-row class="mb-6">
           <v-col cols="12">
             <h2 class="category-title text-center">
@@ -119,7 +167,7 @@
           </v-col>
         </v-row>
         
-        <!-- Индикатор загрузки -->
+       
         <div v-if="loading" class="text-center py-12">
           <v-progress-circular
             indeterminate
@@ -129,7 +177,7 @@
           <p class="mt-4">Ielādē grāmatas...</p>
         </div>
         
-        <!-- Сообщение об ошибке -->
+       
         <div v-else-if="error" class="text-center py-12">
           <div class="error-container">
             <v-icon size="100" color="#ff6b6b" class="mb-4">mdi-alert-circle-outline</v-icon>
@@ -142,9 +190,9 @@
           </div>
         </div>
         
-        <!-- Контент: Книги -->
+       
         <div v-else>
-          <!-- Если выбрана "Моя библиотека" -->
+        
           <div v-if="activeCategory === 'my-library'" class="text-center py-12">
             <v-icon size="80" color="#003D3A" class="mb-4">mdi-book-multiple</v-icon>
             <h3 class="mb-4">Jūsu personīgā bibliotēka</h3>
@@ -154,7 +202,7 @@
             </v-btn>
           </div>
           
-          <!-- Если книги найдены -->
+         
           <div v-else-if="displayedBooks.length > 0">
             <v-row>
               <v-col 
@@ -166,7 +214,7 @@
                 :key="book.isbn"
               >
                 <v-card class="book-card" elevation="0">
-                  <!-- Обложка книги -->
+                 
                   <div class="book-cover-wrapper">
                     <div class="book-cover-container">
                       <v-img
@@ -184,7 +232,7 @@
                     </div>
                   </div>
                   
-                  <!-- Информация о книге -->
+                 
                   <v-card-text class="pa-3 pt-4 text-center">
                     <h3 class="book-title mb-2">{{ book.title }}</h3>
                     <p class="book-author mb-3">{{ book.author }}</p>
@@ -204,7 +252,7 @@
             </v-row>
           </div>
           
-          <!-- Если книги не найдены -->
+        
           <div v-else class="text-center py-12">
             <div class="no-books-container">
               <v-icon size="100" color="#a0a0a0" class="mb-4">mdi-book-search</v-icon>
@@ -227,8 +275,10 @@
     </v-main>
   </v-app>
 </template>
+
 <script>
 import '../../css/library-pages.css'; 
+
 export default {
   name: 'LibraryPage',
   data() {
@@ -241,7 +291,12 @@ export default {
       errorMessage: '',
       allBooks: [],
       closeMenuTimer: null,
-      searchTimeout: null
+      searchTimeout: null,
+      
+     
+      isLoggedIn: false,
+      user: null,
+      authLoading: false
     };
   },
   computed: {
@@ -259,12 +314,113 @@ export default {
       }
       
       return filtered;
+    },
+    
+  
+    userName() {
+      return this.user?.lietotaja_vards || '';
+    },
+    
+    userEmail() {
+      return this.user?.epasts || '';
+    },
+    
+    userInitial() {
+      if (this.userName) {
+        return this.userName.charAt(0).toUpperCase();
+      } else if (this.userEmail) {
+        return this.userEmail.charAt(0).toUpperCase();
+      }
+      return 'U';
     }
   },
   async mounted() {
+  
+    await this.checkAuth();
+   
     await this.fetchBooks();
   },
   methods: {
+  
+    
+    async checkAuth() {
+      if (this.authLoading) return;
+      
+      this.authLoading = true;
+      console.log('🔐 Pārbaudu autentifikāciju...');
+      
+      try {
+       
+        const response = await fetch('http://localhost:8000/api/check-auth', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const data = await response.json();
+        console.log('Auth check response:', data);
+        
+        if (data.authenticated && data.lietotajs) {
+          this.isLoggedIn = true;
+          this.user = data.lietotajs;
+          console.log('✅ Lietotājs autentificēts:', this.userName);
+        } else {
+          this.setGuest();
+          console.log('❌ Lietotājs NAV autentificēts');
+        }
+        
+      } catch (error) {
+        console.error('Auth check error:', error);
+        this.setGuest();
+      } finally {
+        this.authLoading = false;
+      }
+    },
+    
+    async logout() {
+      console.log('🚪 Mēģinu izrakstīties...');
+      
+      try {
+       
+        const response = await fetch('http://localhost:8000/api/izrakstīties', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const data = await response.json();
+        console.log('Logout response:', data);
+        
+        if (data.success) {
+          this.setGuest();
+          alert('Jūs esat veiksmīgi izrakstījies');
+          
+         
+          setTimeout(() => {
+            this.$router.go(0);
+          }, 1000);
+        }
+        
+      } catch (error) {
+        console.error('Logout error:', error);
+        this.setGuest();
+        this.$router.go(0);
+      }
+    },
+    
+    setGuest() {
+      this.isLoggedIn = false;
+      this.user = null;
+    },
+    
+   
+    
     async fetchBooks(searchQuery = '') {
       this.loading = true;
       this.error = false;
@@ -394,9 +550,11 @@ export default {
     },
     
     showMyLibrary() {
+      
       this.activeCategory = 'my-library';
       this.searchQuery = '';
       this.showNodalaMenu = false;
+      
     },
     
     startCloseMenuTimer() {
@@ -404,6 +562,10 @@ export default {
       this.closeMenuTimer = setTimeout(() => {
         this.showNodalaMenu = false;
       }, 300);
+    },
+    
+    goToMyLibrary() {
+      this.showMyLibrary();
     },
     
     goToLogin() {
@@ -416,4 +578,3 @@ export default {
   }
 }
 </script>
-
