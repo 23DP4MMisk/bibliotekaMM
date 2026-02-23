@@ -331,16 +331,48 @@ export default {
       } else if (this.userEmail) {
         return this.userEmail.charAt(0).toUpperCase();
       }
+       const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          if (user.lietotaja_vards) {
+            return user.lietotaja_vards.charAt(0).toUpperCase();
+          } else if (user.epasts) {
+            return user.epasts.charAt(0).toUpperCase();
+          }
+        } catch (e) {
+          console.error('Error parsing saved user:', e);
+        }
+      }
+      
       return 'U';
     }
+    
+    
+     
   },
   async mounted() {
+    this.loadUserFromStorage();
   
     await this.checkAuth();
    
     await this.fetchBooks();
   },
   methods: {
+
+    loadUserFromStorage() {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          this.isLoggedIn = true;
+          this.user = user;
+          console.log('✅ Lietotājs ielādēts no localStorage:', user.lietotaja_vards);
+        } catch (e) {
+          console.error('Kļūda ielādējot lietotāju:', e);
+        }
+      }
+    },
   
     
     async checkAuth() {
@@ -366,15 +398,22 @@ export default {
         if (data.authenticated && data.lietotajs) {
           this.isLoggedIn = true;
           this.user = data.lietotajs;
+          localStorage.setItem('user', JSON.stringify(data.lietotajs));
           console.log('✅ Lietotājs autentificēts:', this.userName);
         } else {
-          this.setGuest();
-          console.log('❌ Lietotājs NAV autentificēts');
+          if (!localStorage.getItem('user')) {
+            this.setGuest();
+            console.log('❌ Lietotājs NAV autentificēts');
+          }
+          
         }
         
       } catch (error) {
         console.error('Auth check error:', error);
-        this.setGuest();
+         if (!localStorage.getItem('user')) {
+          this.setGuest();
+        }
+       
       } finally {
         this.authLoading = false;
       }
@@ -399,6 +438,7 @@ export default {
         
         if (data.success) {
           this.setGuest();
+          localStorage.removeItem('user');
           alert('Jūs esat veiksmīgi izrakstījies');
           
          

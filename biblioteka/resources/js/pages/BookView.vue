@@ -1,28 +1,64 @@
 <template>
   <v-app>
-    <!-- Верхняя панель - ТОЛЬКО MYLIBRARY -->
     <v-app-bar app flat height="80" class="top-nav-bar" fixed>
       <v-container class="d-flex align-center justify-space-between px-8">
-        <!-- ТОЛЬКО MYLIBRARY слева -->
         <v-btn @click="goToLibrary" variant="text" class="library-name-btn">
           <h1 class="library-name">MYLIBRARY</h1>
         </v-btn>
         
-        <!-- Пустой div для выравнивания (ничего не добавляем) -->
         <div></div>
+
+        <div v-if="isLoggedIn && user" class="user-container">
+          <v-menu offset-y>
+            <template v-slot:activator="{ props }">
+              <v-btn 
+                color="#003D3A" 
+                class="user-initial-btn"
+                rounded
+                v-bind="props"
+              >
+                <span class="user-initial">{{ userInitial }}</span>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item>
+                <v-list-item-content>
+                  <v-list-item-title class="font-weight-bold">
+                    {{ userName }}
+                  </v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{ userEmail }}
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item @click="goToMyLibrary">
+                <v-list-item-icon>
+                  <v-icon>mdi-book-multiple</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Mana bibliotēka</v-list-item-title>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item @click="logout">
+                <v-list-item-icon>
+                  <v-icon>mdi-logout</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Iziet</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </div>
+        <div v-else></div>
       </v-container>
     </v-app-bar>
 
-    <!-- Основной контент -->
     <v-main style="margin-top: 80px;">
       <v-container fluid class="main-content pa-8">
-        <!-- Индикатор загрузки -->
         <div v-if="loading" class="text-center py-12">
           <v-progress-circular indeterminate color="#003D3A" size="64"></v-progress-circular>
           <p class="mt-4">Ielādē grāmatas informāciju...</p>
         </div>
 
-        <!-- Сообщение об ошибке -->
         <div v-else-if="error" class="text-center py-12">
           <div class="error-container">
             <v-icon size="100" color="#ff6b6b" class="mb-4">mdi-alert-circle-outline</v-icon>
@@ -32,10 +68,8 @@
           </div>
         </div>
 
-        <!-- Детальная информация о книге - ТОЧНО КАК НА КАРТИНКЕ -->
         <div v-else-if="book" class="book-detail-container">
           <v-row>
-            <!-- Левая колонка - обложка (слева как на картинке) -->
             <v-col cols="12" md="5" lg="4">
               <div class="book-cover-large">
                 <v-img
@@ -54,16 +88,12 @@
               </div>
             </v-col>
 
-            <!-- Правая колонка - информация (справа как на картинке) -->
             <v-col cols="12" md="7" lg="8">
               <div class="book-info-container">
-                <!-- Название книги (сверху) -->
                 <h1 class="book-title-large">{{ book.nosaukums || book.title }}</h1>
                 
-                <!-- Имя и фамилия автора (под названием) -->
                 <h2 class="book-author-large">{{ book.autors || book.author }}</h2>
 
-                <!-- Год и количество страниц (из базы данных) -->
                 <div class="book-meta">
                   <div class="meta-item" v-if="book.gads">
                     <v-icon color="#003D3A" class="mr-2">mdi-calendar</v-icon>
@@ -75,19 +105,16 @@
                   </div>
                 </div>
 
-                <!-- Описание книги (из базы данных) -->
                 <div class="book-description" v-if="book.apraksts">
                   <p class="description-text">{{ book.apraksts }}</p>
                 </div>
 
-                <!-- Информация для гостей - ТОЧНО КАК НА КАРТИНКЕ -->
                 <div class="guest-info">
                   <p class="guest-message">
                     Lai lejupielādētu grāmatu, pievienotu to bibliotēkai un rakstītu atsauksmes, vajag reģistrēties vai ienākt.
                   </p>
                 </div>
 
-                <!-- Кнопка IENĀKT - цвет 003D3A, текст белый -->
                 <div class="action-buttons">
                   <v-btn
                     color="#003D3A"
@@ -109,7 +136,6 @@
               <div class="reviews-section">
                 <h2 class="reviews-title">Atsauksmes</h2>
                 
-                <!-- Карточка с сообщением об отсутствии отзывов -->
                 <div class="reviews-card">
                   <div class="reviews-icon">
                     <v-icon size="48" color="#003D3A">mdi-chat-outline</v-icon>
@@ -121,7 +147,7 @@
                     <p class="reviews-message">
                       Informācija par lasītāju vērtējumiem vai recenzijām nav atrasta, tāpēc grāmata vēl nav plaši apspriesta.
                     </p>
-                     <p class="reviews-author">
+                    <p class="reviews-author">
                       Autors — <strong>{{ book.autors || book.author }}</strong>.
                     </p>
                   </div>
@@ -143,14 +169,139 @@ export default {
       book: null,
       loading: true,
       error: false,
-      errorMessage: ''
-      // Поиск полностью удален
+      errorMessage: '',
+      
+      isLoggedIn: false,
+      user: null,
+      authLoading: false
     };
   },
+  computed: {
+    userName() {
+      return this.user?.lietotaja_vards || '';
+    },
+    
+    userEmail() {
+      return this.user?.epasts || '';
+    },
+    
+    userInitial() {
+      if (this.userName) {
+        return this.userName.charAt(0).toUpperCase();
+      } else if (this.userEmail) {
+        return this.userEmail.charAt(0).toUpperCase();
+      }
+      
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          if (user.lietotaja_vards) {
+            return user.lietotaja_vards.charAt(0).toUpperCase();
+          } else if (user.epasts) {
+            return user.epasts.charAt(0).toUpperCase();
+          }
+        } catch (e) {
+          console.error('Error parsing saved user:', e);
+        }
+      }
+      
+      return 'U';
+    }
+  },
   async mounted() {
+    this.loadUserFromStorage();
+    await this.checkAuth();
     await this.loadBookDetails();
   },
   methods: {
+    loadUserFromStorage() {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          this.isLoggedIn = true;
+          this.user = user;
+          console.log('✅ Lietotājs ielādēts no localStorage:', user.lietotaja_vards);
+        } catch (e) {
+          console.error('Kļūda ielādējot lietotāju:', e);
+        }
+      }
+    },
+
+    async checkAuth() {
+      if (this.authLoading) return;
+      
+      this.authLoading = true;
+      console.log('🔐 Pārbaudu autentifikāciju...');
+      
+      try {
+        const response = await fetch('http://localhost:8000/api/check-auth', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const data = await response.json();
+        console.log('Auth check atbilde:', data);
+        
+        if (data.authenticated && data.lietotajs) {
+          this.isLoggedIn = true;
+          this.user = data.lietotajs;
+          localStorage.setItem('user', JSON.stringify(data.lietotajs));
+          console.log('✅ Lietotājs autentificēts:', this.userName);
+        } else {
+          if (!localStorage.getItem('user')) {
+            this.isLoggedIn = false;
+            this.user = null;
+          }
+        }
+        
+      } catch (error) {
+        console.error('Auth check kļūda:', error);
+      } finally {
+        this.authLoading = false;
+      }
+    },
+
+    async logout() {
+      console.log('🚪 Mēģinu izrakstīties...');
+      
+      try {
+        const response = await fetch('http://localhost:8000/api/izrakstīties', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const data = await response.json();
+        console.log('Logout atbilde:', data);
+        
+        if (data.success) {
+          this.isLoggedIn = false;
+          this.user = null;
+          localStorage.removeItem('user');
+          alert('Jūs esat veiksmīgi izrakstījies');
+          setTimeout(() => {
+            this.$router.go(0);
+          }, 1000);
+        }
+        
+      } catch (error) {
+        console.error('Logout kļūda:', error);
+        this.isLoggedIn = false;
+        this.user = null;
+        localStorage.removeItem('user');
+        this.$router.go(0);
+      }
+    },
+
     async loadBookDetails() {
       this.loading = true;
       this.error = false;
@@ -185,7 +336,6 @@ export default {
     },
 
     getBookCover(book) {
-      // Проверяем наличие обложки в базе данных
       if (book.vaku_attels && book.vaku_attels.trim() !== '') {
         const imagePath = book.vaku_attels;
         
@@ -197,26 +347,25 @@ export default {
         }
       }
       
-      // Если обложки нет, используем плейсхолдер
       return 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=600&fit=crop';
     },
 
-    // Навигация
     goToLibrary() {
       this.$router.push('/library');
     },
 
+    goToMyLibrary() {
+      this.$router.push('/library?tab=my-library');
+    },
+
     goToRegister() {
-      this.$router.push('/register');
+      this.$router.push('/login');
     }
-    // Метод performSearch полностью удален
   }
 }
 </script>
 
 <style scoped>
-/* Стили точно как на картинке */
-
 .top-nav-bar {
   background-color: white !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -232,7 +381,31 @@ export default {
   text-transform: uppercase;
 }
 
-/* Стили для поиска полностью удалены */
+.user-container {
+  display: flex;
+  align-items: center;
+}
+
+.user-initial-btn {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  padding: 0 !important;
+  background-color: #003D3A !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 8px rgba(0, 61, 58, 0.3);
+}
+
+.user-initial {
+  font-size: 20px;
+  font-weight: 600;
+  color: white !important;
+  text-transform: uppercase;
+  line-height: 1;
+}
 
 .main-content {
   background-color: #fafafa;
@@ -240,7 +413,6 @@ export default {
   padding-top: 40px;
 }
 
-/* Контейнер для детальной информации */
 .book-detail-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -250,7 +422,6 @@ export default {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-/* Обложка книги - слева */
 .book-cover-large {
   border-radius: 12px;
   overflow: hidden;
@@ -266,12 +437,10 @@ export default {
   object-fit: cover;
 }
 
-/* Информация о книге - справа */
 .book-info-container {
   padding: 20px 0 20px 30px;
 }
 
-/* Название книги (большое, сверху) */
 .book-title-large {
   font-size: 2.5rem;
   font-weight: 700;
@@ -280,7 +449,6 @@ export default {
   line-height: 1.2;
 }
 
-/* Автор (под названием) */
 .book-author-large {
   font-size: 1.5rem;
   font-weight: 500;
@@ -289,7 +457,6 @@ export default {
   font-style: italic;
 }
 
-/* Мета-информация (год, страницы) */
 .book-meta {
   display: flex;
   gap: 30px;
@@ -310,7 +477,6 @@ export default {
   font-weight: 500;
 }
 
-/* Описание книги */
 .book-description {
   margin-bottom: 30px;
   background-color: white;
@@ -326,7 +492,6 @@ export default {
   text-align: justify;
 }
 
-/* Информация для гостей - точно как на картинке */
 .guest-info {
   margin: 30px 0;
   padding: 20px;
@@ -342,7 +507,6 @@ export default {
   margin: 0;
 }
 
-/* Кнопка IENĀKT - цвет 003D3A, текст белый */
 .action-buttons {
   margin-top: 20px;
 }
@@ -416,7 +580,6 @@ export default {
   color: #666;
 }
 
-/* Адаптивность */
 @media (max-width: 960px) {
   .book-detail-container {
     padding: 20px;
@@ -443,7 +606,7 @@ export default {
     width: 100%;
   }
 
-   .reviews-card {
+  .reviews-card {
     padding: 30px 20px;
   }
   
@@ -453,8 +616,6 @@ export default {
 }
 
 @media (max-width: 600px) {
-  /* Стили для поиска удалены */
-  
   .library-name {
     font-size: 1.5rem;
   }
