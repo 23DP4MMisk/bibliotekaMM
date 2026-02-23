@@ -26,6 +26,7 @@ class BookController extends Controller
                         'gads' => $book->gads,
                         'lapu_skaits' => $book->lapu_skaits,
                         'vaku_attels' => $book->vaku_attels,
+                        'apraksts' => $book->apraksts,
                         'category' => [
                             'id' => $book->Nodala_ID,
                             'tips' => $book->nodala->tips ?? null,

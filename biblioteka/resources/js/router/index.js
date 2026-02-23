@@ -3,6 +3,7 @@ import Home from '../pages/Home.vue';
 import LibraryPage from '../pages/Library.vue';
 import LoginPage from '../pages/PieslLibrary.vue';
 import RegisterPage from '../pages/RegisterPage.vue';
+import BookView from '../pages/BookView.vue';
 
 const routes = [
     { 
@@ -24,6 +25,11 @@ const routes = [
        path: '/register',
        name: 'Register',
        component: RegisterPage
+    },
+    {
+        path: '/book/:isbn',
+        name: 'BookView',
+        component: BookView
     }
 
 ];
