@@ -103,6 +103,7 @@ class BookController extends Controller
                     'autors' => $book->autors,
                     'gads' => $book->gads,
                     'lapu_skaits' => $book->lapu_skaits,
+                    'apraksts' => $book->apraksts,
                     'vaku_attels' => $book->vaku_attels,
                     'category' => [
                         'id' => $book->Nodala_ID,

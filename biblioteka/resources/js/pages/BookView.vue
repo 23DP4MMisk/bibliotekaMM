@@ -103,6 +103,32 @@
               </div>
             </v-col>
           </v-row>
+
+          <v-row class="mt-8">
+            <v-col cols="12">
+              <div class="reviews-section">
+                <h2 class="reviews-title">Atsauksmes</h2>
+                
+                <!-- Карточка с сообщением об отсутствии отзывов -->
+                <div class="reviews-card">
+                  <div class="reviews-icon">
+                    <v-icon size="48" color="#003D3A">mdi-chat-outline</v-icon>
+                  </div>
+                  <div class="reviews-text">
+                    <p class="reviews-message">
+                      Par grāmatu <strong>"{{ book.nosaukums || book.title }}"</strong> pašlaik publiski pieejamu atsauksmju nav.
+                    </p>
+                    <p class="reviews-message">
+                      Informācija par lasītāju vērtējumiem vai recenzijām nav atrasta, tāpēc grāmata vēl nav plaši apspriesta.
+                    </p>
+                     <p class="reviews-author">
+                      Autors — <strong>{{ book.autors || book.author }}</strong>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </v-col>
+          </v-row>
         </div>
       </v-container>
     </v-main>
@@ -341,6 +367,55 @@ export default {
   color: white !important;
 }
 
+.reviews-section {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 2px solid #e0e0e0;
+}
+
+.reviews-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #003D3A;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.reviews-card {
+  background-color: #f8f9fa;
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 4px 12px rgba(0, 61, 58, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.reviews-icon {
+  margin-bottom: 20px;
+}
+
+.reviews-icon .v-icon {
+  opacity: 0.7;
+}
+
+.reviews-text {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #444;
+}
+
+.reviews-message {
+  margin-bottom: 15px;
+}
+
+.reviews-author {
+  margin-top: 20px;
+  font-style: italic;
+  color: #666;
+}
+
 /* Адаптивность */
 @media (max-width: 960px) {
   .book-detail-container {
@@ -367,6 +442,14 @@ export default {
   .action-btn {
     width: 100%;
   }
+
+   .reviews-card {
+    padding: 30px 20px;
+  }
+  
+  .reviews-title {
+    font-size: 1.8rem;
+  }
 }
 
 @media (max-width: 600px) {
@@ -382,6 +465,18 @@ export default {
   
   .book-author-large {
     font-size: 1.2rem;
+  }
+
+  .reviews-card {
+    padding: 25px 15px;
+  }
+  
+  .reviews-title {
+    font-size: 1.6rem;
+  }
+  
+  .reviews-text {
+    font-size: 1rem;
   }
 }
 </style>
