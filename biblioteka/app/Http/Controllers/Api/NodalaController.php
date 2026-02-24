@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class NodalaController extends Controller
 {
-    // GET /api/nodalas — все отделы
+    // GET /api/nodalas — visas nodaļas
     public function index()
     {
         try {
@@ -28,7 +28,7 @@ class NodalaController extends Controller
         }
     }
 
-    // GET /api/nodalas/{id}/books — книги в отделе
+    // GET /api/nodalas/{id}/books — grāmatas konkreta nodāļā
     public function books($id)
     {
         try {

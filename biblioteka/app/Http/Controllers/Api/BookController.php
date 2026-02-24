@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
-    // GET /api/books — все книги
+    // GET /api/books — visas grāmatas
     public function index()
     {
         try {
@@ -82,7 +82,7 @@ class BookController extends Controller
         }
     }
 
-    // GET /api/books/{isbn} — конкретная книга
+    // GET /api/books/{isbn} — konkreta gramata
     public function show($isbn)
     {
         try {
@@ -122,11 +122,11 @@ class BookController extends Controller
         }
     }
 
-      // GET /api/homepage-books — книги для главной страницы
+      // GET /api/homepage-books — gramatas galvenai lapai
     public function homepage()
     {
         try {
-            // Например, последние 6 книг
+            // Piemeram 6 pedejas gramatas
             $books = Gramata::with('nodala')
                 ->orderBy('created_at', 'desc')
                 ->limit(6)

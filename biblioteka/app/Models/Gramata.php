@@ -9,10 +9,10 @@ class Gramata extends Model
 {
      use HasFactory;
 
-    protected $table = 'Gramata';       // имя таблицы в базе
-    protected $primaryKey = 'ISBN';     // первичный ключ
-    public $incrementing = false;       // ISBN не автоинкремент
-    protected $keyType = 'integer';     // тип ключа
+    protected $table = 'Gramata';       // tabula vards
+    protected $primaryKey = 'ISBN';     // primara atslega
+    public $incrementing = false;       // ISBN nav autoinkrements
+    protected $keyType = 'integer';     // atslegas tips
 
     protected $fillable = [
         'ISBN', 'nosaukums', 'gads', 'apraksts', 'lapu_skaits', 
