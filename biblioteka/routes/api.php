@@ -44,6 +44,7 @@ Route::get('/books/search/{query}', [BookController::class, 'search']);
 Route::get('/homepage-books', [BookController::class, 'homepage']);
 Route::get('/books/{isbn}', [BookController::class, 'show']);
 
+Route::get('/genres', [BookController::class, 'genres']);
 
 Route::get('/nodalas', [NodalaController::class, 'index']);
 Route::get('/nodalas/{id}/books', [NodalaController::class, 'books']);

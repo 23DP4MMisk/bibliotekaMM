@@ -124,7 +124,7 @@ class GramatSeeders extends Seeder
              kas grib izbaudīt sirreālu un krāsainu stāstu pasauli',
              'lapu_skaits' => '80',
              'Nodala_ID' => 2,
-             'Zanra_ID' => 6,
+             'Zanra_ID' => 5,
              'vaku_attels' => 'uploids/cover/19734525.jpg',
              'created_at' => now(),
              'updated_at' => now()

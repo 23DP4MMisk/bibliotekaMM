@@ -122,7 +122,7 @@
                 >
                   <v-list class="py-0">
                     <v-list-item 
-                      @click="selectCategory('academic')"
+                      @click="selectNodala('academic')"
                       class="menu-item"
                     >
                       <v-list-item-title class="text-left">
@@ -131,7 +131,7 @@
                     </v-list-item>
                     <v-divider></v-divider>
                     <v-list-item 
-                      @click="selectCategory('leisure')"
+                      @click="selectNodala('leisure')"
                       class="menu-item"
                     >
                       <v-list-item-title class="text-left">
@@ -153,14 +153,31 @@
             </div>
           </v-col>
         </v-row>
+
+         <v-row class="mb-6" v-if="selectedNodala">
+          <v-col cols="12">
+            <div class="genre-menu">
+              <v-btn
+                v-for="genre in availableGenres"
+                :key="genre.id"
+                :class="['genre-btn', { 'active-genre': selectedGenre === genre.id }]"
+                variant="text"
+                @click="selectGenre(genre.id)"
+              >
+                {{ genre.name }}
+                <span class="genre-count" v-if="genre.count">({{ genre.count }})</span>
+              </v-btn>
+            </div>
+          </v-col>
+        </v-row>
         
        
         <v-row class="mb-6">
           <v-col cols="12">
             <h2 class="category-title text-center">
               <span v-if="activeCategory === 'all' && !searchQuery">Visas grāmatas</span>
-              <span v-else-if="activeCategory === 'academic'">Akademiskas grāmatas</span>
-              <span v-else-if="activeCategory === 'leisure'">Grāmatas atpūtai</span>
+              <span v-else-if = "selectedGenreName">{{ selectedGenreName }}</span>
+              <span v-else-if="selectedNodalaName">{{ selectedNodalaName }}</span>
               <span v-else-if="searchQuery">Meklēšanas rezultāti: "{{ searchQuery }}"</span>
               <span v-else>Mana biblioteka</span>
             </h2>
@@ -292,6 +309,10 @@ export default {
       allBooks: [],
       closeMenuTimer: null,
       searchTimeout: null,
+
+      selectedNodala: null, 
+      selectedGenre: null,   
+      genres: [],
       
      
       isLoggedIn: false,
@@ -307,13 +328,43 @@ export default {
         return filtered;
       }
       
-      if (this.activeCategory === 'academic') {
+      if (this.selectedNodala === 'academic') {
         filtered = filtered.filter(book => book.nodala_id === 1);
-      } else if (this.activeCategory === 'leisure') {
+      } else if (this.selectedNodala === 'leisure') {
         filtered = filtered.filter(book => book.nodala_id === 2);
+      }
+
+      if (this.selectedGenre) {
+        filtered = filtered.filter(book => book.zanra_id === this.selectedGenre);
       }
       
       return filtered;
+    },
+
+     availableGenres() {
+      if (!this.selectedNodala) return [];
+      
+      const nodalaId = this.selectedNodala === 'academic' ? 1 : 2;
+      
+      return this.genres
+        .filter(genre => genre.nodala === nodalaId)
+        .map(genre => ({
+          id: genre.id,
+          name: genre.name,
+          count: this.allBooks.filter(book => book.zanra_id === genre.id).length
+        }));
+    },
+
+     selectedNodalaName() {
+      if (this.selectedNodala === 'academic') return 'Akadēmiskās grāmatas';
+      if (this.selectedNodala === 'leisure') return 'Grāmatas atpūtai';
+      return '';
+    },
+    
+    selectedGenreName() {
+      if (!this.selectedGenre) return '';
+      const genre = this.genres.find(g => g.id === this.selectedGenre);
+      return genre ? genre.name : '';
     },
     
   
@@ -355,6 +406,8 @@ export default {
     this.loadUserFromStorage();
   
     await this.checkAuth();
+
+    await this.fetchGenres();
    
     await this.fetchBooks();
   },
@@ -371,6 +424,41 @@ export default {
         } catch (e) {
           console.error('Kļūda ielādējot lietotāju:', e);
         }
+      }
+    },
+
+    async fetchGenres() {
+      try {
+        const response = await fetch('http://localhost:8000/api/genres');
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          this.genres = data.data.map(genre => ({
+            id: genre.Zanra_ID,
+            name: genre.nosaukums,
+            nodala: genre.Nodala
+          }));
+          console.log('✅ Ielādēti žanri:', this.genres);
+        }
+      } catch (error) {
+        console.error('❌ Kļūda ielādējot žanrus:', error);
+      }
+    },
+
+    selectNodala(nodala) {
+      this.selectedNodala = nodala;
+      this.selectedGenre = null; 
+      this.searchQuery = '';
+      this.showNodalaMenu = false;
+      this.activeCategory = nodala;
+    },
+
+    selectGenre(genreId) {
+      if (this.selectedGenre === genreId) {
+       
+        this.selectedGenre = null;
+      } else {
+        this.selectedGenre = genreId;
       }
     },
   
@@ -491,7 +579,8 @@ export default {
             title: book.nosaukums,
             author: book.autors,
             cover_image: book.vaku_attels,
-            nodala_id: book.nodala_id || (book.category ? book.category.id : 1)
+            nodala_id: book.nodala_id || (book.category ? book.category.id : 1),
+            zanra_id: book.zanra_id
           }));
           
           console.log(`✅ Ielādētas ${this.allBooks.length} grāmatas no datubāzes`);
@@ -577,14 +666,13 @@ export default {
     },
     
     selectCategory(category) {
-      this.activeCategory = category;
-      this.searchQuery = '';
-      this.showNodalaMenu = false;
-      this.fetchBooks();
+      this.selectNodala(category);
     },
     
     showAllBooks() {
       this.activeCategory = 'all';
+      this.selectedNodala = null;
+      this.selectedGenre = null;
       this.searchQuery = '';
       this.fetchBooks();
     },
@@ -592,6 +680,8 @@ export default {
     showMyLibrary() {
       
       this.activeCategory = 'my-library';
+      this.selectedNodala = null;
+      this.selectedGenre = null;
       this.searchQuery = '';
       this.showNodalaMenu = false;
       

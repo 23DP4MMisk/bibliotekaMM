@@ -6,9 +6,31 @@ use App\Http\Controllers\Controller;
 use App\Models\Gramata;
 use App\Models\Nodala;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BookController extends Controller
 {
+    public function genres()
+    {
+        try {
+            $genres = DB::table('Zanrs')->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $genres
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kļūda ielādējot žanrus',
+                'error' => env('APP_DEBUG') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+
+
+
     // GET /api/books — visas grāmatas
     public function index()
     {
@@ -27,6 +49,8 @@ class BookController extends Controller
                         'lapu_skaits' => $book->lapu_skaits,
                         'vaku_attels' => $book->vaku_attels,
                         'apraksts' => $book->apraksts,
+                        'nodala_id' => $book->Nodala_ID,
+                        'zanra_id' => $book->Zanra_ID,
                         'category' => [
                             'id' => $book->Nodala_ID,
                             'tips' => $book->nodala->tips ?? null,
