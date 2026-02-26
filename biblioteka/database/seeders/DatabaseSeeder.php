@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             NodalaSeeder::class,
+            ZanrsSeeder::class,
             GramatSeeders::class,
         ]);
     }

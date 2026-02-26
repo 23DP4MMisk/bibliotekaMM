@@ -22,6 +22,7 @@ class GramatSeeders extends Seeder
              'lapu_skaits' => '1514',
              'autors' => 'Jay Abramson',
              'Nodala_ID' => 1,
+             'Zanra_ID' => 1,
              'vaku_attels' => 'uploids/cover/12345623.jpg',
              'created_at' => now(),
              'updated_at' => now()
@@ -37,6 +38,7 @@ class GramatSeeders extends Seeder
              'lapu_skaits' => '975',
              'autors' => 'Jay Abramson',
              'Nodala_ID' => 1,
+             'Zanra_ID' => 2,
              'vaku_attels' => 'uploids/cover/12345723.jpg',
              'created_at' => now(),
              'updated_at' => now()
@@ -53,6 +55,7 @@ class GramatSeeders extends Seeder
              'lapu_skaits' => '406',
              'autors' => 'Jay Abramson',
              'Nodala_ID'=> 1,
+             'Zanra_ID' => 3,
              'vaku_attels' => 'uploids/cover/12345823.jpg',
              'created_at' => now(),
              'updated_at' => now()
@@ -68,6 +71,7 @@ class GramatSeeders extends Seeder
              'lapu_skaits' => '557',
              'autors' => 'Jay Abramson',
              'Nodala_ID' => 1,
+             'Zanra_ID' => 4,
              'vaku_attels' => 'uploids/cover/12345923.jpg',
              'created_at' => now(),
              'updated_at' => now()
@@ -86,6 +90,7 @@ class GramatSeeders extends Seeder
              'lapu_skaits' => '404',
              'autors' => 'Pāvils Rozītis',
              'Nodala_ID' => 2,
+             'Zanra_ID' => 5,
              'vaku_attels' => 'uplods/cover/19364225.jpg',
              'created_at' => now(),
              'updated_at' => now()
@@ -103,6 +108,7 @@ class GramatSeeders extends Seeder
               'lapu_skaits' => '220',
              'autors' => 'Andrejs Upīts',
              'Nodala_ID' => 2,
+             'Zanra_ID' => 6,
              'vaku_attels' => 'uploids/cover/19404325.jpg',
              'created_at' => now(),
              'updated_at' => now()
@@ -118,6 +124,7 @@ class GramatSeeders extends Seeder
              kas grib izbaudīt sirreālu un krāsainu stāstu pasauli',
              'lapu_skaits' => '80',
              'Nodala_ID' => 2,
+             'Zanra_ID' => 6,
              'vaku_attels' => 'uploids/cover/19734525.jpg',
              'created_at' => now(),
              'updated_at' => now()
@@ -137,6 +144,7 @@ class GramatSeeders extends Seeder
              'lapu_skaits' => '544',
              'autors' => 'Reinis Kaudzīte un Matīss Kaudzīte',
              'Nodala_ID' => 2,
+             'Zanra_ID' => 6,
              'vaku_attels' => 'uploids/cover/19804425.jpg',
              'created_at' => now(),
              'updated_at' => now()

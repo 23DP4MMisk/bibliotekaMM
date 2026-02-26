@@ -101,7 +101,7 @@ return new class extends Migration
         // Parskata 
         Schema::create('Parskata', function (Blueprint $table) {
             $table->integer('Parskata_ID')->autoIncrement();
-            $table->integer('parskatas_statuss');
+            $table->integer('parskatas_skaits');
             $table->integer('Gramatas');
             $table->integer('Lietotajs');
             $table->timestamps();
