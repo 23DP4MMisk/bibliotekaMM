@@ -289,6 +289,18 @@
                                 </v-list-item>
                               </v-list>
                             </v-menu>
+
+                           <v-btn
+                             v-if="userBook.statuss === 'izlasiju'"
+                             color="#003D3A"
+                             class="action-btn-small review-btn"
+                             @click="goToReviewPage(userBook)"
+                             rounded
+                             depressed
+                             >
+                             <v-icon left small>mdi-star</v-icon>
+                             Rakstīt atsauksmi
+                           </v-btn>  
                            <v-btn
                               color="#b71c1c"
                               class="action-btn-small delete-btn"
@@ -538,7 +550,19 @@ export default {
       await this.loadUserBooks();
     }
   },
-  methods: {
+  methods: { 
+
+    goToReviewPage(userBook) {
+     
+     this.$router.push({
+     name: 'WriteReview',
+     params: { 
+       isbn: userBook.gramatas_id || userBook.ISBN,
+       bookTitle: userBook.nosaukums || userBook.title,
+       bookAuthor: userBook.autors || userBook.author
+      }
+     });
+    },
 
     loadUserFromStorage() {
       const savedUser = localStorage.getItem('user');

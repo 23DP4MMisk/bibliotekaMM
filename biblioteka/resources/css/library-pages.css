@@ -578,6 +578,20 @@
   .status-btn {
     width: 200px;
   }
+
+  .review-btn {
+   background-color: #ff8f00 !important; 
+  }
+
+  .review-btn:hover {
+   background-color: #ffb300 !important;
+   transform: translateY(-2px);
+   box-shadow: 0 4px 12px rgba(255, 143, 0, 0.3) !important;
+  }
+
+  .review-btn .v-icon {
+   color: white;
+  }
 }
 
 @media (max-width: 600px) {
