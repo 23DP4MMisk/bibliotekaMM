@@ -175,7 +175,8 @@
         <v-row class="mb-6">
           <v-col cols="12">
             <h2 class="category-title text-center">
-              <span v-if="activeCategory === 'all' && !searchQuery">Visas grāmatas</span>
+              <span v-if="activeCategory === 'my-library' && isLoggedIn">Mana bibliotēka</span>
+              <span v-else-if="activeCategory === 'all' && !searchQuery">Visas grāmatas</span>
               <span v-else-if = "selectedGenreName">{{ selectedGenreName }}</span>
               <span v-else-if="selectedNodalaName">{{ selectedNodalaName }}</span>
               <span v-else-if="searchQuery">Meklēšanas rezultāti: "{{ searchQuery }}"</span>
@@ -209,8 +210,113 @@
         
        
         <div v-else>
-        
-          <div v-if="activeCategory === 'my-library'" class="text-center py-12">
+          <div v-if="activeCategory === 'my-library' && isLoggedIn">
+            <!-- Статус-меню -->
+            <div class="status-menu">
+              <v-btn
+                v-for="status in statusOptions"
+                :key="status.value"
+                :class="['status-btn', { 'active-status': selectedStatus === status.value }]"
+                variant="text"
+                @click="selectStatus(status.value)"
+              >
+                {{ status.label }}
+                <span class="status-count">({{ getStatusCount(status.value) }})</span>
+              </v-btn>
+            </div>
+
+            <div v-if="userBooks.length > 0" class="user-books-container">
+              <v-row>
+                <v-col cols="12" v-for="userBook in filteredUserBooks" :key="userBook.LietotajGramatas_ID">
+                  <v-card class="user-book-card" elevation="0">
+                    <v-row>
+                      <v-col cols="12" sm="3" md="2">
+                        <div class="user-book-cover">
+                          <v-img
+                            :src="getBookCover(userBook)"
+                            :alt="userBook.nosaukums"
+                            cover
+                            height="150"
+                          >
+                           <template v-slot:placeholder>
+                              <div class="d-flex align-center justify-center fill-height">
+                                <v-icon color="#003D3A">mdi-book-open-variant</v-icon>
+                              </div>
+                            </template>
+                          </v-img>
+                        </div>
+                      </v-col>
+                      <v-col cols="12" sm="9" md="10">
+                        <div class="user-book-info">
+                          <h3 class="user-book-title">{{ userBook.nosaukums }}</h3>
+                          <p class="user-book-author">{{ userBook.autors }}</p>
+                          <p class="user-book-status">
+                            Statuss: <span :class="'status-badge status-' + userBook.statuss">
+                              {{ getStatusLabel(userBook.statuss) }}
+                            </span>
+                          </p>
+                          <div class="user-book-actions">
+                            <v-btn
+                              color="#003D3A"
+                              class="action-btn-small"
+                              @click="downloadBook(userBook)"
+                              rounded
+                              depressed
+                            >
+                              <v-icon left small>mdi-download</v-icon>
+                              Lejupielādēt
+                            </v-btn>
+                            <v-menu offset-y>
+                              <template v-slot:activator="{ props }">
+                                <v-btn
+                                  color="#003D3A"
+                                  class="action-btn-small"
+                                  v-bind="props"
+                                  rounded
+                                  depressed
+                                >
+                                  <v-icon left small>mdi-pencil</v-icon>
+                                  Izmainīt statusu
+                                </v-btn>
+                              </template>
+                             <v-list>
+                                <v-list-item
+                                  v-for="status in statusOptions"
+                                  :key="status.value"
+                                  @click="updateBookStatus(userBook, status.value)"
+                                >
+                                  <v-list-item-title>{{ status.label }}</v-list-item-title>
+                                </v-list-item>
+                              </v-list>
+                            </v-menu>
+                           <v-btn
+                              color="#b71c1c"
+                              class="action-btn-small delete-btn"
+                              @click="deleteBook(userBook)"
+                              rounded
+                              depressed
+                            >
+                              <v-icon left small>mdi-delete</v-icon>
+                              Dzēst
+                            </v-btn>
+                          </div>
+                        </div>
+                      </v-col>
+                    </v-row>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </div>
+            <div v-else class="text-center py-12">
+              <v-icon size="80" color="#003D3A" class="mb-4">mdi-book-plus</v-icon>
+              <h3 class="mb-4">Jūsu bibliotēka ir tukša</h3>
+              <p class="mb-6">Pievienojiet grāmatas no galvenās lapas</p>
+              <v-btn color="#003D3A" @click="showAllBooks">Skatīt grāmatas</v-btn>
+            </div>
+          </div>
+
+
+          <div v-else-if="activeCategory === 'my-library'" class="text-center py-12">
             <v-icon size="80" color="#003D3A" class="mb-4">mdi-book-multiple</v-icon>
             <h3 class="mb-4">Jūsu personīgā bibliotēka</h3>
             <p class="mb-6">Pieslēdzieties, lai skatītu savas grāmatas</p>
@@ -317,7 +423,16 @@ export default {
      
       isLoggedIn: false,
       user: null,
-      authLoading: false
+      authLoading: false,
+
+       userBooks: [],
+      selectedStatus: 'all',
+      statusOptions: [
+        { value: 'all', label: 'Visas' },
+        { value: 'izlasiju', label: 'Izlāsīju' },
+        { value: 'lasu', label: 'Lasu' },
+        { value: 'vel nelasiju', label: 'Vēl nelasīju' }
+      ]
     };
   },
   computed: {
@@ -366,6 +481,13 @@ export default {
       const genre = this.genres.find(g => g.id === this.selectedGenre);
       return genre ? genre.name : '';
     },
+
+    filteredUserBooks() {
+      if (this.selectedStatus === 'all') {
+        return this.userBooks;
+      }
+      return this.userBooks.filter(book => book.statuss === this.selectedStatus);
+    },
     
   
     userName() {
@@ -410,6 +532,11 @@ export default {
     await this.fetchGenres();
    
     await this.fetchBooks();
+
+    if (this.$route.query.tab === 'my-library' && this.isLoggedIn) {
+      this.activeCategory = 'my-library';
+      await this.loadUserBooks();
+    }
   },
   methods: {
 
@@ -546,8 +673,126 @@ export default {
       this.isLoggedIn = false;
       this.user = null;
     },
+
+     async showMyLibrary() {
+      this.activeCategory = 'my-library';
+      this.selectedNodala = null;
+      this.selectedGenre = null;
+      this.searchQuery = '';
+      this.showNodalaMenu = false;
+      this.selectedStatus = 'all';
+      
+      if (this.isLoggedIn) {
+        await this.loadUserBooks();
+      }
+    },
+
+    async loadUserBooks() {
+      if (!this.isLoggedIn) return;
+      
+      this.loading = true;
+      
+      try {
+        const response = await fetch('http://localhost:8000/api/user/books', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+
+         const data = await response.json();
+        console.log('📚 Lietotāja grāmatas:', data);
+        
+        if (data.success && data.data) {
+          this.userBooks = data.data;
+        } else {
+          this.userBooks = [];
+        }
+      } catch (error) {
+        console.error('❌ Kļūda ielādējot lietotāja grāmatas:', error);
+        this.userBooks = [];
+      } finally {
+        this.loading = false;
+      }
+    },
+
+      selectStatus(status) {
+      this.selectedStatus = status;
+    },
     
-   
+    getStatusCount(status) {
+      if (status === 'all') {
+        return this.userBooks.length;
+      }
+      return this.userBooks.filter(book => book.statuss === status).length;
+    },
+    
+    getStatusLabel(status) {
+      const labels = {
+        'lasu': 'Lasu',
+        'izlasiju': 'Izlāsīju',
+        'vel nelasiju': 'Vēl nelasīju'
+      };
+      return labels[status] || status;
+    },
+
+      async updateBookStatus(userBook, newStatus) {
+      try {
+        const response = await fetch('http://localhost:8000/api/user/book/status', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            book_id: userBook.LietotajGramatas_ID,
+            status: newStatus
+          })
+        });
+
+        const data = await response.json();
+
+         if (data.success) {
+          userBook.statuss = newStatus;
+          console.log(`✅ Statuss mainīts uz: ${newStatus}`);
+        }
+      } catch (error) {
+        console.error('Kļūda mainot statusu:', error);
+      }
+    },
+
+     async deleteBook(userBook) {
+      if (!confirm('Vai tiešām vēlaties dzēst šo grāmatu no savas bibliotēkas?')) return;
+      
+      try {
+        const response = await fetch(`http://localhost:8000/api/user/book/${userBook.LietotajGramatas_ID}`, {
+          method: 'DELETE',
+          headers: {
+            'Accept': 'application/json'
+          },
+          credentials: 'include'
+        });
+
+        const data = await response.json();
+
+         if (data.success) {
+          this.userBooks = this.userBooks.filter(b => b.LietotajGramatas_ID !== userBook.LietotajGramatas_ID);
+          console.log('✅ Grāmata dzēsta');
+        }
+      } catch (error) {
+        console.error('Kļūda dzēšot grāmatu:', error);
+      }
+    },
+
+    downloadBook(userBook) {
+      if (userBook.faila_pdf) {
+        window.open(`http://localhost:8000/${userBook.faila_pdf}`, '_blank');
+      } else {
+        alert('PDF fails nav pieejams');
+      }
+    },
     
     async fetchBooks(searchQuery = '') {
       this.loading = true;
