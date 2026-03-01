@@ -202,11 +202,19 @@ export default {
     console.log('📊 Atbildes dati:', data);
     if (data.success) {
       console.log('✅ Reģistrācija veiksmīga!');
+
           
      
+      if (data.token) {
+       localStorage.setItem('auth_token', data.token);
+      }
+      if (data.lietotajs) {
+       localStorage.setItem('user', JSON.stringify(data.lietotajs));
+      }
+
       localStorage.setItem('last_registered_email', this.email);
           
-      alert('Reģistrācija veiksmīga! Lūdzu pieslēdzieties.');
+      alert(data.message || 'Reģistrācija veiksmīga!');
 
      
       console.log('🏠 Pāreja uz pieslēgšanās lapu...');

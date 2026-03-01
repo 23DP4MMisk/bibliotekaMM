@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 
-class Lietotajs extends Authenticatable
+class Lietotajs extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
 
@@ -38,5 +38,15 @@ class Lietotajs extends Authenticatable
     public function getAuthPassword()
     {
         return $this->parole;
+    }
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
     }
 }

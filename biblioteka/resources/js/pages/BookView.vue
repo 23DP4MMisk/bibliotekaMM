@@ -109,13 +109,16 @@
                   <p class="description-text">{{ book.apraksts }}</p>
                 </div>
 
-                <div class="guest-info">
+                <div class="guest-info" v-if="!isLoggedIn">
                   <p class="guest-message">
                     Lai lejupielādētu grāmatu, pievienotu to bibliotēkai un rakstītu atsauksmes, vajag reģistrēties vai ienākt.
                   </p>
                 </div>
 
+
+
                 <div class="action-buttons">
+                 <template v-if="!isLoggedIn">
                   <v-btn
                     color="#003D3A"
                     class="action-btn"
@@ -126,6 +129,34 @@
                   >
                     <span class="button-text-white">Ienākt</span>
                   </v-btn>
+                 </template>
+
+                 <template v-else>
+                    <div class="action-buttons-row">
+                      <v-btn
+                        color="#003D3A"
+                        class="action-btn"
+                        @click="downloadBook"
+                        rounded
+                        x-large
+                        depressed
+                      >
+                        <span class="button-text-white">Lejupielādēt</span>
+                      </v-btn>
+                      <v-btn
+                        color="#003D3A"
+                        class="action-btn"
+                        @click="addToLibrary"
+                        :loading="addingToLibrary"
+                        :disabled="addingToLibrary"
+                        rounded
+                        x-large
+                        depressed
+                      >
+                        <span class="button-text-white">Pievienot bibliotēkai</span>
+                      </v-btn>
+                    </div>
+                 </template>
                 </div>
               </div>
             </v-col>
@@ -173,7 +204,9 @@ export default {
       
       isLoggedIn: false,
       user: null,
-      authLoading: false
+      authLoading: false,
+
+      addingToLibrary: false
     };
   },
   computed: {
@@ -207,11 +240,22 @@ export default {
       }
       
       return 'U';
+    },
+
+    authToken() {
+      return localStorage.getItem('auth_token');
     }
   },
   async mounted() {
     this.loadUserFromStorage();
-    await this.checkAuth();
+    const isAuthenticated = await this.checkAuth();
+
+    if (!isAuthenticated && localStorage.getItem('user')) {
+      console.log('⚠️ localStorage ir lietotājs, bet sesija ir beigusies');
+      localStorage.removeItem('user');
+      this.isLoggedIn = false;
+      this.user = null;
+    }
     await this.loadBookDetails();
   },
   methods: {
@@ -235,13 +279,22 @@ export default {
       this.authLoading = true;
       console.log('🔐 Pārbaudu autentifikāciju...');
       
+      const token = this.authToken;
+      console.log('Tokens parbaudei:', token ? token.substring(0, 20) + '...' : 'nē');
+      
+      if (!token) {
+       this.isLoggedIn = false;
+       this.user = null;
+       this.authLoading = false;
+       return false;
+      }
+      
       try {
         const response = await fetch('http://localhost:8000/api/check-auth', {
           method: 'GET',
-          credentials: 'include',
           headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Authorization': 'Bearer ' + token
           }
         });
         
@@ -253,15 +306,19 @@ export default {
           this.user = data.lietotajs;
           localStorage.setItem('user', JSON.stringify(data.lietotajs));
           console.log('✅ Lietotājs autentificēts:', this.userName);
+          return true;
         } else {
-          if (!localStorage.getItem('user')) {
-            this.isLoggedIn = false;
-            this.user = null;
-          }
+         console.log('❌ Lietotājs NAV autentificēts pēc API');
+         this.isLoggedIn = false;
+         this.user = null;
+         localStorage.removeItem('auth_token');
+         localStorage.removeItem('user');
+         return false;
         }
         
       } catch (error) {
         console.error('Auth check kļūda:', error);
+        return false;
       } finally {
         this.authLoading = false;
       }
@@ -269,38 +326,34 @@ export default {
 
     async logout() {
       console.log('🚪 Mēģinu izrakstīties...');
+
+      const token = this.authToken;
       
       try {
+       if (token) {  
         const response = await fetch('http://localhost:8000/api/izrakstīties', {
           method: 'POST',
-          credentials: 'include',
           headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
           }
-        });
-        
-        const data = await response.json();
-        console.log('Logout atbilde:', data);
-        
-        if (data.success) {
-          this.isLoggedIn = false;
-          this.user = null;
-          localStorage.removeItem('user');
-          alert('Jūs esat veiksmīgi izrakstījies');
-          setTimeout(() => {
-            this.$router.go(0);
-          }, 1000);
+         });
         }
-        
-      } catch (error) {
-        console.error('Logout kļūda:', error);
-        this.isLoggedIn = false;
-        this.user = null;
-        localStorage.removeItem('user');
-        this.$router.go(0);
-      }
+        } catch (error) {
+         console.error('Logout kļūda:', error);
+        } finally {
+         this.isLoggedIn = false;
+         this.user = null;
+         localStorage.removeItem('auth_token');
+         localStorage.removeItem('user');
+         alert('Jūs esat veiksmīgi izrakstījies');
+         this.$router.push('/library');
+        }
     },
+        
+        
+      
 
     async loadBookDetails() {
       this.loading = true;
@@ -321,7 +374,12 @@ export default {
         
         if (data.success && data.data) {
           this.book = data.data;
+          console.log('📖 Grāmata no API:', this.book);
+          console.log('📖 ISBN no API:', this.book.ISBN);
+          console.log('📖 ISBN tips:', typeof this.book.ISBN);
           console.log('📖 Grāmatas apraksts:', this.book.apraksts);
+          console.log('📖 isbn lauks:', this.book.isbn); 
+          console.log('📖 Gramatas_ID:', this.book.Gramatas_ID); 
         } else {
           throw new Error('Grāmata nav atrasta');
         }
@@ -350,6 +408,118 @@ export default {
       return 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=600&fit=crop';
     },
 
+     downloadBook() {
+      if (this.book.faila_pdf) {
+        window.open(`http://localhost:8000/${this.book.faila_pdf}`, '_blank');
+      } else {
+        alert('PDF fails nav pieejams');
+      }
+    },
+
+    async addToLibrary() {
+    
+  console.log('📤 Mēģinu pievienot grāmatu bibliotēkai...');
+  
+  const token = this.authToken;
+  console.log('Tokiens priekš pievienošanas:', token ? token.substring(0, 20) + '...' : 'nē');
+  console.log('ISBN no grāmatas:', this.book?.isbn); 
+  console.log('ISBN tips:', typeof this.book?.isbn);
+  
+  if (!token) {
+    alert('Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.');
+    this.goToLogin();
+    return;
+  }
+
+  if (!this.book?.isbn) {
+    alert('Grāmatas ISBN nav atrasts');
+    return;
+  }
+
+  this.addingToLibrary = true;
+  
+  try {
+    const requestBody = {
+      isbn: this.book.isbn,
+      statuss: 'vel nelasiju'
+    };
+    
+    console.log('Atsūtu ISBN:', requestBody.isbn);
+    
+    const response = await fetch('http://localhost:8000/api/user/books/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify(requestBody) 
+    });
+
+    
+    const responseText = await response.text();
+    console.log('Atbilde no servera(teksts):', responseText);
+    
+    let data;
+    try {
+      data = JSON.parse(responseText);
+      console.log('Atbilde no servera(JSON):', data);
+    } catch (e) {
+      console.error('Kļuda no parsinga:', e);
+      alert('Servera atbilde nav JSON formātā');
+      return;
+    }
+
+    if (response.status === 401) {
+      console.log('❌ Sesija beigusies, nepieciešama atkārtota autentifikācija');
+      this.isLoggedIn = false;
+      this.user = null;
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+      alert('Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.');
+      this.goToLogin();
+      return;
+    }
+
+    if (response.status === 422) {
+      console.log('❌ 422 Unprocessable Entity');
+      console.log('Validacijas kļudas:', data?.errors);
+      
+      let errorMessage = 'Validācijas kļūda:\n';
+      if (data?.errors) {
+        for (let field in data.errors) {
+          errorMessage += `${field}: ${data.errors[field].join(', ')}\n`;
+        }
+      } else if (data?.message) {
+        errorMessage = data.message;
+      } else {
+        errorMessage = 'Nezināma validācijas kļūda';
+      }
+      
+      alert(errorMessage);
+      return;
+    }
+
+    if (response.status === 500) {
+      console.log('❌ Servera kļūda 500');
+      alert('Servera kļūda. Lūdzu, mēģiniet vēlāk.');
+      return;
+    }
+
+    if (data?.success) {
+      alert('✅ Grāmata pievienota jūsu bibliotēkai!');
+    } else {
+      alert('❌ ' + (data?.message || 'Kļūda pievienojot grāmatu'));
+    }
+    
+  } catch (error) {
+    console.error('❌ Kļūda:', error);
+    alert('Neizdevās pievienot grāmatu: ' + error.message);
+  } finally {
+    this.addingToLibrary = false;
+  }
+
+  },
     goToLibrary() {
       this.$router.push('/library');
     },
@@ -357,6 +527,11 @@ export default {
     goToMyLibrary() {
       this.$router.push('/library?tab=my-library');
     },
+
+    goToLogin() {  
+      this.$router.push('/login');
+    },
+
 
     goToRegister() {
       this.$router.push('/login');
@@ -580,6 +755,33 @@ export default {
   color: #666;
 }
 
+.action-buttons-row {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  min-width: 200px !important;
+  height: 56px !important;
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  box-shadow: 0 4px 12px rgba(0, 61, 58, 0.3) !important;
+}
+
+.action-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 61, 58, 0.4) !important;
+  transition: all 0.3s ease;
+}
+
+.button-text-white {
+  color: white !important;
+}
+
 @media (max-width: 960px) {
   .book-detail-container {
     padding: 20px;
@@ -638,6 +840,16 @@ export default {
   
   .reviews-text {
     font-size: 1rem;
+  }
+
+ .action-buttons-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+ .action-btn {
+    width: 100%;
+    min-width: 100% !important;
   }
 }
 </style>

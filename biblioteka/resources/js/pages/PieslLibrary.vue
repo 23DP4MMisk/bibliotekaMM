@@ -126,7 +126,7 @@ export default {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           },
-          credentials: 'include',
+          
           body: JSON.stringify({
             epasts: this.email,
             parole: this.password
@@ -136,19 +136,16 @@ export default {
         console.log('📊 Atbilde:', data);
          if (data.success) {
           console.log('✅ Pieslēgšanās veiksmīga!');
-          
-         
-          if (data.lietotajs) {
-            localStorage.setItem('user', JSON.stringify(data.lietotajs));
-          }
-          
+
+          localStorage.setItem('auth_token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.lietotajs));
           alert(data.message || 'Pieslēgšanās veiksmīga!');
+
           
-         
           console.log('🏠 Pāreja uz bibliotēkas lapu...');
           this.$router.push('/library');
 
-            } else {
+          } else {
           console.error('❌ Kļūda:', data);
           this.errorMessage = data.message || 'Pieslēgšanās neizdevās';
         }

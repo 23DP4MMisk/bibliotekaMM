@@ -10,13 +10,14 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        Log::info('=== SIMPLE REGISTER ===');
-        Log::info('Data:', $request->all());
+        Log::info('=== REGISTRĀCIJA ===');
+
         
        
         $validator = Validator::make($request->all(), [
@@ -42,13 +43,14 @@ class AuthController extends Controller
                 'status' => 'aktivs'
             ]);
             
+         $token = JWTAuth::fromUser($lietotajs);
+            
             Log::info('✅ Lietotājs izveidots:', ['id' => $lietotajs->kodsID]);
-            
-            
             
             return response()->json([
                 'success' => true,
-                'message' => 'Reģistrācija veiksmīga',
+                'message' => 'Reģistrācija veiksmīga!',
+                'token' => $token,
                 'lietotajs' => [
                     'kodsID' => $lietotajs->kodsID,
                     'lietotaja_vards' => $lietotajs->lietotaja_vards,
@@ -57,133 +59,146 @@ class AuthController extends Controller
                     'status' => $lietotajs->status
                 ]
             ], 201);
-            
-        } catch (\Exception $e) {
-            Log::error('Error:', ['message' => $e->getMessage()]);
+
+            } catch (\Exception $e) {
+            Log::error('❌ Kļūda:', ['message' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda: ' . $e->getMessage()
+                'message' => 'Servera kļūda: ' . $e->getMessage()
             ], 500);
         }
     }
     
     public function login(Request $request)
     {
-        Log::info('=== SIMPLE LOGIN ===');
         
-      
-        $lietotajs = Lietotajs::where('epasts', $request->epasts)->first();
         
-        if (!$lietotajs) {
+        Log::info('=== Ieja ===');
+        Log::info('Email: ' . $request->epasts);
+        
+        // Валидация
+        $validator = Validator::make($request->all(), [
+            'epasts' => 'required|email',
+            'parole' => 'required|string'
+        ]);
+        
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Lietotājs nav atrasts'
-            ], 404);
+                'errors' => $validator->errors()
+            ], 422);
         }
+
+        $user = Lietotajs::where('epasts', $request->epasts)->first();
         
-       
-        if (!Hash::check($request->parole, $lietotajs->parole)) {
+        if (!$user) {
+            Log::error('Lietotājs nav atrasts: ' . $request->epasts);
             return response()->json([
                 'success' => false,
-                'message' => 'Nepareiza parole'
+                'message' => 'Nepareizs e-pasts vai parole'
             ], 401);
         }
-        
-        
-        if ($lietotajs->status !== 'aktivs') {
+
+        if (!Hash::check($request->parole, $user->parole)) {
+            Log::error('Nepareiza parole lietotājam: ' . $request->epasts);
             return response()->json([
                 'success' => false,
-                'message' => 'Konts bloķēts'
-            ], 403);
-        }
-        
-        
-        Auth::login($lietotajs);
-
-        
-        $request->session()->regenerate();
-
-        Log::info('Pieslēgšanās veiksmīga:', [
-            'user_id' => $lietotajs->kodsID,
-            'session_id' => session()->getId()
-        ]);
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Pieslēgšanās veiksmīga',
-            'lietotajs' => [
-                'kodsID' => $lietotajs->kodsID,
-                'lietotaja_vards' => $lietotajs->lietotaja_vards,
-                'epasts' => $lietotajs->epasts,
-                'loma' => $lietotajs->loma,
-                'status' => $lietotajs->status
-            ],
-            'session_id' => session()->getId()
-        ]);
-    }
-    
-    public function logout(Request $request)
-    {
-        Auth::logout();
-
-       
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        Log::info('Izrakstīšanās veiksmīga');
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Izrakstīšanās veiksmīga'
-        ]);
-    }
-    
-    public function checkAuth(Request $request)
-    {
-        Log::info('=== AUTENTIFIKĀCIJAS PĀRBAUDE ===');
-        Log::info('Session ID:', ['id' => session()->getId()]);
-        Log::info('Auth check:', ['check' => Auth::check()]);
-
-        if (!Auth::check()) {
-        Log::info('❌ User NOT authenticated');
-        return response()->json([
-            'success' => true,
-            'authenticated' => false,
-            'message' => 'Nav pieslēgts'
-        ]);
+                'message' => 'Nepareizs e-pasts vai parole'
+            ], 401);
         }
 
-       
-        $user = Auth::user();
-
-        Log::info('✅ User authenticated:', [
-        'id' => $user->kodsID,
-        'name' => $user->lietotaja_vards,
-        'email' => $user->epasts
-        ]); 
-
+         
+            $token = $user->kodsID . '_' . time();
+    
+            Log::info('✅ Ieja veiksmiga. ID: ' . $user->kodsID);
+            
             return response()->json([
                 'success' => true,
-                'authenticated' => true,
+                'message' => 'Ieja veiksmīga!',
+                'token' => $token,
                 'lietotajs' => [
                     'kodsID' => $user->kodsID,
                     'lietotaja_vards' => $user->lietotaja_vards,
                     'epasts' => $user->epasts,
                     'loma' => $user->loma,
                     'status' => $user->status
-                ],
-                 'session_id' => session()->getId()
+                ]
+            ]);
+
+           
+        
+        
+    }
+
+    public function checkAuth(Request $request)
+    {
+        try {
+        
+        $token = $request->header('Authorization');
+        
+        if (!$token) {
+            return response()->json([
+                'authenticated' => false,
+                'message' => 'No token provided'
             ]);
         }
+        
+        
+        $token = str_replace('Bearer ', '', $token);
+        
+        $parts = explode('_', $token);
+        
+        if (count($parts) === 2) {
+            $userId = $parts[0];
+            $user = Lietotajs::find($userId);
+        if ($user) {
+                return response()->json([
+                    'authenticated' => true,
+                    'lietotajs' => [
+                        'kodsID' => $user->kodsID,
+                        'lietotaja_vards' => $user->lietotaja_vards,
+                        'epasts' => $user->epasts,
+                        'loma' => $user->loma,
+                        'status' => $user->status
+                    ]
+                ]);
+            }
+        }
 
+          return response()->json([
+            'authenticated' => false,
+            'message' => 'Invalid token'
+        ]);
         
+    } catch (\Exception $e) {
         
+        return response()->json([
+            'authenticated' => false,
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ]);
+    }
+ }
+    
+   
+    
+    public function logout(Request $request)
+    {
+        Log::info('=== LOGOUT ===');
+    
+   
+        return response()->json([
+         'success' => true,
+         'message' => 'Izrakstīšanās veiksmīga'
+        ]);
+    }
+    
+    
+    
        
-        
-       
-    
-    
-    
+      
+
     public function testCreateUser(Request $request)
     {
         Log::info('=== TEST CREATE USER ===');

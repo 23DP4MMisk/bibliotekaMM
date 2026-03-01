@@ -4,15 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\NodalaController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\UserBookController;
 
-
-Route::middleware('web')->group(function (){
 Route::post('/register', [AuthController::class, 'register']); 
 Route::post('/reģistrēties', [AuthController::class, 'register']);
 Route::post('/pieslēgties', [AuthController::class, 'login']);
-Route::post('/izrakstīties', [AuthController::class, 'logout']);
 Route::get('/check-auth', [AuthController::class, 'checkAuth']);
-});
 
 
 Route::get('/test-create-user', [AuthController::class, 'testCreateUser']);
@@ -38,6 +35,43 @@ Route::get('/test', function () {
     ]);
 });
 
+Route::get('/jwt-test', function() {
+    try {
+        // Попробуем создать тестового пользователя прямо здесь
+        $user = App\Models\Lietotajs::where('epasts', 'test@test.com')->first();
+        
+        if (!$user) {
+            return response()->json(['error' => 'Пользователь не найден']);
+        }
+        
+        $token = Tymon\JWTAuth\Facades\JWTAuth::fromUser($user);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'JWT работает',
+            'token' => $token,
+            'user' => $user->epasts
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    }
+});
+
+Route::get('/test-token', function(Request $request) {
+    $token = $request->header('Authorization');
+    $user = auth()->user();
+    
+    return response()->json([
+        'header_token' => $token,
+        'user' => $user ? $user->epasts : null,
+        'authenticated' => auth()->check(),
+        'headers' => $request->headers->all()
+    ]);
+})->middleware('auth:api');
+
 
 Route::get('/books', [BookController::class, 'index']);
 Route::get('/books/search/{query}', [BookController::class, 'search']);
@@ -48,5 +82,13 @@ Route::get('/genres', [BookController::class, 'genres']);
 
 Route::get('/nodalas', [NodalaController::class, 'index']);
 Route::get('/nodalas/{id}/books', [NodalaController::class, 'books']);
+
+
+Route::post('/izrakstīties', [AuthController::class, 'logout']);
+Route::get('/user/books', [UserBookController::class, 'index']);
+Route::post('/user/books/add', [UserBookController::class, 'add']);
+Route::put('/user/book/status', [UserBookController::class, 'updateStatus']);
+Route::delete('/user/book/{id}', [UserBookController::class, 'destroy']);
+
 
 

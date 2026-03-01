@@ -531,11 +531,16 @@ export default {
       }
       
       return 'U';
+    },
+    
+    authToken() {
+     return localStorage.getItem('auth_token');
     }
     
-    
-     
   },
+
+     
+
   async mounted() {
     this.loadUserFromStorage();
   
@@ -613,24 +618,34 @@ export default {
       }
     },
   
-    
+   
     async checkAuth() {
       if (this.authLoading) return;
       
       this.authLoading = true;
       console.log('🔐 Pārbaudu autentifikāciju...');
       
+      const token = localStorage.getItem('auth_token');
+      console.log('Parbaudes tokens:', token ? token.substring(0, 20) + '...' : 'нет');
+
+
+      if (!token) {
+        this.setGuest();
+        this.authLoading = false;
+        return;
+      }
+
       try {
-       
+        console.log('Atsūtu pieprasijumu tokenam:', 'Bearer ' + token.substring(0, 20) + '...');
         const response = await fetch('http://localhost:8000/api/check-auth', {
           method: 'GET',
-          credentials: 'include',
           headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Authorization': `Bearer ` + token
           }
         });
         
+        console.log('Atbildes statuss:', response.status);
         const data = await response.json();
         console.log('Auth check response:', data);
         
@@ -639,19 +654,21 @@ export default {
           this.user = data.lietotajs;
           localStorage.setItem('user', JSON.stringify(data.lietotajs));
           console.log('✅ Lietotājs autentificēts:', this.userName);
+          
+          await this.loadUserBooks();
+          console.log('📚 Gramatas ir ieladeti pec autorizacijas:', this.userBooks.length);
         } else {
-          if (!localStorage.getItem('user')) {
-            this.setGuest();
-            console.log('❌ Lietotājs NAV autentificēts');
-          }
+         this.setGuest();
+         localStorage.removeItem('auth_token');
+         localStorage.removeItem('user');
+         console.log('❌ Lietotājs NAV autentificēts');
           
         }
         
       } catch (error) {
         console.error('Auth check error:', error);
-         if (!localStorage.getItem('user')) {
-          this.setGuest();
-        }
+        this.setGuest();
+        
        
       } finally {
         this.authLoading = false;
@@ -660,45 +677,38 @@ export default {
     
     async logout() {
       console.log('🚪 Mēģinu izrakstīties...');
+
+      const token = this.authToken;
       
       try {
-       
+       if(token) {
         const response = await fetch('http://localhost:8000/api/izrakstīties', {
           method: 'POST',
           credentials: 'include',
           headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Authorization': 'Bearer ' + token
           }
         });
-        
-        const data = await response.json();
-        console.log('Logout response:', data);
-        
-        if (data.success) {
-          this.setGuest();
-          localStorage.removeItem('user');
-          alert('Jūs esat veiksmīgi izrakstījies');
-          
-         
-          setTimeout(() => {
-            this.$router.go(0);
-          }, 1000);
+       }
+        } catch (error) {
+         console.error('Logout error:', error);
+        } finally {
+         this.setGuest();
+         localStorage.removeItem('auth_token');
+         localStorage.removeItem('user');
+         alert('Jūs esat veiksmīgi izrakstījies');
+         this.$router.push('/library');
         }
+      },
         
-      } catch (error) {
-        console.error('Logout error:', error);
-        this.setGuest();
-        this.$router.go(0);
-      }
-    },
-    
-    setGuest() {
+        
+      setGuest() {
       this.isLoggedIn = false;
       this.user = null;
     },
 
-     async showMyLibrary() {
+    async showMyLibrary() {
       this.activeCategory = 'my-library';
       this.selectedNodala = null;
       this.selectedGenre = null;
@@ -715,17 +725,25 @@ export default {
       if (!this.isLoggedIn) return;
       
       this.loading = true;
-      
+      const token = this.authToken;
+     
       try {
         const response = await fetch('http://localhost:8000/api/user/books', {
           method: 'GET',
-          credentials: 'include',
           headers: {
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + token
           }
         });
 
-         const data = await response.json();
+        if (response.status === 401) {
+          this.setGuest();
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('user');
+          return;
+        }
+
+        const data = await response.json();
         console.log('📚 Lietotāja grāmatas:', data);
         
         if (data.success && data.data) {
@@ -760,41 +778,108 @@ export default {
       };
       return labels[status] || status;
     },
+    async updateBookStatus(userBook, newStatus) {
+     console.log('📤 Mainu grāmatas statusu:', userBook);
+     console.log('Jauns statuss:', newStatus);
+     console.log('Grāmatas ID bibliotēkā:', userBook.LietotajGramatas_ID);
+  
+     const token = this.authToken;
+     console.log('Tokens:', token ? token.substring(0, 20) + '...' : 'nav');
 
-      async updateBookStatus(userBook, newStatus) {
+      if (!token) {
+       alert('Jūsu sesija ir beigusies');
+       this.goToLogin();
+       return;
+      }
+
       try {
+        const requestBody = {
+         book_id: userBook.LietotajGramatas_ID,
+         status: newStatus
+        };
+    
+        console.log('Отправляю данные:', requestBody);
+    
         const response = await fetch('http://localhost:8000/api/user/book/status', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            book_id: userBook.LietotajGramatas_ID,
-            status: newStatus
-          })
+        method: 'PUT',
+        headers: {
+         'Content-Type': 'application/json',
+         'Accept': 'application/json',
+         'Authorization': 'Bearer ' + token
+        },
+         body: JSON.stringify(requestBody)
         });
 
-        const data = await response.json();
-
-         if (data.success) {
-          userBook.statuss = newStatus;
-          console.log(`✅ Statuss mainīts uz: ${newStatus}`);
+        console.log('Статус ответа:', response.status);
+    
+        // kļudu apraksts
+        const responseText = await response.text();
+        console.log('Текст ответа:', responseText);
+    
+        // kļudu apraksts JSON
+        let data;
+        try {
+         data = JSON.parse(responseText);
+         console.log('Atbildes dati:', data);
+        } catch (e) {
+         console.error('Ошибка парсинга JSON:', e);
+         alert('Servera atbilde nav JSON formātā. Atbilde: ' + responseText);
+         return;
         }
+
+        if (response.status === 401) {
+         console.log('❌ Nav avtorizets');
+         alert('Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.');
+         this.goToLogin();
+         return;
+        }
+
+        if (response.status === 404) {
+         console.log('❌ Ieraksts nav atrasta');
+         alert('Grāmata nav atrasta jūsu bibliotēkā');
+         return;
+        }
+
+        if (response.status === 422) {
+         console.log('❌ Validācijas kļūda:', data.errors);
+         alert('Validācijas kļūda: ' + JSON.stringify(data.errors));
+         return;
+        }
+
+        if (response.status === 500) {
+         console.log('❌ Servera kļūda 500');
+         alert('Servera kļūda. Lūdzu, mēģiniet vēlāk.');
+         return;
+        }
+
+        if (data.success) {
+      
+         userBook.statuss = newStatus;
+         console.log(`✅ Statuss veiksmīgi mainīts uz: ${newStatus}`);
+      
+      
+         alert('Statuss veiksmīgi mainīts!');
+        } else {
+         console.log('❌ Kļūda no servera:', data.message);
+         alert('Kļūda: ' + (data.message || 'Neizdevās mainīt statusu'));
+        }
+    
       } catch (error) {
-        console.error('Kļūda mainot statusu:', error);
-      }
+       console.error('❌ Kļūda fetch:', error);
+       alert('Neizdevās mainīt statusu: ' + error.message);
+      } 
     },
 
-     async deleteBook(userBook) {
+    
+    async deleteBook(userBook) {
       if (!confirm('Vai tiešām vēlaties dzēst šo grāmatu no savas bibliotēkas?')) return;
-      
+      const token = this.authToken;
       try {
         const response = await fetch(`http://localhost:8000/api/user/book/${userBook.LietotajGramatas_ID}`, {
           method: 'DELETE',
           headers: {
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + token
           },
           credentials: 'include'
         });
@@ -884,6 +969,19 @@ export default {
         } else {
           const cleanPath = imagePath.replace(/^\/+/, '');
           return `http://localhost:8000/${cleanPath}`;
+        }
+      }
+
+      if (book?.vaku_attels && book.vaku_attels.trim() !== '') {
+        console.log('✅ Izmanto vaku_attels:', book.vaku_attels);
+        // Formatējam URL bez atsevišķas metodes
+          
+        if (book.vaku_attels.startsWith('http')) {
+          return book.vaku_attels;
+        } else {
+          const cleanPath = book.vaku_attels.replace(/^\/+/, '');
+          return `http://localhost:8000/${cleanPath}`;
+          
         }
       }
       
