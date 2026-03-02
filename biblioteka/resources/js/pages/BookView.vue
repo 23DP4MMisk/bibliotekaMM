@@ -132,7 +132,9 @@
                  </template>
 
                  <template v-else>
+                   
                     <div class="action-buttons-row">
+                      <div style="position: relative; width: 100%;">
                       <v-btn
                         color="#003D3A"
                         class="action-btn"
@@ -143,6 +145,17 @@
                       >
                         <span class="button-text-white">Lejupielādēt</span>
                       </v-btn>
+                       <v-alert
+                          v-if="notifications.download.show"
+                          :type="notifications.download.type"
+                          class="mt-2 notification-alert"
+                          dense
+                          outlined
+                        >
+                          {{ notifications.download.message }}
+                      </v-alert>
+                    </div>
+                    <div style="position: relative; width: 100%;">
                       <v-btn
                         color="#003D3A"
                         class="action-btn"
@@ -155,6 +168,16 @@
                       >
                         <span class="button-text-white">Pievienot bibliotēkai</span>
                       </v-btn>
+                      <v-alert
+                        v-if="notifications.add.show"
+                        :type="notifications.add.type"
+                        class="mt-2 notification-alert"
+                        dense
+                        outlined
+                      >
+                        {{ notifications.add.message }}
+                      </v-alert>
+                    </div>
                     </div>
                  </template>
                 </div>
@@ -193,7 +216,9 @@
 </template>
 
 <script>
+import '../../css/book-view.css';
 export default {
+  
   name: 'BookView',
   data() {
     return {
@@ -206,7 +231,12 @@ export default {
       user: null,
       authLoading: false,
 
-      addingToLibrary: false
+      addingToLibrary: false,
+
+      notifications: {
+       download: { show: false, message: '', type: 'success' },
+       add: { show: false, message: '', type: 'success' }
+      }
     };
   },
   computed: {
@@ -259,6 +289,21 @@ export default {
     await this.loadBookDetails();
   },
   methods: {
+
+    showNotification(type, message, isSuccess = true) {
+      
+      this.notifications[type] = {
+        show: true,
+        message: message,
+        type: isSuccess ? 'success' : 'error'
+      };
+      
+      
+      setTimeout(() => {
+        this.notifications[type].show = false;
+      }, 3000);
+    },
+    
     loadUserFromStorage() {
       const savedUser = localStorage.getItem('user');
       if (savedUser) {
@@ -347,7 +392,7 @@ export default {
          this.user = null;
          localStorage.removeItem('auth_token');
          localStorage.removeItem('user');
-         alert('Jūs esat veiksmīgi izrakstījies');
+         
          this.$router.push('/library');
         }
     },
@@ -408,118 +453,121 @@ export default {
       return 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=600&fit=crop';
     },
 
-     downloadBook() {
-      if (this.book.faila_pdf) {
+    downloadBook() {
+    if (this.book.faila_pdf) {
         window.open(`http://localhost:8000/${this.book.faila_pdf}`, '_blank');
+        this.showNotification('download', 'Lejupielāde sākta!', true);
       } else {
-        alert('PDF fails nav pieejams');
+        this.showNotification('download', 'PDF fails nav pieejams', false);
       }
     },
 
     async addToLibrary() {
-    
-  console.log('📤 Mēģinu pievienot grāmatu bibliotēkai...');
-  
-  const token = this.authToken;
-  console.log('Tokiens priekš pievienošanas:', token ? token.substring(0, 20) + '...' : 'nē');
-  console.log('ISBN no grāmatas:', this.book?.isbn); 
-  console.log('ISBN tips:', typeof this.book?.isbn);
-  
-  if (!token) {
-    alert('Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.');
-    this.goToLogin();
-    return;
-  }
-
-  if (!this.book?.isbn) {
-    alert('Grāmatas ISBN nav atrasts');
-    return;
-  }
-
-  this.addingToLibrary = true;
-  
-  try {
-    const requestBody = {
-      isbn: this.book.isbn,
-      statuss: 'vel nelasiju'
-    };
-    
-    console.log('Atsūtu ISBN:', requestBody.isbn);
-    
-    const response = await fetch('http://localhost:8000/api/user/books/add', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer ' + token
-      },
-      body: JSON.stringify(requestBody) 
-    });
-
-    
-    const responseText = await response.text();
-    console.log('Atbilde no servera(teksts):', responseText);
-    
-    let data;
-    try {
-      data = JSON.parse(responseText);
-      console.log('Atbilde no servera(JSON):', data);
-    } catch (e) {
-      console.error('Kļuda no parsinga:', e);
-      alert('Servera atbilde nav JSON formātā');
-      return;
-    }
-
-    if (response.status === 401) {
-      console.log('❌ Sesija beigusies, nepieciešama atkārtota autentifikācija');
-      this.isLoggedIn = false;
-      this.user = null;
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user');
-      alert('Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.');
-      this.goToLogin();
-      return;
-    }
-
-    if (response.status === 422) {
-      console.log('❌ 422 Unprocessable Entity');
-      console.log('Validacijas kļudas:', data?.errors);
       
-      let errorMessage = 'Validācijas kļūda:\n';
-      if (data?.errors) {
-        for (let field in data.errors) {
-          errorMessage += `${field}: ${data.errors[field].join(', ')}\n`;
-        }
-      } else if (data?.message) {
-        errorMessage = data.message;
-      } else {
-        errorMessage = 'Nezināma validācijas kļūda';
+      console.log('📤 Mēģinu pievienot grāmatu bibliotēkai...');
+      
+      const token = this.authToken;
+      console.log('Tokiens priekš pievienošanas:', token ? token.substring(0, 20) + '...' : 'nē');
+      console.log('ISBN no grāmatas:', this.book?.isbn); 
+      console.log('ISBN tips:', typeof this.book?.isbn);
+      
+      if (!token) {
+        this.showNotification('add', 'Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.', false);
+        this.goToLogin();
+        return;
       }
+
+      if (!this.book?.isbn) {
+        this.showNotification('add', 'Grāmatas ISBN nav atrasts', false);
+        return;
+      }
+
+      this.addingToLibrary = true;
       
-      alert(errorMessage);
-      return;
-    }
+      try {
+        const requestBody = {
+          isbn: this.book.isbn,
+          statuss: 'vel nelasiju'
+        };
+        
+        console.log('Atsūtu ISBN:', requestBody.isbn);
+        
+        const response = await fetch('http://localhost:8000/api/user/books/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify(requestBody) 
+        });
 
-    if (response.status === 500) {
-      console.log('❌ Servera kļūda 500');
-      alert('Servera kļūda. Lūdzu, mēģiniet vēlāk.');
-      return;
-    }
+        
+        const responseText = await response.text();
+        console.log('Atbilde no servera(teksts):', responseText);
+        
+        let data;
+        try {
+          data = JSON.parse(responseText);
+          console.log('Atbilde no servera(JSON):', data);
+        } catch (e) {
+          console.error('Kļuda no parsinga:', e);
+          this.showNotification('add', 'Servera atbilde nav JSON formātā', false);
+          return;
+        }
 
-    if (data?.success) {
-      alert('✅ Grāmata pievienota jūsu bibliotēkai!');
-    } else {
-      alert('❌ ' + (data?.message || 'Kļūda pievienojot grāmatu'));
-    }
+        if (response.status === 401) {
+          console.log('❌ Sesija beigusies, nepieciešama atkārtota autentifikācija');
+          this.isLoggedIn = false;
+          this.user = null;
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('user');
+          this.showNotification('add', 'Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.', false);
+          this.goToLogin();
+          return;
+        }
+
+        if (response.status === 422) {
+          console.log('❌ 422 Unprocessable Entity');
+          console.log('Validacijas kļudas:', data?.errors);
+          
+          let errorMessage = 'Validācijas kļūda:\n';
+          if (data?.errors) {
+            for (let field in data.errors) {
+              errorMessage += `${field}: ${data.errors[field].join(', ')}\n`;
+            }
+          } else if (data?.message) {
+            errorMessage = data.message;
+          } else {
+            errorMessage = 'Nezināma validācijas kļūda';
+          }
+          
+          this.showNotification('add', errorMessage, false);
+          return;
+        }
+
+        if (response.status === 500) {
+          console.log('❌ Servera kļūda 500');
+          this.showNotification('add', 'Servera kļūda. Lūdzu, mēģiniet vēlāk.', false);
+          return;
+        }
+
+        if (data?.success) {
+          this.showNotification('add', '✅ Grāmata pievienota jūsu bibliotēkai!', true);
+
+        } else {
+          this.showNotification('add', '❌ ' + (data?.message || 'Kļūda pievienojot grāmatu'), false);
+        }
+        
+      } catch (error) {
+        console.error('❌ Kļūda:', error);
+        this.showNotification('add', 'Neizdevās pievienot grāmatu: ' + error.message, false);
+      } finally {
+        this.addingToLibrary = false;
+      }
+
+    },
     
-  } catch (error) {
-    console.error('❌ Kļūda:', error);
-    alert('Neizdevās pievienot grāmatu: ' + error.message);
-  } finally {
-    this.addingToLibrary = false;
-  }
-
-  },
     goToLibrary() {
       this.$router.push('/library');
     },
@@ -540,316 +588,3 @@ export default {
 }
 </script>
 
-<style scoped>
-.top-nav-bar {
-  background-color: white !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-bottom: 1px solid rgba(0, 61, 58, 0.1);
-}
-
-.library-name {
-  font-size: 2.2rem;
-  color: #003D3A;
-  font-weight: 800;
-  letter-spacing: 1px;
-  cursor: pointer;
-  text-transform: uppercase;
-}
-
-.user-container {
-  display: flex;
-  align-items: center;
-}
-
-.user-initial-btn {
-  width: 48px !important;
-  height: 48px !important;
-  min-width: 48px !important;
-  padding: 0 !important;
-  background-color: #003D3A !important;
-  border-radius: 50% !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-shadow: 0 2px 8px rgba(0, 61, 58, 0.3);
-}
-
-.user-initial {
-  font-size: 20px;
-  font-weight: 600;
-  color: white !important;
-  text-transform: uppercase;
-  line-height: 1;
-}
-
-.main-content {
-  background-color: #fafafa;
-  min-height: calc(100vh - 80px);
-  padding-top: 40px;
-}
-
-.book-detail-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  background-color: white;
-  border-radius: 16px;
-  padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-.book-cover-large {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
-  max-width: 350px;
-  margin: 0 auto;
-}
-
-.book-cover-image-large {
-  width: 100%;
-  height: 400px;
-  object-fit: cover;
-}
-
-.book-info-container {
-  padding: 20px 0 20px 30px;
-}
-
-.book-title-large {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #003D3A;
-  margin-bottom: 10px;
-  line-height: 1.2;
-}
-
-.book-author-large {
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: #555;
-  margin-bottom: 25px;
-  font-style: italic;
-}
-
-.book-meta {
-  display: flex;
-  gap: 30px;
-  margin-bottom: 25px;
-  background-color: #f8f9fa;
-  padding: 15px 20px;
-  border-radius: 12px;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-}
-
-.meta-text {
-  font-size: 1.1rem;
-  color: #333;
-  font-weight: 500;
-}
-
-.book-description {
-  margin-bottom: 30px;
-  background-color: white;
-  padding: 20px;
-  border-radius: 12px;
-  border-left: 4px solid #003D3A;
-}
-
-.description-text {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: #444;
-  text-align: justify;
-}
-
-.guest-info {
-  margin: 30px 0;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 12px;
-  border: 1px solid #e0e0e0;
-}
-
-.guest-message {
-  font-size: 1.1rem;
-  color: #333;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.action-buttons {
-  margin-top: 20px;
-}
-
-.action-btn {
-  min-width: 200px !important;
-  height: 56px !important;
-  font-size: 1.2rem !important;
-  font-weight: 600 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 1px !important;
-  box-shadow: 0 4px 12px rgba(0, 61, 58, 0.3) !important;
-}
-
-.action-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 61, 58, 0.4) !important;
-  transition: all 0.3s ease;
-}
-
-.button-text-white {
-  color: white !important;
-}
-
-.reviews-section {
-  margin-top: 40px;
-  padding-top: 20px;
-  border-top: 2px solid #e0e0e0;
-}
-
-.reviews-title {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #003D3A;
-  margin-bottom: 25px;
-  text-align: center;
-}
-
-.reviews-card {
-  background-color: #f8f9fa;
-  border-radius: 20px;
-  padding: 40px;
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto;
-  box-shadow: 0 4px 12px rgba(0, 61, 58, 0.1);
-  border: 1px solid #e0e0e0;
-}
-
-.reviews-icon {
-  margin-bottom: 20px;
-}
-
-.reviews-icon .v-icon {
-  opacity: 0.7;
-}
-
-.reviews-text {
-  font-size: 1.1rem;
-  line-height: 1.8;
-  color: #444;
-}
-
-.reviews-message {
-  margin-bottom: 15px;
-}
-
-.reviews-author {
-  margin-top: 20px;
-  font-style: italic;
-  color: #666;
-}
-
-.action-buttons-row {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.action-btn {
-  min-width: 200px !important;
-  height: 56px !important;
-  font-size: 1.2rem !important;
-  font-weight: 600 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 1px !important;
-  box-shadow: 0 4px 12px rgba(0, 61, 58, 0.3) !important;
-}
-
-.action-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 61, 58, 0.4) !important;
-  transition: all 0.3s ease;
-}
-
-.button-text-white {
-  color: white !important;
-}
-
-@media (max-width: 960px) {
-  .book-detail-container {
-    padding: 20px;
-  }
-  
-  .book-info-container {
-    padding: 20px 0 0 0;
-  }
-  
-  .book-title-large {
-    font-size: 2rem;
-  }
-  
-  .book-author-large {
-    font-size: 1.3rem;
-  }
-  
-  .book-meta {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .action-btn {
-    width: 100%;
-  }
-
-  .reviews-card {
-    padding: 30px 20px;
-  }
-  
-  .reviews-title {
-    font-size: 1.8rem;
-  }
-}
-
-@media (max-width: 600px) {
-  .library-name {
-    font-size: 1.5rem;
-  }
-  
-  .book-title-large {
-    font-size: 1.8rem;
-  }
-  
-  .book-author-large {
-    font-size: 1.2rem;
-  }
-
-  .reviews-card {
-    padding: 25px 15px;
-  }
-  
-  .reviews-title {
-    font-size: 1.6rem;
-  }
-  
-  .reviews-text {
-    font-size: 1rem;
-  }
-
- .action-buttons-row {
-    flex-direction: column;
-    gap: 10px;
-  }
-
- .action-btn {
-    width: 100%;
-    min-width: 100% !important;
-  }
-}
-</style>

@@ -211,7 +211,7 @@
        
         <div v-else>
           <div v-if="activeCategory === 'my-library' && isLoggedIn">
-            <!-- Статус-меню -->
+            <!-- Statuss menu -->
             <div class="status-menu">
               <v-btn
                 v-for="status in statusOptions"
@@ -312,6 +312,35 @@
                               Dzēst
                             </v-btn>
                           </div>
+                          <v-alert
+                            v-if="notifications.download.show && notifications.download.bookId === userBook.LietotajGramatas_ID"
+                            :type="notifications.download.type"
+                            class="mt-2 notification-alert"
+                            dense
+                            outlined
+                          >
+                            {{ notifications.download.message }}
+                          </v-alert>
+
+                          <v-alert
+                            v-if="notifications.status.show && notifications.status.bookId === userBook.LietotajGramatas_ID"
+                            :type="notifications.status.type"
+                            class="mt-2 notification-alert"
+                            dense
+                            outlined
+                          >
+                            {{ notifications.status.message }}
+                          </v-alert>
+                          
+                          <v-alert
+                            v-if="notifications.delete.show && notifications.delete.bookId === userBook.LietotajGramatas_ID"
+                            :type="notifications.delete.type"
+                            class="mt-2 notification-alert"
+                            dense
+                            outlined
+                          >
+                            {{ notifications.delete.message }}
+                          </v-alert>
                         </div>
                       </v-col>
                     </v-row>
@@ -408,6 +437,27 @@
         </div>
       </v-container>
     </v-main>
+
+    <!-- Dialogs pret gramatas dzēšanai -->
+    <v-dialog v-model="deleteConfirmation.show" max-width="400">
+      <v-card>
+        <v-card-title class="headline">Dzēst grāmatu?</v-card-title>
+        <v-card-text>
+          Vai tiešām vēlaties dzēst grāmatu 
+          <strong>"{{ deleteConfirmation.bookTitle }}"</strong> 
+          no savas bibliotēkas?
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="grey darken-1" text @click="deleteConfirmation.show = false">
+            Atcelt
+          </v-btn>
+          <v-btn color="#b71c1c" dark @click="confirmDelete">
+            Dzēst
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -437,14 +487,27 @@ export default {
       user: null,
       authLoading: false,
 
-       userBooks: [],
+      userBooks: [],
       selectedStatus: 'all',
       statusOptions: [
         { value: 'all', label: 'Visas' },
         { value: 'izlasiju', label: 'Izlāsīju' },
         { value: 'lasu', label: 'Lasu' },
         { value: 'vel nelasiju', label: 'Vēl nelasīju' }
-      ]
+      ],
+
+      notifications: {
+       download: { show: false, message: '', type: 'success', bookId: null },
+       status: { show: false, message: '', type: 'success', bookId: null },
+       delete: { show: false, message: '', type: 'success', bookId: null },
+       add: { show: false, message: '', type: 'success', bookId: null }
+      },
+
+      deleteConfirmation: {
+       show: false,
+       bookId: null,
+       bookTitle: ''
+      }
     };
   },
   computed: {
@@ -556,6 +619,22 @@ export default {
     }
   },
   methods: { 
+    showNotification(type, bookId, message, isSuccess = true) {
+      // Atjaunojam notifikaciju konkretai  gramatai
+      this.notifications[type] = {
+        show: true,
+        message: message,
+        type: isSuccess ? 'success' : 'error',
+        bookId: bookId
+      };
+      
+      // Automatiski paslēpt notifikaciju pēc 3 sekundem
+      setTimeout(() => {
+        if (this.notifications[type]?.bookId === bookId) {
+          this.notifications[type].show = false;
+        }
+      }, 3000);
+    },
 
     goToReviewPage(userBook) {
      
@@ -697,7 +776,7 @@ export default {
          this.setGuest();
          localStorage.removeItem('auth_token');
          localStorage.removeItem('user');
-         alert('Jūs esat veiksmīgi izrakstījies');
+         
          this.$router.push('/library');
         }
       },
@@ -787,7 +866,7 @@ export default {
      console.log('Tokens:', token ? token.substring(0, 20) + '...' : 'nav');
 
       if (!token) {
-       alert('Jūsu sesija ir beigusies');
+       this.showNotification('status', userBook.LietotajGramatas_ID, 'Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.', false);
        this.goToLogin();
        return;
       }
@@ -798,7 +877,7 @@ export default {
          status: newStatus
         };
     
-        console.log('Отправляю данные:', requestBody);
+        console.log('Atsūtu datus:', requestBody);
     
         const response = await fetch('http://localhost:8000/api/user/book/status', {
         method: 'PUT',
@@ -810,11 +889,11 @@ export default {
          body: JSON.stringify(requestBody)
         });
 
-        console.log('Статус ответа:', response.status);
+        console.log('Statussa atbilde:', response.status);
     
         // kļudu apraksts
         const responseText = await response.text();
-        console.log('Текст ответа:', responseText);
+        console.log('Teksta atbilde:', responseText);
     
         // kļudu apraksts JSON
         let data;
@@ -822,21 +901,21 @@ export default {
          data = JSON.parse(responseText);
          console.log('Atbildes dati:', data);
         } catch (e) {
-         console.error('Ошибка парсинга JSON:', e);
-         alert('Servera atbilde nav JSON formātā. Atbilde: ' + responseText);
+         console.error('Kļūda parsējot JSON:', e);
+         this.showNotification('status', userBook.LietotajGramatas_ID, 'Servera atbilde nav JSON formātā', false);
          return;
         }
 
         if (response.status === 401) {
          console.log('❌ Nav avtorizets');
-         alert('Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.');
+         this.showNotification('status', userBook.LietotajGramatas_ID, 'Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.', false);
          this.goToLogin();
          return;
         }
 
         if (response.status === 404) {
          console.log('❌ Ieraksts nav atrasta');
-         alert('Grāmata nav atrasta jūsu bibliotēkā');
+         this.showNotification('status', userBook.LietotajGramatas_ID, 'Grāmata nav atrasta jūsu bibliotēkā', false);
          return;
         }
 
@@ -848,7 +927,7 @@ export default {
 
         if (response.status === 500) {
          console.log('❌ Servera kļūda 500');
-         alert('Servera kļūda. Lūdzu, mēģiniet vēlāk.');
+         this.showNotification('status', userBook.LietotajGramatas_ID, 'Servera kļūda. Lūdzu, mēģiniet vēlāk.', false);
          return;
         }
 
@@ -858,48 +937,65 @@ export default {
          console.log(`✅ Statuss veiksmīgi mainīts uz: ${newStatus}`);
       
       
-         alert('Statuss veiksmīgi mainīts!');
+         this.showNotification('status', userBook.LietotajGramatas_ID, 'Statuss veiksmīgi mainīts!', true);
         } else {
          console.log('❌ Kļūda no servera:', data.message);
-         alert('Kļūda: ' + (data.message || 'Neizdevās mainīt statusu'));
+         this.showNotification('status', userBook.LietotajGramatas_ID, data.message || 'Neizdevās mainīt statusu', false);
         }
     
       } catch (error) {
        console.error('❌ Kļūda fetch:', error);
-       alert('Neizdevās mainīt statusu: ' + error.message);
+       this.showNotification('status', userBook.LietotajGramatas_ID, 'Neizdevās mainīt statusu: ' + error.message, false);
       } 
     },
 
     
-    async deleteBook(userBook) {
-      if (!confirm('Vai tiešām vēlaties dzēst šo grāmatu no savas bibliotēkas?')) return;
-      const token = this.authToken;
-      try {
-        const response = await fetch(`http://localhost:8000/api/user/book/${userBook.LietotajGramatas_ID}`, {
-          method: 'DELETE',
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          credentials: 'include'
-        });
+      async deleteBook(userBook) {
+        // Paradam apstiprinajumu 
+        this.deleteConfirmation = {
+          show: true,
+          bookId: userBook.LietotajGramatas_ID,
+          bookTitle: userBook.nosaukums
+        };
+      },
 
-        const data = await response.json();
+      // Jauns metods priekš gramatas dzešanai
+      async confirmDelete() {
+        const bookId = this.deleteConfirmation.bookId;
+        const token = this.authToken;
+        
+        this.deleteConfirmation.show = false;
+        
+        try {
+          const response = await fetch(`http://localhost:8000/api/user/book/${bookId}`, {
+            method: 'DELETE',
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ' + token
+            }
+          });
 
-         if (data.success) {
-          this.userBooks = this.userBooks.filter(b => b.LietotajGramatas_ID !== userBook.LietotajGramatas_ID);
-          console.log('✅ Grāmata dzēsta');
+          const data = await response.json();
+
+          if (data.success) {
+            this.userBooks = this.userBooks.filter(b => b.LietotajGramatas_ID !== bookId);
+            console.log('✅ Grāmata dzēsta');
+            this.showNotification('delete', bookId, 'Grāmata veiksmīgi dzēsta!', true);
+          } else {
+            this.showNotification('delete', bookId, 'Kļūda dzēšot grāmatu', false);
+          }
+        } catch (error) {
+          console.error('Kļūda dzēšot grāmatu:', error);
+          this.showNotification('delete', bookId, 'Kļūda dzēšot grāmatu', false);
         }
-      } catch (error) {
-        console.error('Kļūda dzēšot grāmatu:', error);
-      }
-    },
+      },
 
     downloadBook(userBook) {
       if (userBook.faila_pdf) {
         window.open(`http://localhost:8000/${userBook.faila_pdf}`, '_blank');
+        this.showNotification('download', userBook.LietotajGramatas_ID, 'Lejupielāde sākta!', true);
       } else {
-        alert('PDF fails nav pieejams');
+        this.showNotification('download', userBook.LietotajGramatas_ID, 'PDF fails nav pieejams', false);
       }
     },
     

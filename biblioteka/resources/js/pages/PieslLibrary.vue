@@ -13,6 +13,18 @@
                 <div class="login-title">Pieslegties</div>
               </div>
               
+              <v-alert
+                v-if="showRegisterSuccess"
+                type="success"
+                class="mx-4 mb-4"
+                dense
+                outlined
+                dismissible
+                @click:close="showRegisterSuccess = false"
+              >
+                Reģistrācija veiksmīga! Lūdzu pieslēdzieties.
+              </v-alert>
+              
               
               <v-form ref="form">
                 
@@ -41,6 +53,16 @@
                     class="custom-text-field"
                   ></v-text-field>
                 </div>
+
+                <v-alert
+                  v-if="showLoginSuccess"
+                  type="success"
+                  class="mx-4 mb-4"
+                  dense
+                  outlined
+                >
+                  Pieslēgšanās veiksmīga! Pāreja uz bibliotēku...
+                </v-alert>
                 
                
                 <div class="button-container pa-4">
@@ -89,7 +111,9 @@ export default {
     return {
       email: '',
       password: '',
-      errorMessage: ''
+      errorMessage: '',
+      showRegisterSuccess: false,
+      showLoginSuccess: false
     };
   },
 
@@ -101,10 +125,17 @@ export default {
       localStorage.removeItem('last_registered_email');
     }
 
-    
     if (this.$route.query.registered === 'true') {
-      alert('Reģistrācija veiksmīga! Lūdzu pieslēdzieties.');
+      this.showRegisterSuccess = true;
+      
+      
+      setTimeout(() => {
+        this.showRegisterSuccess = false;
+      }, 5000);
     }
+
+    
+   
   },
   
   methods: {
@@ -139,7 +170,7 @@ export default {
 
           localStorage.setItem('auth_token', data.token);
           localStorage.setItem('user', JSON.stringify(data.lietotajs));
-          alert(data.message || 'Pieslēgšanās veiksmīga!');
+          this.showLoginSuccess = true;
 
           
           console.log('🏠 Pāreja uz bibliotēkas lapu...');

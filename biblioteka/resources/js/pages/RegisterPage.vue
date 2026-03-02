@@ -214,7 +214,7 @@ export default {
 
       localStorage.setItem('last_registered_email', this.email);
           
-      alert(data.message || 'Reģistrācija veiksmīga!');
+     
 
      
       console.log('🏠 Pāreja uz pieslēgšanās lapu...');

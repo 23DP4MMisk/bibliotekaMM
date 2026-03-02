@@ -508,6 +508,26 @@
   background-color: #d32f2f !important;
 }
 
+/* Stili priekš paziņojumam */
+.notification-alert {
+  margin-top: 10px !important;
+  width: 100%;
+  font-size: 0.9rem;
+  border-radius: 4px;
+}
+
+.v-alert--success {
+  background-color: #e8f5e8 !important;
+  color: #2e7d32 !important;
+  border-left: 4px solid #2e7d32 !important;
+}
+
+.v-alert--error {
+  background-color: #ffebee !important;
+  color: #c62828 !important;
+  border-left: 4px solid #c62828 !important;
+}
+
 
 @media (max-width: 960px) {
   .search-container {
