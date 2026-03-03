@@ -258,6 +258,53 @@
   border-left: 4px solid #c62828 !important;
 }
 
+.book-library-status {
+  margin: 20px 0;
+}
+
+.status-alert {
+  border-radius: 8px;
+}
+
+.status-alert.v-alert--info {
+  background-color: #e3f2fd !important;
+  color: #1976d2 !important;
+  border-left: 4px solid #1976d2 !important;
+}
+
+.status-alert.v-alert--success {
+  background-color: #e8f5e8 !important;
+  color: #2e7d32 !important;
+  border-left: 4px solid #2e7d32 !important;
+}
+
+.status-alert.v-alert--warning {
+  background-color: #fff3e0 !important;
+  color: #b76e00 !important;
+  border-left: 4px solid #b76e00 !important;
+}
+
+.status-alert.not-in-library {
+  background-color: #f5f5f5 !important;
+  color: #666 !important;
+  border-left: 4px solid #999 !important;
+}
+
+.status-text-lasu {
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.status-text-izlasiju {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.status-text-vel\ nelasiju {
+  color: #b76e00;
+  font-weight: 600;
+}
+
 
 @media (max-width: 960px) {
   .book-detail-container {

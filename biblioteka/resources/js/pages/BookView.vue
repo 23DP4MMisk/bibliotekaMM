@@ -103,6 +103,45 @@
                     <v-icon color="#003D3A" class="mr-2">mdi-book-open-page-variant</v-icon>
                     <span class="meta-text">Lapu skaits: {{ book.lapu_skaits }}</span>
                   </div>
+                  <div class="meta-item" v-if="book.faila_pdf">
+                    <v-icon color="#003D3A" class="mr-2">mdi-file-pdf-box</v-icon>
+                    <span class="meta-text">PDF fails: {{ book.faila_pdf.split('/').pop() }}</span>
+                  </div>
+                </div>
+
+                <div v-if="isLoggedIn && book.in_library" class="book-library-status">
+                  <v-alert
+                    :type="getStatusAlertType(book.book_status)"
+                    class="status-alert"
+                    dense
+                    outlined
+                  >
+                    <div class="d-flex align-center">
+                      <v-icon left :color="getStatusIconColor(book.book_status)">
+                        {{ getStatusIcon(book.book_status) }}
+                      </v-icon>
+                      <span>
+                        <strong>Jūsu bibliotēkā:</strong> 
+                        <span :class="'status-text-' + book.book_status">
+                          {{ getStatusLabel(book.book_status) }}
+                        </span>
+                      </span>
+                    </div>
+                  </v-alert>
+                </div>
+
+                <div v-else-if="isLoggedIn && !book.in_library" class="book-library-status">
+                  <v-alert
+                    type="info"
+                    class="status-alert not-in-library"
+                    dense
+                    outlined
+                  >
+                    <div class="d-flex align-center">
+                      <v-icon left color="#003D3A">mdi-book-plus</v-icon>
+                      <span>Šīs grāmatas nav jūsu bibliotēkā</span>
+                    </div>
+                  </v-alert>
                 </div>
 
                 <div class="book-description" v-if="book.apraksts">
@@ -407,8 +446,23 @@ export default {
       try {
         const isbn = this.$route.params.isbn;
         console.log('📡 Ielādē grāmatu ar ISBN:', isbn);
+
+        const token = this.authToken; 
+        console.log('Tokens par grāmatas ielādi:', token ? 'ir' : 'nav');
+
+        const headers = {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        };
+
+        if (token) {
+          headers['Authorization'] = 'Bearer ' + token;
+        }
         
-        const response = await fetch(`http://localhost:8000/api/books/${isbn}`);
+        const response = await fetch(`http://localhost:8000/api/books/${isbn}`, {
+          method: 'GET',
+          headers: headers
+        });
         
         if (!response.ok) {
           throw new Error(`HTTP kļūda: ${response.status}`);
@@ -420,11 +474,14 @@ export default {
         if (data.success && data.data) {
           this.book = data.data;
           console.log('📖 Grāmata no API:', this.book);
-          console.log('📖 ISBN no API:', this.book.ISBN);
-          console.log('📖 ISBN tips:', typeof this.book.ISBN);
+          console.log('📖 ISBN no API:', this.book.isbn);
+          console.log('📖 ISBN tips:', typeof this.book.isbn);
           console.log('📖 Grāmatas apraksts:', this.book.apraksts);
           console.log('📖 isbn lauks:', this.book.isbn); 
-          console.log('📖 Gramatas_ID:', this.book.Gramatas_ID); 
+          console.log('📖 Gramatas_ID:', this.book.isbn);
+          console.log('📖 faila_pdf:', this.book.faila_pdf);
+          console.log('📖 in_library:', this.book.in_library);
+          console.log('📖 book_status:', this.book.book_status);
         } else {
           throw new Error('Grāmata nav atrasta');
         }
@@ -454,8 +511,19 @@ export default {
     },
 
     downloadBook() {
-    if (this.book.faila_pdf) {
-        window.open(`http://localhost:8000/${this.book.faila_pdf}`, '_blank');
+      if (this.book.faila_pdf) {
+        const bookTitle = this.book.nosaukums || this.book.title || 'gramata';
+        const pdfPath = this.book.faila_pdf;
+        const pdfFileName = pdfPath.split('/').pop() || 'book.pdf';
+        
+        console.log('Lejupielādē failu:', pdfPath);
+        console.log('Faila nosaukums:', pdfFileName);
+        const link = document.createElement('a');
+        link.href = `http://localhost:8000/${pdfPath}`;
+        link.download = `${bookTitle}.pdf`; // 
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
         this.showNotification('download', 'Lejupielāde sākta!', true);
       } else {
         this.showNotification('download', 'PDF fails nav pieejams', false);
@@ -553,7 +621,15 @@ export default {
         }
 
         if (data?.success) {
+          
+            
+          this.book.in_library = true;
+          this.book.book_status = 'vel nelasiju';
+            
           this.showNotification('add', '✅ Grāmata pievienota jūsu bibliotēkai!', true);
+          
+          
+       
 
         } else {
           this.showNotification('add', '❌ ' + (data?.message || 'Kļūda pievienojot grāmatu'), false);
@@ -567,13 +643,54 @@ export default {
       }
 
     },
+
+    getStatusLabel(status) {
+      const labels = {
+        'lasu': 'Lasu',
+        'izlasiju': 'Izlāsīju',
+        'vel nelasiju': 'Vēl nelasīju'
+      };
+      return labels[status] || status;
+    },
+
+    getStatusIcon(status) {
+      const icons = {
+        'lasu': 'mdi-book-open-page-variant',
+        'izlasiju': 'mdi-book-check',
+        'vel nelasiju': 'mdi-book-plus'
+      };
+      return icons[status] || 'mdi-book';
+    },
+
+    getStatusIconColor(status) {
+      const colors = {
+        'lasu': '#1976d2',
+        'izlasiju': '#2e7d32',
+        'vel nelasiju': '#b76e00'
+      };
+      return colors[status] || '#003D3A';
+    },
+
+    getStatusAlertType(status) {
+      const types = {
+        'lasu': 'info',
+        'izlasiju': 'success',
+        'vel nelasiju': 'warning'
+      };
+      return types[status] || 'info';
+    },
+  
+   
     
     goToLibrary() {
       this.$router.push('/library');
     },
 
     goToMyLibrary() {
-      this.$router.push('/library?tab=my-library');
+      this.$router.push({
+       path: '/library',
+       query: { tab: 'my-library' }
+      });
     },
 
     goToLogin() {  

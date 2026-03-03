@@ -250,6 +250,10 @@
                         <div class="user-book-info">
                           <h3 class="user-book-title">{{ userBook.nosaukums }}</h3>
                           <p class="user-book-author">{{ userBook.autors }}</p>
+                          <p class="user-book-pdf-id" v-if="userBook.faila_pdf">
+                            <v-icon small color="#003D3A">mdi-file-pdf-box</v-icon>
+                            PDF ID: {{ userBook.faila_pdf.split('/').pop() }}
+                          </p>
                           <p class="user-book-status">
                             Statuss: <span :class="'status-badge status-' + userBook.statuss">
                               {{ getStatusLabel(userBook.statuss) }}
@@ -605,17 +609,30 @@ export default {
      
 
   async mounted() {
+
+    console.log('📌 LibraryPage mounted');
+    console.log('URL параметры:', this.$route.query);
     this.loadUserFromStorage();
+
+    const shouldShowLibrary = this.$route.query.tab === 'my-library';
   
-    await this.checkAuth();
-
-    await this.fetchGenres();
    
-    await this.fetchBooks();
 
+    console.log('tab параметр:', this.$route.query.tab);
+    console.log('isLoggedIn:', this.isLoggedIn);
+   
+    
     if (this.$route.query.tab === 'my-library' && this.isLoggedIn) {
       this.activeCategory = 'my-library';
-      await this.loadUserBooks();
+      
+      await this.checkAuth(); 
+      await this.fetchGenres();
+      this.activeCategory = 'my-library';
+
+    }  else {
+     await this.checkAuth();
+     await this.fetchGenres();
+     await this.fetchBooks();
     }
   },
   methods: { 
@@ -992,7 +1009,20 @@ export default {
 
     downloadBook(userBook) {
       if (userBook.faila_pdf) {
-        window.open(`http://localhost:8000/${userBook.faila_pdf}`, '_blank');
+        const bookTitle = userBook.nosaukums || userBook.title || 'gramata';
+        const fileName = `${bookTitle}.pdf`;
+        const link = document.createElement('a');
+        link.href = `http://localhost:8000/${userBook.faila_pdf}`;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        this.showNotification(
+          'download', 
+          userBook.LietotajGramatas_ID, 
+          `Lejupielādē: "${bookTitle}"`, 
+          true
+        );
         this.showNotification('download', userBook.LietotajGramatas_ID, 'Lejupielāde sākta!', true);
       } else {
         this.showNotification('download', userBook.LietotajGramatas_ID, 'PDF fails nav pieejams', false);
@@ -1140,15 +1170,7 @@ export default {
       this.fetchBooks();
     },
     
-    showMyLibrary() {
-      
-      this.activeCategory = 'my-library';
-      this.selectedNodala = null;
-      this.selectedGenre = null;
-      this.searchQuery = '';
-      this.showNodalaMenu = false;
-      
-    },
+   
     
     startCloseMenuTimer() {
       clearTimeout(this.closeMenuTimer);

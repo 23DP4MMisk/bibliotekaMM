@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+
 use App\Http\Controllers\Controller;
 use App\Models\Gramata;
 use App\Models\Nodala;
@@ -49,6 +50,7 @@ class BookController extends Controller
                         'lapu_skaits' => $book->lapu_skaits,
                         'vaku_attels' => $book->vaku_attels,
                         'apraksts' => $book->apraksts,
+                        'faila_pdf' => $book->faila_pdf,
                         'nodala_id' => $book->Nodala_ID,
                         'zanra_id' => $book->Zanra_ID,
                         'category' => [
@@ -107,7 +109,7 @@ class BookController extends Controller
     }
 
     // GET /api/books/{isbn} — konkreta gramata
-    public function show($isbn)
+    public function show($isbn, Request $request)
     {
         try {
             $book = Gramata::with('nodala')->find($isbn);
@@ -119,6 +121,32 @@ class BookController extends Controller
                 ], 404);
             }
 
+            $inLibrary = false;
+            $bookStatus = null;
+
+            $user = $this->getUserFromToken($request);
+
+            \Log::info('=== BOOK SHOW DEBUG ===');
+            \Log::info('ISBN: ' . $isbn);
+            \Log::info('User from token: ' . ($user ? 'YES (ID: ' . $user->kodsID . ')' : 'NO'));
+
+            if ($user) {
+                 
+                
+                $userBook = DB::table('LietotajGramatas')
+                    ->where('Lietotajs', $user->kodsID)
+                    ->where('Gramatas', $isbn)
+                    ->first();
+
+                    \Log::info('Book in library: ' . ($userBook ? 'YES' : 'NO'));
+                    
+                if ($userBook) {
+                    $inLibrary = true;
+                    $bookStatus = $userBook->statuss;
+                    \Log::info('Book status: ' . $bookStatus);
+                }
+            }
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -128,7 +156,10 @@ class BookController extends Controller
                     'gads' => $book->gads,
                     'lapu_skaits' => $book->lapu_skaits,
                     'apraksts' => $book->apraksts,
+                    'faila_pdf' => $book->faila_pdf,
                     'vaku_attels' => $book->vaku_attels,
+                    'in_library' => $inLibrary,    
+                    'book_status' => $bookStatus, 
                     'category' => [
                         'id' => $book->Nodala_ID,
                         'tips' => $book->nodala->tips ?? null,
@@ -181,4 +212,24 @@ class BookController extends Controller
             ], 500);
         }
     }
+
+    private function getUserFromToken($request)
+    {
+        $token = $request->header('Authorization');
+        
+        if (!$token) {
+            return null;
+        }
+        
+        $token = str_replace('Bearer ', '', $token);
+        $parts = explode('_', $token);
+        
+        if (count($parts) === 2) {
+            $userId = $parts[0];
+            return \App\Models\Lietotajs::find($userId);
+        }
+        
+        return null;
+    }
+
 }

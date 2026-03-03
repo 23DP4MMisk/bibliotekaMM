@@ -20,6 +20,7 @@ class GramatSeeders extends Seeder
              identitātes un pielietojumus. Grāmata paredzēta vidusskolas un koledžas 
              līmeņa studentiem un ietver daudzus piemērus un uzdevumus pašpārbaudei.',
              'lapu_skaits' => '1514',
+             'faila_pdf' => 'uploids/books/12345623.pdf',
              'autors' => 'Jay Abramson',
              'Nodala_ID' => 1,
              'Zanra_ID' => 1,
@@ -36,6 +37,7 @@ class GramatSeeders extends Seeder
              lietojot vienkāršu valodu, piemērus un ilustrācijas, lai palīdzētu studentiem apgūt 
              ekonomikas teoriju un pielietojumu.',
              'lapu_skaits' => '975',
+             'faila_pdf' => 'uploids/books/12345723.pdf',
              'autors' => 'Jay Abramson',
              'Nodala_ID' => 1,
              'Zanra_ID' => 2,
@@ -53,6 +55,7 @@ class GramatSeeders extends Seeder
              klasēm un rekursiju. Tā ir paredzēta pilnīgiem iesācējiem un satur praktiskus piemērus, 
              uzdevumus un interaktīvus materiālus, kas palīdz apgūt kodēšanas prasmes teorijā un praksē.',
              'lapu_skaits' => '406',
+             'faila_pdf' => 'uploids/books/12345823.pdf',
              'autors' => 'Jay Abramson',
              'Nodala_ID'=> 1,
              'Zanra_ID' => 3,
@@ -69,6 +72,7 @@ class GramatSeeders extends Seeder
              algoritmus, mašīnmācīšanos, Python izmantošanu, datu vizualizāciju, pārskatu sagatavošanu un profesionālo 
              ētiku. Grāmata paredzēta bakalaura līmeņa studentiem vai ikvienam, kas vēlas apgūt datu zinātnes pamatus',
              'lapu_skaits' => '557',
+             'faila_pdf' => 'uploids/books/12345923.pdf',
              'autors' => 'Jay Abramson',
              'Nodala_ID' => 1,
              'Zanra_ID' => 4,
@@ -88,10 +92,11 @@ class GramatSeeders extends Seeder
              par personīgo un sabiedrisko brīvību. Tajā ir daudz autobiogrāfisku motīvu, 
              spilgti raksturi un tēlaini aprakstīta Valmiera un Gauja.',
              'lapu_skaits' => '404',
+             'faila_pdf' => 'uploids/books/19364225.pdf',
              'autors' => 'Pāvils Rozītis',
              'Nodala_ID' => 2,
              'Zanra_ID' => 5,
-             'vaku_attels' => 'uplods/cover/19364225.jpg',
+             'vaku_attels' => 'uploids/cover/19364225.jpg',
              'created_at' => now(),
              'updated_at' => now()
             ],
@@ -106,6 +111,7 @@ class GramatSeeders extends Seeder
               uzlabot savu dzīvi un darbību, tā simboliski uzsverot, ka laime un veiksme ir pašu 
               cilvēku rokās, nevis brīnumos.',
               'lapu_skaits' => '220',
+              'faila_pdf' => 'uploids/books/19404325.pdf',
              'autors' => 'Andrejs Upīts',
              'Nodala_ID' => 2,
              'Zanra_ID' => 6,
@@ -123,6 +129,7 @@ class GramatSeeders extends Seeder
              valodu un simboliem. Pasakas ir piemērotas gan bērniem, gan pieaugušajiem, 
              kas grib izbaudīt sirreālu un krāsainu stāstu pasauli',
              'lapu_skaits' => '80',
+             'faila_pdf' => 'uploids/books/19734525.pdf',
              'Nodala_ID' => 2,
              'Zanra_ID' => 5,
              'vaku_attels' => 'uploids/cover/19734525.jpg',
@@ -142,6 +149,7 @@ class GramatSeeders extends Seeder
              no 19 gs blēžu romāniem Romāns sastāv no trim daļām un balstās uz autora novērojumiem 
              no 1867 līdz 1873 gadam',
              'lapu_skaits' => '544',
+             'faila_pdf' => 'uploids/books/19804425.pdf',
              'autors' => 'Reinis Kaudzīte un Matīss Kaudzīte',
              'Nodala_ID' => 2,
              'Zanra_ID' => 6,

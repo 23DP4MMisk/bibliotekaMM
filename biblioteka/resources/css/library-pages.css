@@ -528,6 +528,19 @@
   border-left: 4px solid #c62828 !important;
 }
 
+.user-book-pdf-id {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.user-book-pdf-id .v-icon {
+  font-size: 16px !important;
+}
+
 
 @media (max-width: 960px) {
   .search-container {
