@@ -228,8 +228,42 @@
             <v-col cols="12">
               <div class="reviews-section">
                 <h2 class="reviews-title">Atsauksmes</h2>
+
+                 <div v-if="reviews.length > 0" class="reviews-list">
+                    <div
+                      v-for="review in reviews"
+                      :key="review.Atsauksmes_ID"
+                      class="review-item"
+                    >
+                      <div class="review-header">
+                        <div class="reviewer-info">
+                          <v-avatar color="#003D3A" size="40" class="mr-3">
+                            <span class="reviewer-initial">{{ getUserInitial(review.lietotaja_vards) }}</span>
+                          </v-avatar>
+                          <div>
+                            <div class="reviewer-name">{{ review.lietotaja_vards }}</div>
+                            <div class="review-date">{{ formatDate(review.created_at) }}</div>
+                          </div>
+                        </div>
+                        <div class="review-rating">
+                          <v-icon
+                            v-for="star in 5"
+                            :key="star"
+                            :color="star <= review.vertejums ? '#FFD700' : '#C0C0C0'"
+                            size="18"
+                          >
+                            mdi-star
+                          </v-icon>
+                          <span class="rating-value">({{ review.vertejums }}/5)</span>
+                        </div>
+                      </div>
+                      <p class="review-text">{{ review.komentārs }}</p>
+                    </div>
+                  </div>
+
+
                 
-                <div class="reviews-card">
+                <div v-else  class="reviews-card">
                   <div class="reviews-icon">
                     <v-icon size="48" color="#003D3A">mdi-chat-outline</v-icon>
                   </div>
@@ -275,7 +309,9 @@ export default {
       notifications: {
        download: { show: false, message: '', type: 'success' },
        add: { show: false, message: '', type: 'success' }
-      }
+      },
+
+      reviews: []
     };
   },
   computed: {
@@ -326,8 +362,29 @@ export default {
       this.user = null;
     }
     await this.loadBookDetails();
+    await this.loadBookReviews();
   },
   methods: {
+
+    async loadBookReviews() {
+      try {
+        const isbn = this.$route.params.isbn;
+        console.log('📝 Ielādē atsauksmes grāmatai:', isbn);
+        
+        const response = await fetch(`http://localhost:8000/api/books/${isbn}/reviews`);
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          this.reviews = data.data;
+          console.log('✅ Ielādētas', this.reviews.length, 'atsauksmes');
+        } else {
+          this.reviews = [];
+        }
+      } catch (error) {
+        console.error('❌ Kļūda ielādējot atsauksmes:', error);
+        this.reviews = [];
+      }
+    },
 
     showNotification(type, message, isSuccess = true) {
       
@@ -700,7 +757,29 @@ export default {
 
     goToRegister() {
       this.$router.push('/login');
-    }
+    },
+
+    getUserInitial(name) {
+      if (!name) return 'U';
+      return name.charAt(0).toUpperCase();
+    },
+
+    formatDate(dateString) {
+      if (!dateString) return '';
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString('lv-LV', options);
+    },
+
+    goToReviewPage() {
+    this.$router.push({
+      path: `/review/${this.book.isbn}`,
+      query: {
+        title: this.book.nosaukums,
+        author: this.book.autors,
+        cover: this.book.vaku_attels
+      }
+    });
+},
   }
 }
 </script>

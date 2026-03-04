@@ -5,12 +5,16 @@ use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\NodalaController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserBookController;
+use App\Http\Controllers\Api\ReviewController;
 
 Route::post('/register', [AuthController::class, 'register']); 
 Route::post('/reģistrēties', [AuthController::class, 'register']);
 Route::post('/pieslēgties', [AuthController::class, 'login']);
 Route::get('/check-auth', [AuthController::class, 'checkAuth']);
 
+Route::post('/reviews', [ReviewController::class, 'store']);
+Route::get('/reviews/check/{bookId}', [ReviewController::class, 'check']);
+Route::get('/books/{isbn}/reviews', [ReviewController::class, 'bookReviews']);
 
 Route::get('/test-create-user', [AuthController::class, 'testCreateUser']);
 Route::get('/test-db', function() {

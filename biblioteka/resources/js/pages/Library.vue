@@ -654,15 +654,19 @@ export default {
     },
 
     goToReviewPage(userBook) {
-     
-     this.$router.push({
-     name: 'WriteReview',
-     params: { 
-       isbn: userBook.gramatas_id || userBook.ISBN,
-       bookTitle: userBook.nosaukums || userBook.title,
-       bookAuthor: userBook.autors || userBook.author
-      }
-     });
+      console.log('📝 Данные для отзыва:', userBook);
+  
+      this.$router.push({
+        name: 'RewievPage',
+        params: { 
+          isbn: userBook.gramatas_id || userBook.ISBN, 
+        },
+        query: { 
+          title: encodeURIComponent(userBook.nosaukums || userBook.title || 'Grāmata'),
+          author: encodeURIComponent(userBook.autors || userBook.author || ''),
+          cover: userBook.vaku_attels || ''
+        }
+      });
     },
 
     loadUserFromStorage() {
