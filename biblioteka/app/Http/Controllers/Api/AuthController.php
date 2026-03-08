@@ -38,12 +38,12 @@ class AuthController extends Controller
                 'lietotaja_vards' => substr($request->lietotaja_vards, 0, 10),
                 'epasts' => substr($request->epasts, 0, 20),
                 'parole' => Hash::make($request->parole),
-                'loma' =>  $request->loma === 'admin' ? 'admin' : 'registretajsklients',
+                'loma' =>  $request->loma === 'admins' ? 'admins' : 'registretajsklients',
                 'registresanas_datums' => Carbon::now(),
                 'status' => 'aktivs'
             ]);
             
-         $token = JWTAuth::fromUser($lietotajs);
+         $token = $lietotajs->kodsID . '_' . time();
             
             Log::info('✅ Lietotājs izveidots:', ['id' => $lietotajs->kodsID]);
             

@@ -174,7 +174,17 @@ export default {
 
           
           console.log('🏠 Pāreja uz bibliotēkas lapu...');
-          this.$router.push('/library');
+
+          const userRole = data.lietotajs.loma;
+          if (userRole === 'admins' || userRole === 'admin') {
+            
+            console.log('👑 Administrators atpazīts, pāreja uz admin paneli');
+            this.$router.push('/admin');
+          } else {
+            
+            this.$router.push('/library');
+          }
+          
 
           } else {
           console.error('❌ Kļūda:', data);

@@ -41,7 +41,7 @@ Route::get('/test', function () {
 
 Route::get('/jwt-test', function() {
     try {
-        // Попробуем создать тестового пользователя прямо здесь
+        
         $user = App\Models\Lietotajs::where('epasts', 'test@test.com')->first();
         
         if (!$user) {
@@ -75,6 +75,37 @@ Route::get('/test-token', function(Request $request) {
         'headers' => $request->headers->all()
     ]);
 })->middleware('auth:api');
+
+// ВРЕМЕННЫЙ МАРШРУТ для первоначального обновления
+Route::get('/fix-genre-counts', function() {
+    try {
+        $genres = DB::table('Zanrs')->get();
+        $updated = 0;
+        
+        foreach ($genres as $genre) {
+            $count = DB::table('Gramata')
+                ->where('Zanra_ID', $genre->Zanra_ID)
+                ->count();
+            
+            DB::table('Zanrs')
+                ->where('Zanra_ID', $genre->Zanra_ID)
+                ->update(['gramatu_skaits' => $count]);
+            
+            $updated++;
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => "Atjaunināti {$updated} žanri",
+            'data' => DB::table('Zanrs')->get()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Kļūda: ' . $e->getMessage()
+        ], 500);
+    }
+});
 
 
 Route::get('/books', [BookController::class, 'index']);

@@ -5,6 +5,8 @@ import LoginPage from '../pages/PieslLibrary.vue';
 import RegisterPage from '../pages/RegisterPage.vue';
 import BookView from '../pages/BookView.vue';
 import RewievPage from '../pages/RewievPage.vue';
+import AdminLibrary from '../pages/AdminLibrary.vue';
+
 
 const routes = [
     { 
@@ -36,7 +38,12 @@ const routes = [
         path: '/review/:isbn',
         name: 'RewievPage',
         component: RewievPage
-    }
+    },
+    { 
+        path: '/admin', 
+        name: 'AdminLibrary', 
+        component: AdminLibrary 
+    } 
 
 ];
 

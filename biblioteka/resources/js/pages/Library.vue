@@ -611,14 +611,14 @@ export default {
   async mounted() {
 
     console.log('📌 LibraryPage mounted');
-    console.log('URL параметры:', this.$route.query);
+    console.log('URL parametri:', this.$route.query);
     this.loadUserFromStorage();
 
     const shouldShowLibrary = this.$route.query.tab === 'my-library';
   
    
 
-    console.log('tab параметр:', this.$route.query.tab);
+    console.log('tab parametrs:', this.$route.query.tab);
     console.log('isLoggedIn:', this.isLoggedIn);
    
     
@@ -654,7 +654,7 @@ export default {
     },
 
     goToReviewPage(userBook) {
-      console.log('📝 Данные для отзыва:', userBook);
+      console.log('📝 Dati priekš atsauksmi:', userBook);
   
       this.$router.push({
         name: 'RewievPage',
