@@ -76,7 +76,7 @@ class AuthController extends Controller
         Log::info('=== Ieja ===');
         Log::info('Email: ' . $request->epasts);
         
-        // Валидация
+        
         $validator = Validator::make($request->all(), [
             'epasts' => 'required|email',
             'parole' => 'required|string'

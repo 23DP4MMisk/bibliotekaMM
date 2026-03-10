@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\NodalaController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserBookController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\AdminController;
+use Illuminate\Http\Request;
 
 Route::post('/register', [AuthController::class, 'register']); 
 Route::post('/reģistrēties', [AuthController::class, 'register']);
@@ -76,7 +78,7 @@ Route::get('/test-token', function(Request $request) {
     ]);
 })->middleware('auth:api');
 
-// ВРЕМЕННЫЙ МАРШРУТ для первоначального обновления
+
 Route::get('/fix-genre-counts', function() {
     try {
         $genres = DB::table('Zanrs')->get();
@@ -126,4 +128,89 @@ Route::put('/user/book/status', [UserBookController::class, 'updateStatus']);
 Route::delete('/user/book/{id}', [UserBookController::class, 'destroy']);
 
 
+    
+Route::prefix('admin')->group(function () {
+    // Lietotāju pārvaldība
+    Route::get('/users', [AdminController::class, 'getUsers']);
+    Route::put('/users/{id}/status', [AdminController::class, 'updateUserStatus']);
+    
+    // Grāmatu pārvaldība
+    Route::post('/books', [AdminController::class, 'storeBook']);
+    Route::put('/books/{isbn}', [AdminController::class, 'updateBook']);
+    Route::delete('/books/{isbn}', [AdminController::class, 'deleteBook']);
+    
+    // Žanru pārvaldība
+    Route::post('/genres', [AdminController::class, 'storeGenre']);
+    Route::put('/genres/{id}', [AdminController::class, 'updateGenre']);
+    Route::delete('/genres/{id}', [AdminController::class, 'deleteGenre']);
+    
+    // Statistika
+    Route::get('/stats/books/{isbn}', [AdminController::class, 'bookStats']);
+    Route::get('/stats/users', [AdminController::class, 'userStats']);
+});
 
+// DEBUG MARŠRUTS - lai redzētu lietotāja datus no tokena
+Route::get('/debug-user-from-token', function(Request $request) {
+    $authHeader = $request->header('Authorization');
+    
+    if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Nav Authorization header',
+            'headers' => $request->headers->all()
+        ]);
+    }
+    
+    $token = str_replace('Bearer ', '', $authHeader);
+    
+    // Parsējam tokenu (pieņemot, ka formāts ir "kodsID_timestamp")
+    $tokenParts = explode('_', $token);
+    $userId = $tokenParts[0] ?? null;
+    
+    if (!$userId) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Nederīgs tokena formāts',
+            'token' => $token
+        ]);
+    }
+    
+    $user = DB::table('Lietotajs')->where('kodsID', $userId)->first();
+    
+    return response()->json([
+        'success' => true,
+        'token' => $token,
+        'user_id_from_token' => $userId,
+        'user_from_db' => $user,
+        'is_admin' => $user && $user->loma === 'admins'
+    ]);
+});
+    
+
+
+// routes/api.php - pievienojiet šo maršrutu
+Route::get('/debug-token', function(Request $request) {
+    $authHeader = $request->header('Authorization');
+    
+    $result = [
+        'has_auth_header' => !is_null($authHeader),
+        'auth_header' => $authHeader,
+        'headers' => $request->headers->all(),
+    ];
+    
+    if ($authHeader && str_starts_with($authHeader, 'Bearer ')) {
+        $token = str_replace('Bearer ', '', $authHeader);
+        $tokenParts = explode('_', $token);
+        $userId = $tokenParts[0] ?? null;
+        
+        $result['token'] = $token;
+        $result['user_id_from_token'] = $userId;
+        
+        if ($userId) {
+            $user = DB::table('Lietotajs')->where('kodsID', $userId)->first();
+            $result['user_from_db'] = $user;
+        }
+    }
+    
+    return response()->json($result);
+});

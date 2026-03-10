@@ -661,16 +661,51 @@ export default {
     }
   },
 
+ 
+
   async mounted() {
     console.log('📌 AdminLibraryPage mounted');
+    console.log('Auth token:', this.authToken);
+    await this.debugToken();
     
     await this.checkAuth();
+    await this.debugUserToken();
     await this.fetchGenres();
     await this.fetchBooks();
     await this.loadUsersList();
   },
 
   methods: {
+
+    async debugToken() {
+      try {
+        const response = await fetch('http://localhost:8000/api/debug-token', {
+          headers: {
+            'Authorization': 'Bearer ' + this.authToken
+          }
+        });
+        const data = await response.json();
+        console.log('🔍 DEBUG token:', data);
+      } catch (error) {
+        console.error('Debug token error:', error);
+      }
+    },
+    
+    async debugUserToken() {
+    try {
+      const response = await fetch('http://localhost:8000/api/debug-user-from-token', {
+        headers: {
+          'Authorization': 'Bearer ' + this.authToken
+        }
+      });
+      const data = await response.json();
+      console.log('🔍 DEBUG token info:', data);
+      return data;
+    } catch (error) {
+      console.error('Debug kļūda:', error);
+    }
+   },
+    
     showNotification(type, message, isSuccess = true) {
       this.notifications[type] = {
         show: true,
@@ -867,19 +902,49 @@ export default {
 
     
     async loadUsersList() {
+      console.log('Mēģinu ielādēt lietotājus...');
+      console.log('Auth token:', this.authToken);
+      console.log('Lietotājs no this.user:', this.user);
+        
+      if (!this.authToken) {
+        console.error('Nav auth token');
+        return;
+      }
+    
       try {
         const response = await fetch('http://localhost:8000/api/admin/users', {
+          method: 'GET',
           headers: {
-            'Authorization': 'Bearer ' + this.authToken
+            'Authorization': 'Bearer ' + this.authToken,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
           }
         });
-        const data = await response.json();
-        if (data.success) {
-          this.usersList = data.data;
-        }
-      } catch (error) {
-        console.error('Kļūda ielādējot lietotājus:', error);
+
+      console.log('Response status:', response.status);
+    
+      // Pārbaudām vai atbilde ir JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Atbilde nav JSON:', text.substring(0, 200));
+        throw new Error('Serveris atgrieza HTML, nevis JSON');
       }
+    
+      const data = await response.json();
+      console.log('Saņemtie dati:', data);
+      
+      if (data.success) {
+        this.usersList = data.data;
+        console.log('Lietotāji ielādēti:', this.usersList);
+      } else {
+        console.error('Kļūda ielādējot lietotājus:', data.message);
+      }
+        } catch (error) {
+          console.error('Kļūda ielādējot lietotājus:', error);
+        }
+      }
+    
     },
 
     async toggleUserStatus(user) {
@@ -976,7 +1041,7 @@ export default {
       }
     }
   }
-}
+
 </script>
 
 <style scoped>
