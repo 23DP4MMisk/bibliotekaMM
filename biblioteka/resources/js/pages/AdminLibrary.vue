@@ -460,47 +460,101 @@
     </v-dialog>
 
     
-    <v-dialog v-model="showStatistics" max-width="900" scrollable>
-      <v-card>
-        <v-card-title class="headline" style="background-color: #003D3A; color: white;">
-          Grāmatu statistika
-          <v-spacer></v-spacer>
-          <v-btn icon dark @click="showStatistics = false">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
+    <v-dialog v-model="showStatistics" max-width="1200" scrollable>
+      <v-card class="statistics-card">
+        <v-card-title class="statistics-header">
+          <div class="header-content">
+            <div>
+              <h2 class="statistics-title">Grāmatu statistika</h2>
+              <p class="statistics-subtitle">Skatījumu un lejupielāžu analīze</p>
+            </div>
+            <v-spacer></v-spacer>
+            <v-btn icon dark @click="showStatistics = false" class="close-btn">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
         </v-card-title>
         
-        <v-card-text>
-          <v-simple-table>
-            <template v-slot:default>
-              <thead>
-                <tr>
-                  <th class="text-left">Grāmata</th>
-                  <th class="text-left">Autors</th>
-                  <th class="text-center">Skatījumi</th>
-                  <th class="text-center">Lejupielādes</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="book in allBooks" :key="book.isbn">
-                  <td>{{ book.title }}</td>
-                  <td>{{ book.author }}</td>
-                  <td class="text-center">
-                    <v-chip small color="primary">
-                      <v-icon left x-small>mdi-eye</v-icon>
-                      {{ book.views || 0 }}
-                    </v-chip>
-                  </td>
-                  <td class="text-center">
-                    <v-chip small color="success">
-                      <v-icon left x-small>mdi-download</v-icon>
-                      {{ book.downloads || 0 }}
-                    </v-chip>
-                  </td>
-                </tr>
-              </tbody>
-            </template>
-          </v-simple-table>
+        <v-card-text class="statistics-content">
+          <!-- Statistikas kopsavilkums -->
+          <v-row class="stats-summary mb-6">
+            <v-col cols="12" sm="6" md="3">
+              <v-card class="stat-card" flat>
+                <v-card-text class="text-center py-8">
+                  <v-icon size="48" color="#003D3A" class="mb-3">mdi-eye</v-icon>
+                  <div class="stat-value">{{ totalViews }}</div>
+                  <div class="stat-label">Kopējie skatījumi</div>
+                </v-card-text>
+              </v-card>
+            </v-col>
+            <v-col cols="12" sm="6" md="3">
+              <v-card class="stat-card" flat>
+                <v-card-text class="text-center py-8">
+                  <v-icon size="48" color="#2e7d32" class="mb-3">mdi-download</v-icon>
+                  <div class="stat-value">{{ totalDownloads }}</div>
+                  <div class="stat-label">Kopējās lejupielādes</div>
+                </v-card-text>
+              </v-card>
+            </v-col>
+            <v-col cols="12" sm="6" md="3">
+              <v-card class="stat-card" flat>
+                <v-card-text class="text-center py-8">
+                  <v-icon size="48" color="#f57c00" class="mb-3">mdi-book</v-icon>
+                  <div class="stat-value">{{ allBooks.length }}</div>
+                  <div class="stat-label">Kopējās grāmatas</div>
+                </v-card-text>
+              </v-card>
+            </v-col>
+            <v-col cols="12" sm="6" md="3">
+              <v-card class="stat-card" flat>
+                <v-card-text class="text-center py-8">
+                  <v-icon size="48" color="#c62828" class="mb-3">mdi-chart-line</v-icon>
+                  <div class="stat-value">{{ averageViews }}</div>
+                  <div class="stat-label">Vidējie skatījumi</div>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+
+          <!-- Grāmatu tabula -->
+          <div class="table-wrapper">
+            <v-simple-table class="statistics-table">
+              <template v-slot:default>
+                <thead>
+                  <tr class="table-header">
+                    <th class="text-left header-cell">Grāmata</th>
+                    <th class="text-left header-cell">Autors</th>
+                    <th class="text-center header-cell">Skatījumi</th>
+                    <th class="text-center header-cell">Lejupielādes</th>
+                    
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(book, index) in displayedBooks" :key="book.isbn" :class="['data-row', index % 2 === 0 ? 'even-row' : 'odd-row']">
+                    <td class="cell-text book-cell">
+                      <div class="book-info">
+                        <div class="book-name">{{ book.title }}</div>
+                      </div>
+                    </td>
+                    <td class="cell-text author-cell">{{ book.author }}</td>
+                    <td class="cell-center">
+                      <v-chip small color="#1565C0" text-color="white" class="stat-chip">
+                        <v-icon left x-small>mdi-eye</v-icon>
+                        {{ book.views || 0 }}
+                      </v-chip>
+                    </td>
+                    <td class="cell-center">
+                      <v-chip small color="#2E7D32" text-color="white" class="stat-chip">
+                        <v-icon left x-small>mdi-download</v-icon>
+                        {{ book.downloads || 0 }}
+                      </v-chip>
+                    </td>
+                   
+                  </tr>
+                </tbody>
+              </template>
+            </v-simple-table>
+          </div>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -530,7 +584,7 @@
 </template>
 
 <script>
-import '../../css/library-pages.css'; 
+import '../../css/admin-library.css'; 
 
 export default {
   name: 'AdminLibraryPage',
@@ -574,6 +628,13 @@ export default {
         faila_pdf: '',
         vaku_attels: ''
       },
+
+      stats: {
+        totalViews: 0,
+        totalDownloads: 0,
+        totalBooks: 0,
+        averageViews: '0.0'
+      },
       
       
       deleteBookConfirmation: {
@@ -588,6 +649,18 @@ export default {
     };
   },
   computed: {
+    totalViews() {
+     return this.stats.totalViews;
+    },
+
+    totalDownloads() {
+     return this.stats.totalDownloads;
+    },
+
+    averageViews() {
+      return this.stats.averageViews;
+    },
+
     displayedBooks() {
       let filtered = this.allBooks;
       
@@ -673,9 +746,36 @@ export default {
     await this.fetchGenres();
     await this.fetchBooks();
     await this.loadUsersList();
+    await this.loadStats();
   },
 
   methods: {
+
+   
+    async loadStats() {
+      try {
+        const response = await fetch('http://localhost:8000/api/admin/stats', {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + this.authToken,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          this.stats = data.data;
+        }
+      } catch (error) {
+        console.error('Kļuda ieladejot statistiku:', error);
+      }
+    },
+
+
+    calculateRatio(views, downloads) {
+     if (!views || views === 0) return 0;
+     return Math.round((downloads / views) * 100);
+    },
 
     async debugToken() {
       try {
@@ -1044,512 +1144,3 @@ export default {
 
 </script>
 
-<style scoped>
-
-
-
-.library-name {
-  font-size: 2.2rem;
-  color: #003D3A;
-  font-weight: 800;
-  letter-spacing: 1px;
-  cursor: pointer;
-  text-transform: uppercase;
-}
-
-.search-container {
-  flex: 1;
-  max-width: 600px;
-  margin: 0 40px;
-}
-
-.search-field {
-  background-color: #f5f5f5;
-  border-radius: 25px;
-  border: 1px solid #ddd;
-}
-
-.search-field .v-input__slot {
-  border-radius: 25px !important;
-  padding-left: 20px !important;
-}
-
-.top-nav-bar {
-  background-color: white !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  z-index: 1000;
-  border-bottom: 1px solid rgba(0, 61, 58, 0.1);
-}
-
-.main-content {
-  background-color: #fafafa;
-  min-height: calc(100vh - 80px);
-  padding-top: 20px;
-}
-
-
-.admin-btn {
-  background-color: #003D3A !important;
-  color: white !important;
-  font-weight: 600;
-  border-radius: 25px;
-  min-width: 140px;
-  height: 45px;
-  padding: 0 20px !important;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 8px rgba(0, 61, 58, 0.3);
-}
-
-.admin-btn:hover {
-  background-color: #002c29 !important;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 61, 58, 0.4);
-}
-
-.admin-text {
-  font-size: 1rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  margin-right: 5px;
-}
-
-
-.category-btn,
-.admin-link,
-.nav-link-btn {
-  font-size: 1.3rem;
-  font-weight: 500;
-  text-transform: none;
-  letter-spacing: normal;
-  color: #666 !important;
-  padding: 8px 20px;
-  height: auto;
-  transition: all 0.3s ease;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  text-decoration: none;
-  display: inline-block;
-  cursor: pointer;
-}
-
-.category-btn:hover,
-.admin-link:hover,
-.nav-link-btn:hover {
-  color: #003D3A !important;
-  background-color: rgba(0, 61, 58, 0.05) !important;
-}
-
-.category-btn::before,
-.admin-link::before,
-.nav-link-btn::before {
-  display: none;
-}
-
-
-.nodala-dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.nodala-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  z-index: 1000;
-  min-width: 250px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  margin-top: 8px;
-  overflow: hidden;
-}
-
-.menu-item {
-  padding: 16px 24px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 56px;
-}
-
-.menu-item:hover {
-  background-color: rgba(0, 61, 58, 0.08);
-  padding-left: 28px;
-}
-
-
-.zanri-dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.zanri-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  z-index: 1000;
-  min-width: 250px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  margin-top: 8px;
-  overflow: hidden;
-}
-
-.genre-count {
-  font-size: 0.9rem;
-  color: #888;
-  margin-left: 5px;
-}
-
-
-.category-title {
-  color: #003D3A;
-  font-size: 2.8rem;
-  font-weight: 700;
-  margin-bottom: 30px;
-  letter-spacing: 0.5px;
-}
-
-.book-card {
-  border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: transparent !important;
-  border: none !important;
-  position: relative;
-}
-
-.book-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-}
-
-.book-cover-wrapper {
-  position: relative;
-  width: 100%;
-  padding-top: 150%;
-  overflow: hidden;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
-  margin-bottom: 20px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-}
-
-.book-cover-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.book-cover-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.6s ease;
-}
-
-.book-card:hover .book-cover-image {
-  transform: scale(1.08);
-}
-
-.book-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #003D3A;
-  line-height: 1.4;
-  margin: 0 0 10px 0;
-  min-height: 3.5em;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-align: center;
-}
-
-.book-author {
-  font-size: 1.1rem;
-  color: #666;
-  font-style: italic;
-  margin-bottom: 20px;
-  line-height: 1.4;
-  min-height: 1.4em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: center;
-  font-weight: 500;
-}
-
-
-.view-btn {
-  background: linear-gradient(135deg, #003D3A 0%, #005a52 100%) !important;
-  color: white !important;
-  border-radius: 25px;
-  font-weight: 600;
-  text-transform: none;
-  letter-spacing: 0.5px;
-  font-size: 1.05rem;
-  height: 48px;
-  margin: 0 auto;
-  display: block;
-  max-width: 220px;
-  box-shadow: 0 4px 12px rgba(0, 61, 58, 0.25);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.view-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 61, 58, 0.35);
-}
-
-.view-btn::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.view-btn:hover::after {
-  width: 300px;
-  height: 300px;
-}
-
-
-.delete-book-btn {
-  background-color: #b71c1c !important;
-  color: white !important;
-  border-radius: 25px;
-  font-weight: 600;
-  text-transform: none;
-  font-size: 1rem;
-  height: 40px;
-  margin-top: 8px;
-  box-shadow: 0 4px 8px rgba(183, 28, 28, 0.3);
-  transition: all 0.3s ease;
-}
-
-.delete-book-btn:hover {
-  background-color: #d32f2f !important;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(183, 28, 28, 0.4);
-}
-
-
-.error-container, .no-books-container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 40px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-}
-
-.error-title, .no-books-title {
-  color: #003D3A;
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin-bottom: 15px;
-}
-
-.error-message, .no-books-message {
-  color: #666;
-  font-size: 1.2rem;
-  line-height: 1.6;
-  margin-bottom: 30px;
-}
-
-
-.v-dialog .v-card {
-  border-radius: 12px;
-}
-
-.v-dialog .v-card__title {
-  background-color: #003D3A;
-  color: white;
-  font-weight: 600;
-  padding: 16px 24px;
-}
-
-.v-dialog .v-card__text {
-  padding: 24px;
-  font-size: 1.1rem;
-}
-
-.v-dialog .v-card__actions {
-  padding: 16px 24px;
-  border-top: 1px solid #eee;
-}
-
-
-.v-simple-table {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.v-simple-table th {
-  background-color: #f5f5f5;
-  color: #003D3A;
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-.v-simple-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #eee;
-}
-
-
-.notification-alert {
-  margin-top: 10px !important;
-  width: 100%;
-  font-size: 0.9rem;
-  border-radius: 4px;
-}
-
-.v-alert--success {
-  background-color: #e8f5e8 !important;
-  color: #2e7d32 !important;
-  border-left: 4px solid #2e7d32 !important;
-}
-
-.v-alert--error {
-  background-color: #ffebee !important;
-  color: #c62828 !important;
-  border-left: 4px solid #c62828 !important;
-}
-
-
-.v-list-item {
-  min-height: 60px !important;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.v-list-item:hover {
-  background-color: #f9f9f9;
-}
-
-.v-list-item__avatar {
-  margin-right: 16px;
-}
-
-.v-list-item__title {
-  font-weight: 600;
-  color: #333;
-}
-
-.v-list-item__subtitle {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-
-@media (max-width: 960px) {
-  .search-container {
-    max-width: 400px;
-    margin: 0 20px;
-  }
-  
-  .library-name {
-    font-size: 1.8rem;
-  }
-  
-  .category-title {
-    font-size: 2.2rem;
-  }
-  
-  .error-title, .no-books-title {
-    font-size: 1.8rem;
-  }
-  
-  .book-title {
-    font-size: 1.15rem;
-  }
-  
-  .book-author {
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .category-menu {
-    flex-direction: column;
-    gap: 15px;
-    align-items: center;
-  }
-  
-  .admin-link {
-    margin-left: 0 !important;
-  }
-  
-  .nodala-menu {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  
-  .zanri-menu {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  
-  .book-cover-wrapper {
-    padding-top: 140%;
-  }
-}
-
-@media (max-width: 600px) {
-  .search-container {
-    display: none;
-  }
-  
-  .admin-btn {
-    min-width: 100px;
-    font-size: 0.9rem;
-    height: 40px;
-  }
-  
-  .library-name {
-    font-size: 1.5rem;
-  }
-  
-  .category-title {
-    font-size: 1.8rem;
-  }
-  
-  .book-title {
-    font-size: 1.1rem;
-  }
-  
-  .error-container, .no-books-container {
-    padding: 30px 20px;
-  }
-  
-  .error-title, .no-books-title {
-    font-size: 1.6rem;
-  }
-  
-  .view-btn, .delete-book-btn {
-    max-width: 100%;
-  }
-}
-</style>

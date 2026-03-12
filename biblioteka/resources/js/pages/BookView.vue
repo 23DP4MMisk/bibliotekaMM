@@ -567,17 +567,34 @@ export default {
       return 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=600&fit=crop';
     },
 
-    downloadBook() {
+    async downloadBook() {
       if (this.book.faila_pdf) {
         const bookTitle = this.book.nosaukums || this.book.title || 'gramata';
         const pdfPath = this.book.faila_pdf;
         const pdfFileName = pdfPath.split('/').pop() || 'book.pdf';
+        const authToken = localStorage.getItem('auth_token');
         
         console.log('Lejupielādē failu:', pdfPath);
         console.log('Faila nosaukums:', pdfFileName);
+
+        const trackResponse = await fetch(`http://localhost:8000/api/admin/books/${this.book.isbn}/download`, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + authToken,
+          'Content-Type': 'application/json'
+        }
+        });
+
+        const trackData = await trackResponse.json();
+        console.log('Download tracked:', trackData);
+
+        if (this.loadStats) {
+         await this.loadStats();
+        }
+        
         const link = document.createElement('a');
         link.href = `http://localhost:8000/${pdfPath}`;
-        link.download = `${bookTitle}.pdf`; // 
+        link.download = `${bookTitle}.pdf`; 
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -586,6 +603,8 @@ export default {
         this.showNotification('download', 'PDF fails nav pieejams', false);
       }
     },
+
+    
 
     async addToLibrary() {
       

@@ -128,6 +128,7 @@ Route::put('/user/book/status', [UserBookController::class, 'updateStatus']);
 Route::delete('/user/book/{id}', [UserBookController::class, 'destroy']);
 
 
+
     
 Route::prefix('admin')->group(function () {
     // Lietotāju pārvaldība
@@ -138,6 +139,8 @@ Route::prefix('admin')->group(function () {
     Route::post('/books', [AdminController::class, 'storeBook']);
     Route::put('/books/{isbn}', [AdminController::class, 'updateBook']);
     Route::delete('/books/{isbn}', [AdminController::class, 'deleteBook']);
+    Route::post('/books/{isbn}/download', [BookController::class, 'incrementDownload']);
+    
     
     // Žanru pārvaldība
     Route::post('/genres', [AdminController::class, 'storeGenre']);
@@ -147,6 +150,9 @@ Route::prefix('admin')->group(function () {
     // Statistika
     Route::get('/stats/books/{isbn}', [AdminController::class, 'bookStats']);
     Route::get('/stats/users', [AdminController::class, 'userStats']);
+    Route::get('/admin/stats', [AdminController::class, 'getStats']);
+    Route::get('/stats', [AdminController::class, 'getStats']);
+    
 });
 
 // DEBUG MARŠRUTS - lai redzētu lietotāja datus no tokena
@@ -188,7 +194,7 @@ Route::get('/debug-user-from-token', function(Request $request) {
     
 
 
-// routes/api.php - pievienojiet šo maršrutu
+
 Route::get('/debug-token', function(Request $request) {
     $authHeader = $request->header('Authorization');
     

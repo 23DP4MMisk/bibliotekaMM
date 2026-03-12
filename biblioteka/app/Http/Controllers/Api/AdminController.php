@@ -12,12 +12,10 @@ use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
-    /**
-     * Pārbauda vai lietotājs ir administrators
-     */
+    
     private function checkAdmin($request)
     {
-        $user = $request->user();
+        $user = $this->userFromToken($request);
         if (!$user || $user->loma !== 'admins') {
             Log::warning('checkAdmin failed', [
                 'user_exists' => !!$user,
@@ -28,13 +26,49 @@ class AdminController extends Controller
         return true;
     }
 
-    /**
-     * Iegūt visus lietotājus
-     */
-  
+    private function userFromToken(Request $request)
+    {
+        $authHeader = $request->header('Authorization');
+        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+            return null;
+        }
+
+        $token = str_replace('Bearer ', '', $authHeader);
+        $parts = explode('_', $token);         
+        $userId = $parts[0] ?? null;
+        if (!$userId) {
+            return null;
+        }
+
+        return Lietotajs::where('kodsID', $userId)->first();
+    }
+
+    public function getStats(Request $request)
+{
+    if (!$this->checkAdmin($request)) {
+        return response()->json(['success' => false, 'message' => 'Piekļuve liegta'], 403);
+    }
+
+    $totalViews     = DB::table('Parskata')->sum('parskatas_skaits');
+    $totalDownloads = DB::table('Lejupielade')->count();
+    $totalBooks     = Gramata::count();
+    $averageViews   = $totalBooks > 0 ? round($totalViews / $totalBooks, 1) : 0;
+
+    return response()->json([
+        'success' => true,
+        'data'    => [
+            'totalViews'     => $totalViews,
+            'totalDownloads' => $totalDownloads,
+            'totalBooks'     => $totalBooks,
+            'averageViews'   => $averageViews,
+        ]
+    ]);
+}
+
+   
     public function getUsers(Request $request)
     {
-        // Pārbaudām Authorization header
+        
         $authHeader = $request->header('Authorization');
         \Log::info('Auth header: ' . $authHeader);
         
@@ -49,7 +83,7 @@ class AdminController extends Controller
         $token = str_replace('Bearer ', '', $authHeader);
         \Log::info('Token: ' . $token);
         
-        // PARSĒJAM TOKENU - pieņemot, ka formāts ir "kodsID_timestamp"
+        
         $tokenParts = explode('_', $token);
         $userId = $tokenParts[0] ?? null;
         
@@ -61,7 +95,7 @@ class AdminController extends Controller
             ], 401);
         }
         
-        // Atrodam lietotāju pēc ID
+        
         $user = \App\Models\Lietotajs::where('kodsID', $userId)->first();
         
         if (!$user) {
@@ -72,7 +106,7 @@ class AdminController extends Controller
             ], 401);
         }
         
-        // Pārbaudām vai lietotājs ir aktīvs
+        
         if ($user->status !== 'aktivs') {
             return response()->json([
                 'success' => false,
@@ -81,7 +115,6 @@ class AdminController extends Controller
             ], 403);
         }
         
-        // Pārbaudām vai loma ir 'admins'
         if ($user->loma !== 'admins') {
             return response()->json([
                 'success' => false,
@@ -90,11 +123,15 @@ class AdminController extends Controller
             ], 403);
         }
         
-        // Viss ok - ielādējam lietotājus
         try {
             $users = \App\Models\Lietotajs::select('kodsID', 'lietotaja_vards', 'epasts', 'loma', 'status', 'registresanas_datums')
                 ->orderBy('registresanas_datums', 'desc')
                 ->get();
+
+            $users = $users->filter(function($u) use ($user) {
+                return $u->kodsID !== $user->kodsID;
+            });
+
 
             return response()->json([
                 'success' => true,
@@ -115,9 +152,7 @@ class AdminController extends Controller
     }
     
 
-    /**
-     * Atjaunināt lietotāja statusu
-     */
+    
     public function updateUserStatus(Request $request, $id)
     {
         if (!$this->checkAdmin($request)) {
@@ -164,9 +199,7 @@ class AdminController extends Controller
         }
     }
 
-    /**
-     * Pievienot jaunu grāmatu
-     */
+   
     public function storeBook(Request $request)
     {
         if (!$this->checkAdmin($request)) {
@@ -193,7 +226,6 @@ class AdminController extends Controller
         try {
             $book = Gramata::create($request->all());
             
-            // Atjauninām žanra grāmatu skaitu
             $this->updateGenreBookCount($request->Zanra_ID);
 
             return response()->json([
@@ -209,9 +241,7 @@ class AdminController extends Controller
         }
     }
 
-    /**
-     * Rediģēt grāmatu
-     */
+    
     public function updateBook(Request $request, $isbn)
     {
         if (!$this->checkAdmin($request)) {
@@ -264,9 +294,7 @@ class AdminController extends Controller
         }
     }
 
-    /**
-     * Dzēst grāmatu
-     */
+  
     public function deleteBook(Request $request, $isbn)
     {
         if (!$this->checkAdmin($request)) {
@@ -297,9 +325,7 @@ class AdminController extends Controller
         }
     }
 
-    /**
-     * Pievienot jaunu žanru
-     */
+   
     public function storeGenre(Request $request)
     {
         if (!$this->checkAdmin($request)) {
@@ -335,9 +361,7 @@ class AdminController extends Controller
         }
     }
 
-    /**
-     * Rediģēt žanru
-     */
+   
     public function updateGenre(Request $request, $id)
     {
         if (!$this->checkAdmin($request)) {
@@ -375,9 +399,7 @@ class AdminController extends Controller
         }
     }
 
-    /**
-     * Dzēst žanru
-     */
+    
     public function deleteGenre(Request $request, $id)
     {
         if (!$this->checkAdmin($request)) {
@@ -414,9 +436,7 @@ class AdminController extends Controller
         }
     }
 
-    /**
-     * Grāmatas statistika
-     */
+   
     public function bookStats(Request $request, $isbn)
     {
         if (!$this->checkAdmin($request)) {
@@ -430,27 +450,29 @@ class AdminController extends Controller
         if (!$book) {
             return response()->json(['success' => false, 'message' => 'Grāmata nav atrasta'], 404);
         }
+        
+        $views = DB::table('Parskata')->where('Gramatas', $isbn)->sum('parskatas_skaits');
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'book' => [
-                    'ISBN' => $book->ISBN,
-                    'nosaukums' => $book->nosaukums,
-                    'autors' => $book->autors,
-                    'gads' => $book->gads
-                ],
-                'genre' => $book->zanrs->nosaukums ?? 'Nav',
-                'section_id' => $book->Nodala_ID,
-                'added_date' => $book->created_at ? $book->created_at->format('Y-m-d H:i:s') : null,
-                'last_updated' => $book->updated_at ? $book->updated_at->format('Y-m-d H:i:s') : null
-            ]
-        ]);
+        $downloads = DB::table('Lejupielade')->where('Gramatas_ID', $isbn)->count();
+
+        
+    $stats = [
+        'isbn' => $book->ISBN,
+        'title' => $book->nosaukums,
+        'author' => $book->autors,
+        'views' => $views,
+        'downloads' => $downloads,
+        'genre' => $book->zanrs ? $book->zanrs->nosaukums : null,
+        'nodala' => $book->nodala ? $book->nodala->tips : null,
+    ];
+
+    return response()->json([
+        'data' => $stats
+    ]);
+       
     }
 
-    /**
-     * Lietotāju statistika
-     */
+   
     public function userStats(Request $request)
     {
         if (!$this->checkAdmin($request)) {
@@ -473,13 +495,40 @@ class AdminController extends Controller
         ]);
     }
 
-    /**
-     * Palīgfunkcija žanra grāmatu skaita atjaunināšanai
-     */
+   
     private function updateGenreBookCount($genreId)
     {
         if (!$genreId) return;
         $count = Gramata::where('Zanra_ID', $genreId)->count();
         Zanrs::where('Zanra_ID', $genreId)->update(['gramatu_skaits' => $count]);
     }
+
+    public function trackDownload(Request $request, $isbn)
+    {
+        try {
+            $user = $this->userFromToken($request);
+            
+            DB::table('Lejupielade')->insert([
+                'Gramatas_ID' => $isbn,
+                'Lietotaja_ID' => $user ? $user->kodsID : null,
+                'laiks' => now()
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Download tracked successfully'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error tracking download: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error tracking download'
+            ], 500);
+        }
+    }
+
+ 
+
+
+
 }

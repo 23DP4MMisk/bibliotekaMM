@@ -1011,8 +1011,26 @@ export default {
         }
       },
 
-    downloadBook(userBook) {
+    async downloadBook(userBook) {
       if (userBook.faila_pdf) {
+
+        const bookIsbn = userBook.gramatas_id || userBook.ISBN || userBook.isbn;
+        
+        try {
+          const response = await fetch(`http://localhost:8000/api/admin/books/${bookIsbn}/download`, {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer ' + this.authToken,
+              'Content-Type': 'application/json'
+            }
+          });
+          if (!response.ok) {
+            console.error('Neizdavas reģistrēt lejupielādi');
+          }
+        } catch (error) {
+          console.error('Kļūda reģistrējot lejupielādic:', error);
+        }
+        
         const bookTitle = userBook.nosaukums || userBook.title || 'gramata';
         const fileName = `${bookTitle}.pdf`;
         const link = document.createElement('a');
@@ -1192,7 +1210,7 @@ export default {
     },
     
     viewBook(isbn) {
-      window.location.href = `/book/${isbn}`;
+      this.$router.push(`/book/${isbn}`);
     }
   }
 }

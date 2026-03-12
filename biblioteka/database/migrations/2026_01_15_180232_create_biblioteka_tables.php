@@ -116,8 +116,8 @@ return new class extends Migration
         Schema::create('Lejupielade', function (Blueprint $table) {
             $table->integer('Lejupielade_ID')->autoIncrement();
             $table->date('Datums');
-            $table->integer('Gramatas_ID');
-            $table->integer('Lietotaja_ID');
+            $table->string('Gramatas_ID');
+            $table->integer('Lietotaja_ID')->nullable();;
             $table->timestamps();
         });
          // Arejas atslegas Lejupielade
