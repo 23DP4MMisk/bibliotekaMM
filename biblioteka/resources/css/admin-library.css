@@ -489,40 +489,40 @@
   font-size: 0.9rem;
 }
 
-.statistics-card {
+.statistics-card, .lietotaji-card, .addBook-card {
   border-radius: 16px !important;
   overflow: hidden;
 }
 
-.statistics-header {
+.statistics-header, .lietotaji-header, .addBook-header {
   background: linear-gradient(135deg, #003D3A 0%, #005a52 100%) !important;
   color: white !important;
   padding: 24px !important;
 }
 
 
-.header-content {
+.header-content, .lietotaji-content, .addBook-content {
   display: flex;
   align-items: center;
   width: 100%;
   gap: 16px;
 }
 
-.statistics-title {
+.statistics-title, .lietotaji-title, .addBook-title {
   font-size: 2rem;
   font-weight: 700;
   margin: 0;
   color: white;
 }
 
-.statistics-subtitle {
+.statistics-subtitle, .lietotaji-subtitle, .addBook-subtitle {
   font-size: 1rem;
   color: rgba(255, 255, 255, 0.8);
   margin: 8px 0 0 0;
 }
 
-.close-btn {
-  margin-right: -12px;
+.close-btn, .close-btn-lietotaji, .close-btn-addBook {
+  margin-right: -12px; 
 }
 
 .statistics-content {

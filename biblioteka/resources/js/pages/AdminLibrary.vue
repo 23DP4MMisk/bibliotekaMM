@@ -292,13 +292,19 @@
 
     
     <v-dialog v-model="showAddBookForm" max-width="600" persistent>
-      <v-card>
-        <v-card-title class="headline" style="background-color: #003D3A; color: white;">
-          Pievienot jaunu grāmatu
-          <v-spacer></v-spacer>
-          <v-btn icon dark @click="showAddBookForm = false">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
+      <v-card class="addBook-card">
+        <v-card-title class="addBook-header">
+          <div class="addBook-content">
+            <div>
+              <h2 class="addBook-title">Pievienot jaunu grāmatu</h2>
+              <p class="addBook-subtitle">Aizpildiet visus obligātos laukus</p>
+            </div>
+          
+            <v-spacer></v-spacer>
+            <v-btn icon dark @click="showAddBookForm = false" class="close-btn-addBook">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
         </v-card-title>
         
         <v-card-text class="pt-4">
@@ -416,14 +422,20 @@
     </v-dialog>
 
     
-    <v-dialog v-model="showUsersList" max-width="800" scrollable>
-      <v-card>
-        <v-card-title class="headline" style="background-color: #003D3A; color: white;">
-          Lietotāju saraksts
-          <v-spacer></v-spacer>
-          <v-btn icon dark @click="showUsersList = false">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
+    <v-dialog v-model="showUsersList" max-width="1000" scrollable>
+      <v-card class="lietotaji-card">
+        <v-card-title class="lietotaji-header">
+          <div class="lietotaji-content">
+            <div>
+              <h2 class="lietotaji-title">Lietotāju saraksts</h2>
+              <p class="lietotaji-subtitle">Reģistrētie lietotāji sistēmā</p>
+            </div>
+          
+            <v-spacer></v-spacer>
+            <v-btn icon dark @click="showUsersList = false" class="close-btn-lietotaji">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
         </v-card-title>
         
         <v-card-text class="pa-0">
