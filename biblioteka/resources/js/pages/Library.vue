@@ -421,7 +421,7 @@
           </div>
           
         
-          <div v-else class="text-center py-12">
+          <div v-else-if="!loading && !booksLoading"  class="text-center py-12">
             <div class="no-books-container">
               <v-icon size="100" color="#a0a0a0" class="mb-4">mdi-book-search</v-icon>
               <h3 class="no-books-title mb-3">Grāmatas netika atrastas</h3>
@@ -485,7 +485,9 @@ export default {
       selectedNodala: null, 
       selectedGenre: null,   
       genres: [],
-      
+
+      booksLoading: true,
+      initialLoadComplete: false,
      
       isLoggedIn: false,
       user: null,
@@ -1052,6 +1054,7 @@ export default {
     },
     
     async fetchBooks(searchQuery = '') {
+      this.booksLoading = true;
       this.loading = true;
       this.error = false;
       this.errorMessage = '';
@@ -1096,6 +1099,8 @@ export default {
         this.errorMessage = this.getErrorMessage(error);
       } finally {
         this.loading = false;
+        this.booksLoading = false;
+        this.initialLoadComplete = true;
       }
     },
     

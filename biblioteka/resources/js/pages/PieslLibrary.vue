@@ -165,8 +165,16 @@ export default {
         });
         const data = await response.json();
         console.log('📊 Atbilde:', data);
-         if (data.success) {
+
+        if (data.lietotajs && data.lietotajs.status !== 'aktivs') {
+          this.errorMessage = 'Jūsu konts ir bloķēts. Sazinieties ar administratoru.';
+          this.loading = false;
+          return; 
+        }
+
+        if (data.success) {
           console.log('✅ Pieslēgšanās veiksmīga!');
+          
 
           localStorage.setItem('auth_token', data.token);
           localStorage.setItem('user', JSON.stringify(data.lietotajs));

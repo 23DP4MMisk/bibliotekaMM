@@ -851,6 +851,14 @@ export default {
         
         if (data.authenticated && data.lietotajs) {
           this.user = data.lietotajs;
+
+          if (this.user.status !== 'aktivs') {
+            console.log('Lietotajs ir bloķēts, izpildam logout');
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user');
+            this.$router.push('/login?blocked=true');
+            return;
+          }
           
           
           if (this.user.loma !== 'admins' && this.user.loma !== 'admin') {
@@ -1055,9 +1063,9 @@ export default {
         } catch (error) {
           console.error('Kļūda ielādējot lietotājus:', error);
         }
-      }
+      },
     
-    },
+    
 
     async toggleUserStatus(user) {
       try {
@@ -1153,6 +1161,6 @@ export default {
       }
     }
   }
-
+}
 </script>
 

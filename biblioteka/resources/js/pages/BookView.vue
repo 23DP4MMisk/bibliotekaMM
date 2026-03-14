@@ -229,7 +229,12 @@
               <div class="reviews-section">
                 <h2 class="reviews-title">Atsauksmes</h2>
 
-                 <div v-if="reviews.length > 0" class="reviews-list">
+                  <div v-if="reviewsLoading" class="text-center py-4">
+                    <v-progress-circular indeterminate color="#003D3A" size="40"></v-progress-circular>
+                    <p class="mt-2">Ielādē atsauksmes...</p>
+                  </div>
+
+                 <div v-else-if="reviews.length > 0" class="reviews-list">
                     <div
                       v-for="review in reviews"
                       :key="review.Atsauksmes_ID"
@@ -311,7 +316,8 @@ export default {
        add: { show: false, message: '', type: 'success' }
       },
 
-      reviews: []
+      reviews: [],
+      reviewsLoading: true,
     };
   },
   computed: {
@@ -367,6 +373,7 @@ export default {
   methods: {
 
     async loadBookReviews() {
+      this.reviewsLoading = true; 
       try {
         const isbn = this.$route.params.isbn;
         console.log('📝 Ielādē atsauksmes grāmatai:', isbn);
@@ -383,6 +390,8 @@ export default {
       } catch (error) {
         console.error('❌ Kļūda ielādējot atsauksmes:', error);
         this.reviews = [];
+      }finally {
+       this.reviewsLoading = false;
       }
     },
 
