@@ -1017,7 +1017,7 @@ export default {
     },
 
     viewBook(isbn) {
-      window.location.href = `/book/${isbn}`;
+      this.$router.push(`/admin/book/${isbn}`);
     },
 
     

@@ -6,6 +6,7 @@ import RegisterPage from '../pages/RegisterPage.vue';
 import BookView from '../pages/BookView.vue';
 import RewievPage from '../pages/RewievPage.vue';
 import AdminLibrary from '../pages/AdminLibrary.vue';
+import AdminBookView from  '../pages/AdminBookView.vue';
 
 
 const routes = [
@@ -43,7 +44,12 @@ const routes = [
         path: '/admin', 
         name: 'AdminLibrary', 
         component: AdminLibrary 
-    } 
+    },
+    {
+        path: '/admin/book/:isbn',
+        name: 'AdminBookView',
+        component: AdminBookView
+    }
 
 ];
 

@@ -140,7 +140,7 @@ Route::prefix('admin')->group(function () {
     Route::put('/books/{isbn}', [AdminController::class, 'updateBook']);
     Route::delete('/books/{isbn}', [AdminController::class, 'deleteBook']);
     Route::post('/books/{isbn}/download', [BookController::class, 'incrementDownload']);
-    
+    Route::post('/books/{isbn}/view', [AdminController::class, 'trackView']);
     
     // Žanru pārvaldība
     Route::post('/genres', [AdminController::class, 'storeGenre']);
