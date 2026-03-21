@@ -177,9 +177,30 @@
 
         <v-row class="mb-6" v-if="selectedNodala">
           <v-col cols="12">
+            <div class="genre-header">
+              <div class="genre-header-left">
+                <h3 class="genre-header-title">Žanri</h3>
+              </div>
+              <div class="genre-header-right">
+                <v-btn
+                  color="#003D3A"
+                  small
+                  class="add-genre-btn"
+                  @click="openAddGenreForm"
+                >
+                  <v-icon left small>mdi-plus</v-icon>
+                  Pievienot žanru
+                </v-btn>
+              </div>
+            </div>
             <div class="genre-menu">
+              <div
+               v-for="genre in availableGenres" 
+                :key="genre.id" 
+                class="genre-item-wrapper"
+              >
               <v-btn
-                v-for="genre in availableGenres"
+                
                 :key="genre.id"
                 :class="['genre-btn', { 'active-genre': selectedGenre === genre.id }]"
                 variant="text"
@@ -188,6 +209,29 @@
                 {{ genre.name }}
                 <span class="genre-count" v-if="genre.count">({{ genre.count }})</span>
               </v-btn>
+              <div class="genre-control-buttons">
+                  <v-btn
+                    icon
+                    x-small
+                    color="primary"
+                    class="ml-1"
+                    @click.stop="openEditGenreForm(genre)"
+                    title="Rediģet žanru"
+                  >
+                    <v-icon x-small>mdi-pencil</v-icon>
+                  </v-btn>
+                  <v-btn
+                  icon
+                  x-small
+                  color="error"
+                  class="ml-1"
+                  @click.stop="deleteGenre(genre)"
+                  title="Dzēst žanru"
+                >
+                  <v-icon x-small>mdi-delete</v-icon>
+                </v-btn>
+              </div>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -592,6 +636,99 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="showAddGenreForm" max-width="500" persistent>
+      <v-card>
+        <v-card-title class="headline" style="background-color: #003D3A; color: white;">
+          Pievienot jaunu žanru
+          <v-spacer></v-spacer>
+          <v-btn icon dark @click="showAddGenreForm = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        
+        <v-card-text class="pt-4">
+          <v-form ref="addGenreForm">
+            <v-text-field
+              v-model="newGenre.nosaukums"
+              label="Žanra nosaukums *"
+              required
+              outlined
+              dense
+              class="mb-3"
+            ></v-text-field>
+            <v-select
+              v-model="newGenre.nodala_id"
+              :items="nodalaOptions"
+              item-text="tips"
+              item-value="Nodala_ID"
+              label="Nodaļa *"
+              outlined
+              dense
+              class="mb-3"
+              required
+            ></v-select>
+          </v-form>
+        </v-card-text>
+
+          <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="grey darken-1" text @click="showAddGenreForm = false">
+            Atcelt
+          </v-btn>
+          <v-btn color="#003D3A" dark @click="addGenre">
+            Pievienot
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="showEditGenreForm" max-width="500" persistent>
+      <v-card>
+        <v-card-title class="headline" style="background-color: #003D3A; color: white;">
+          Rediģēt žanru
+          <v-spacer></v-spacer>
+          <v-btn icon dark @click="showEditGenreForm = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+
+        <v-card-text class="pt-4">
+          <v-form ref="editGenreForm">
+            <v-text-field
+              v-model="editingGenre.nosaukums"
+              label="Žanra nosaukums *"
+              required
+              outlined
+              dense
+              class="mb-3"
+            ></v-text-field>
+                <v-select
+              v-model="editingGenre.nodala"
+              :items="nodalaOptions"
+              item-text="tips"
+              item-value="Nodala_ID"
+              label="Nodaļa"
+              outlined
+              dense
+              class="mb-3"
+              disabled
+            ></v-select>
+            <small class="text-grey">Nodaļu nevar mainīt, jo žanrs ir piesaistīts konkrētai nodaļai</small>
+          </v-form>
+        </v-card-text>
+          <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="grey darken-1" text @click="showEditGenreForm = false">
+            Atcelt
+          </v-btn>
+          <v-btn color="#003D3A" dark @click="updateGenre">
+            Saglabāt
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-app>
 </template>
 
@@ -653,6 +790,14 @@ export default {
         show: false,
         bookIsbn: null,
         bookTitle: ''
+      },
+
+      showAddGenreForm: false,
+      showEditGenreForm: false,
+      editingGenre: null,
+      newGenre: {
+        nosaukums: '',
+        nodala_id: null
       },
       
       notifications: {
@@ -900,18 +1045,232 @@ export default {
       try {
         const response = await fetch('http://localhost:8000/api/genres');
         const data = await response.json();
+
+        console.log('📦 RAW DATA FROM SERVER:', data);
+
+
         
         if (data.success && data.data) {
+          console.log('📚 First genre from server:', data.data[0]); 
           this.genres = data.data.map(genre => ({
             id: genre.Zanra_ID,
+            Zanra_ID: genre.Zanra_ID,
             name: genre.nosaukums,
-            nodala: genre.Nodala
+            nodala: genre.Nodala,
+            count: genre.gramatu_skaits || 0
           }));
           console.log('✅ Ielādēti žanri:', this.genres);
+          console.log('✅ First genre nodala:', this.genres[0]?.nodala);
         }
       } catch (error) {
         console.error('❌ Kļūda ielādējot žanrus:', error);
       }
+    },
+
+    
+
+    async addGenre() {
+      if (!this.newGenre.nosaukums.trim()) {
+        this.showNotification('add', 'Lūdzu, ievadiet žanra nosaukumu!', false);
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:8000/api/admin/genres', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + this.authToken
+          },
+          body: JSON.stringify({
+            nosaukums: this.newGenre.nosaukums,
+            Nodala_id: this.newGenre.Nodala_id
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          this.showNotification('add', 'Žanrs veiksmīgi pievienots!', true);
+          this.showAddGenreForm = false;
+          
+          
+          this.newGenre = {
+            nosaukums: '',
+            Nodala_id: this.selectedNodala === 'academic' ? 1 : 2
+          };
+          
+          
+          await this.fetchGenres();
+          
+        } else {
+          this.showNotification('add', data.message || 'Kļūda pievienojot žanru', false);
+        }
+      } catch (error) {
+        console.error('Kļūda pievienojot žanru:', error);
+        this.showNotification('add', 'Kļūda pievienojot žanru', false);
+      }
+    },
+
+    async updateGenre() {
+
+      if (!this.editingGenre) {
+        this.showNotification('add', 'Ошибка: жанр не выбран', false);
+        return;
+      }
+
+      const genreId = this.editingGenre.Zanra_ID || this.editingGenre.id;
+      if (!genreId) {
+        console.error('updateGenre: genre ID is undefined', this.editingGenre);
+        this.showNotification('add', 'Ошибка: ID жанра не найден', false);
+        return;
+      }
+
+      const genreName = this.editingGenre.nosaukums || this.editingGenre.name;
+      console.log('2. New genre name from form:', genreName);
+      console.log('3. Original genre name in DB:', this.editingGenre.originalName || 'unknown');
+      if (!genreName || !genreName.trim()) {
+        this.showNotification('add', 'Lūdzu, ievadiet žanra nosaukumu!', false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:8000/api/admin/genres/${genreId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + this.authToken
+          },
+          body: JSON.stringify({
+            nosaukums: genreName,
+            Nodala_id: this.selectedNodala === 'academic' ? 1 : 2
+          })
+        });
+        
+        const data = await response.json();
+        console.log('Update genre response:', data);
+        
+        if (data.success) {
+          this.showNotification('add', 'Žanrs veiksmīgi atjaunināts!', true);
+          this.showEditGenreForm = false;
+          
+          
+          await this.fetchGenres();
+
+          const updatedGenre = this.genres.find(g => g.id === genreId);
+          console.log('11. Genre after refresh:', updatedGenre);
+          console.log('12. Name in DB after refresh:', updatedGenre?.name);
+          
+        } else {
+          this.showNotification('add', data.message || 'Kļūda atjauninot žanru', false);
+        }
+      } catch (error) {
+        console.error('Kļūda atjauninot žanru:', error);
+        this.showNotification('add', 'Kļūda atjauninot žanru', false);
+      }
+    },
+
+    async deleteGenre(genre) {
+      console.log('deleteGenre called with:', genre);
+  
+      if (!genre) {
+        console.error('deleteGenre: genre is undefined');
+        this.showNotification('add', 'Ошибка: жанр не найден', false);
+        return;
+      }
+
+    
+      const genreId = genre.Zanra_ID || genre.id;
+      if (!genreId) {
+        console.error('deleteGenre: genre ID is undefined', genre);
+        this.showNotification('add', 'Ошибка: ID жанра не найден', false);
+        return;
+      }
+      
+      
+      const genreName = genre.nosaukums || genre.name || `жанр #${genreId}`;
+      
+      if (!confirm(`Vai tiešām vēlaties dzēst žanru "${genreName}"?`)) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`http://localhost:8000/api/admin/genres/${genre.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': 'Bearer ' + this.authToken
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          this.showNotification('add', 'Žanrs veiksmīgi dzēsts!', true);
+          
+          
+          if (this.selectedGenre === genre.id) {
+            this.selectedGenre = null;
+          }
+          
+          
+          await this.fetchGenres();
+          
+          
+          await this.fetchBooks();
+          
+        } else {
+          this.showNotification('add', data.message || 'Kļūda dzēšot žanru', false);
+        }
+      } catch (error) {
+        console.error('Kļūda dzēšot žanru:', error);
+        this.showNotification('add', 'Kļūda dzēšot žanru', false);
+      }
+    },
+
+    openAddGenreForm() {
+      this.newGenre = {
+        nosaukums: '',
+        nodala_id: this.selectedNodala === 'academic' ? 1 : 2
+      };
+      this.showAddGenreForm = true;
+    },
+
+   openEditGenreForm(genre) {
+      console.log('Opening edit form for genre:', genre);
+      
+      if (!genre) {
+        console.error('Invalid genre object');
+        this.showNotification('add', 'Ошибка: неверные данные жанра', false);
+        return;
+      }
+      
+    
+      const genreId = genre.Zanra_ID || genre.id;
+      if (!genreId) {
+        console.error('Genre has no ID:', genre);
+        this.showNotification('add', 'Ошибка: ID жанра не найден', false);
+        return;
+      }
+
+      const originalName = genre.nosaukums || genre.name;
+      const newName = genre.name || originalName; 
+      
+      console.log('Original name from DB:', originalName);
+      console.log('Current name in form:', newName);
+  
+      this.editingGenre = { 
+        Zanra_ID: genreId,
+        id: genreId,
+        name: newName,           
+        nosaukums: originalName, 
+        originalName: originalName, 
+        nodala: genre.nodala
+      };
+      
+   
+      
+      console.log('Editing genre prepared:', this.editingGenre);
+      this.showEditGenreForm = true;
     },
 
     selectNodala(nodala) {

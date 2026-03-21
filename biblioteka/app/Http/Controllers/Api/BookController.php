@@ -55,7 +55,9 @@ class BookController extends Controller
     public function genres()
     {
         try {
-            $genres = DB::table('Zanrs')->get();
+            $genres = DB::table('Zanrs')
+            ->select('Zanra_ID', 'nosaukums', 'Nodala', 'gramatu_skaits')  
+            ->get();
             
             return response()->json([
                 'success' => true,

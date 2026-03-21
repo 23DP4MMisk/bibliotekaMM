@@ -364,6 +364,14 @@ class AdminController extends Controller
    
     public function updateGenre(Request $request, $id)
     {
+
+        \Log::info('Update genre request', [
+         'id' => $id,
+         'all_data' => $request->all(),
+         'headers' => $request->headers->all()
+        ]);
+
+
         if (!$this->checkAdmin($request)) {
             return response()->json(['success' => false, 'message' => 'Piekļuve liegta'], 403);
         }
@@ -384,13 +392,40 @@ class AdminController extends Controller
         }
 
         try {
-            $genre->update($request->only(['nosaukums', 'Nodala']));
+
+            $updateData = [];
+
+             if ($request->has('nosaukums')) {
+            $updateData['nosaukums'] = $request->nosaukums;
+        }
+        
+            if ($request->has('Nodala_id')) {
+                $updateData['Nodala'] = $request->Nodala_id;
+            }
             
-            return response()->json([
-                'success' => true,
-                'message' => 'Žanrs veiksmīgi atjaunots',
-                'data' => $genre
-            ]);
+            \Log::info('Updating genre with data', ['updateData' => $updateData, 'genre_id' => $id]);
+        
+            
+            $updated = Zanrs::where('Zanra_ID', $id)->update($updateData);
+            
+            \Log::info('Update result', ['updated_rows' => $updated]);
+            
+            
+            $updatedGenre = Zanrs::where('Zanra_ID', $id)->first();
+            \Log::info('Updated genre', ['updated_genre' => $updatedGenre]);
+            
+          if ($updated) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Žanrs veiksmīgi atjaunots',
+                    'data' => $updatedGenre
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Netika veiktas izmaiņas'
+                ], 500);
+            }
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
