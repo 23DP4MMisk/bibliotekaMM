@@ -573,11 +573,14 @@ export default {
   
     userName() {
       return this.user?.lietotaja_vards || '';
+    
     },
     
     userEmail() {
       return this.user?.epasts || '';
     },
+
+   
     
     userInitial() {
       if (this.userName) {
@@ -614,9 +617,12 @@ export default {
 
     console.log('📌 LibraryPage mounted');
     console.log('URL parametri:', this.$route.query);
+    
+    console.log(' checkAdminAndRedirect...');
+    await this.checkAdminAndRedirect();
     this.loadUserFromStorage();
 
-    const shouldShowLibrary = this.$route.query.tab === 'my-library';
+    
   
    
 
@@ -638,6 +644,72 @@ export default {
     }
   },
   methods: { 
+      async checkAdminAndRedirect() {
+      const token = localStorage.getItem('auth_token');
+      const savedUser = localStorage.getItem('user');
+      
+      if (!token || !savedUser) {
+        return; // Nav autorizēts, turpinām normāli
+      }
+      
+      let isAdmin = false;
+      let userData = null;
+      
+      try {
+        // Pārbauda, vai lietotājs ir administrators
+        userData = JSON.parse(savedUser);
+        isAdmin = userData.loma === 'admins' || 
+                  userData.is_admin === true || 
+                  userData.role === 'administrator';
+      } catch (e) {
+        console.error('Error parsing user data:', e);
+        return; // Ja nevar parsēt, turpinām bez pārbaudes
+      }
+
+      if (isAdmin) {
+        console.log('👑 Atrasts administrators localStorage, pārbaudu ar serveri...');
+        
+        try {
+          const response = await fetch('http://localhost:8000/api/check-auth', {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ' + token
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (data.authenticated && data.lietotajs) {
+            // Pārbauda, vai serveris arī atgriež administratoru
+            const serverIsAdmin = data.lietotajs.loma === 'admins' || 
+                                  data.lietotajs.is_admin === true || 
+                                  data.lietotajs.role === 'administrator';
+            
+            if (serverIsAdmin) {
+              console.log('🚫 Administrators mēģina piekļūt bibliotēkas lapai - novirzu uz admin paneli');
+              
+              // Pārbauda, vai nav īpašs parametrs, kas atļauj palikt (piemēram, piespiedu režīms)
+              const forceStay = this.$route.query.force === 'true';
+              
+              if (!forceStay) {
+                // Novirza uz administratora lapu
+                this.$router.replace({ 
+                  path: '/admin', 
+                  query: { redirect: 'library', message: 'Jūs jau esat pieslēdzies kā administrators' }
+                });
+                return;
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Kļūda pārbaudot administratora statusu:', error);
+          // Kļūdas gadījumā turpinām normāli
+        }
+      }
+    },
+
+
     showNotification(type, bookId, message, isSuccess = true) {
       // Atjaunojam notifikaciju konkretai  gramatai
       this.notifications[type] = {

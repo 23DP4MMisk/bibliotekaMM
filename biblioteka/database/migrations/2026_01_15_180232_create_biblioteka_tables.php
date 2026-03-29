@@ -77,7 +77,7 @@ return new class extends Migration
         //Arejas atslegas  LietotajGramatas uz zanriem un gramatam 
         Schema::table('LietotajGramatas', function (Blueprint $table) {
             $table->foreign('Lietotajs')->references('kodsID')->on('Lietotajs');
-            $table->foreign('Gramatas')->references('ISBN')->on('Gramata');
+            $table->foreign('Gramatas')->references('ISBN')->on('Gramata')->onDelete('cascade');
         });
 
         // Atsauksmes 
@@ -92,7 +92,7 @@ return new class extends Migration
         //  Arejas atslegas Atsauksmes uz lietotajam un gramatam 
         Schema::table('Atsauksmes', function (Blueprint $table) {
             $table->foreign('Lietotaja_ID')->references('kodsID')->on('Lietotajs');
-            $table->foreign('Gramatas_ID')->references('ISBN')->on('Gramata');
+            $table->foreign('Gramatas_ID')->references('ISBN')->on('Gramata') ->onDelete('cascade');
 
         });
 
@@ -108,7 +108,7 @@ return new class extends Migration
         });
          // Arejas atslegas Parskata
         Schema::table('Parskata', function (Blueprint $table) {
-            $table->foreign('Gramatas')->references('ISBN')->on('Gramata');
+            $table->foreign('Gramatas')->references('ISBN')->on('Gramata')->onDelete('cascade');
             $table->foreign('Lietotajs')->references('kodsID')->on('Lietotajs');
         });
 
@@ -116,13 +116,13 @@ return new class extends Migration
         Schema::create('Lejupielade', function (Blueprint $table) {
             $table->integer('Lejupielade_ID')->autoIncrement();
             $table->date('Datums');
-            $table->string('Gramatas_ID');
+            $table->integer('Gramatas_ID');
             $table->integer('Lietotaja_ID')->nullable();;
             $table->timestamps();
         });
          // Arejas atslegas Lejupielade
         Schema::table('Lejupielade', function (Blueprint $table) {
-            $table->foreign('Gramatas_ID')->references('ISBN')->on('Gramata');
+            $table->foreign('Gramatas_ID')->references('ISBN')->on('Gramata') ->onDelete('cascade');
             $table->foreign('Lietotaja_ID')->references('kodsID')->on('Lietotajs');
         });
 

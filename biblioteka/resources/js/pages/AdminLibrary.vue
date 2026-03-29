@@ -135,7 +135,7 @@
               
               <a 
                 href="#" 
-                @click.prevent="showAddBookForm = true" 
+                @click.prevent="openAddBookForm" 
                 class="admin-link"
               >
                 Pievienot grāmatu
@@ -354,7 +354,7 @@
         <v-card-text class="pt-4">
           <v-form ref="addBookForm">
             <v-text-field
-              v-model="newBook.isbn"
+              v-model="newBook.ISBN"
               label="ISBN *"
               required
               outlined
@@ -410,10 +410,11 @@
             ></v-textarea>
             
             <v-select
-              v-model="newBook.nodala_id"
+              v-model="newBook.Nodala_ID"
               :items="nodalaOptions"
               item-text="tips"
               item-value="Nodala_ID"
+              :return-object="false"
               label="Nodaļa *"
               outlined
               dense
@@ -422,10 +423,11 @@
             ></v-select>
             
             <v-select
-              v-model="newBook.zanra_id"
+              v-model="newBook.Zanra_ID"
               :items="genreOptions"
               item-text="nosaukums"
               item-value="Zanra_ID"
+              :return-object="false"
               label="Žanrs *"
               outlined
               dense
@@ -766,14 +768,14 @@ export default {
       
       
       newBook: {
-        isbn: '',
+        ISBN: '',
         nosaukums: '',
         autors: '',
         gads: '',
         lapu_skaits: '',
         apraksts: '',
-        zanra_id: null,
-        nodala_id: null,
+        Zanra_ID: null,
+        Nodala_ID: null,
         faila_pdf: '',
         vaku_attels: ''
       },
@@ -1084,7 +1086,7 @@ export default {
           },
           body: JSON.stringify({
             nosaukums: this.newGenre.nosaukums,
-            Nodala_id: this.newGenre.Nodala_id
+            Nodala: this.newGenre.Nodala
           })
         });
         
@@ -1097,7 +1099,7 @@ export default {
           
           this.newGenre = {
             nosaukums: '',
-            Nodala_id: this.selectedNodala === 'academic' ? 1 : 2
+            Nodala: this.selectedNodala === 'academic' ? 1 : 2
           };
           
           
@@ -1175,7 +1177,7 @@ export default {
   
       if (!genre) {
         console.error('deleteGenre: genre is undefined');
-        this.showNotification('add', 'Ошибка: жанр не найден', false);
+        this.showNotification('add', 'Kļūda: žanrs nav atrasts', false);
         return;
       }
 
@@ -1183,12 +1185,12 @@ export default {
       const genreId = genre.Zanra_ID || genre.id;
       if (!genreId) {
         console.error('deleteGenre: genre ID is undefined', genre);
-        this.showNotification('add', 'Ошибка: ID жанра не найден', false);
+        this.showNotification('add', 'Kļūda: žanra ID nav atrasts', false);
         return;
       }
       
       
-      const genreName = genre.nosaukums || genre.name || `жанр #${genreId}`;
+      const genreName = genre.nosaukums || genre.name || `žanrs #${genreId}`;
       
       if (!confirm(`Vai tiešām vēlaties dzēst žanru "${genreName}"?`)) {
         return;
@@ -1230,9 +1232,25 @@ export default {
     openAddGenreForm() {
       this.newGenre = {
         nosaukums: '',
-        nodala_id: this.selectedNodala === 'academic' ? 1 : 2
+        Nodala: this.selectedNodala === 'academic' ? 1 : 2
       };
       this.showAddGenreForm = true;
+    },
+
+    openAddBookForm() {
+      this.newBook = {
+        ISBN: '',
+        nosaukums: '',
+        autors: '',
+        gads: '',
+        lapu_skaits: '',
+        apraksts: '',
+        Zanra_ID: null,
+        Nodala_ID: null,
+        faila_pdf: '',
+        vaku_attels: ''
+      };
+      this.showAddBookForm = true;
     },
 
    openEditGenreForm(genre) {
@@ -1471,13 +1489,24 @@ export default {
           this.allBooks = this.allBooks.filter(b => b.isbn !== this.deleteBookConfirmation.bookIsbn);
           this.showNotification('add', 'Grāmata veiksmīgi dzēsta', true);
           this.deleteBookConfirmation.show = false;
-        } else {
-          this.showNotification('add', 'Kļūda dzēšot grāmatu', false);
+        } else if (response.status === 500 || response.status === 422) {
+          
+          console.error('❌ Server error on delete:', data);
+          
+          let errorMsg = data.message || 'Nezināma kļūda';
+          if (errorMsg.includes('Kļūda:')) {
+            errorMsg = errorMsg.replace('Kļūda: ', '');
+          }
+          this.showNotification('add', 'Kļūda dzēšot grāmatu: ' + errorMsg, false);
+        } 
+        else {
+          this.showNotification('add', data.message || 'Kļūda dzēšot grāmatu', false);
         }
       } catch (error) {
         console.error('Kļūda dzēšot grāmatu:', error);
-        this.showNotification('add', 'Kļūda dzēšot grāmatu', false);
+        this.showNotification('add', 'Servera kļūda (500)', false);
       }
+
     },
 
     async addBook() {
@@ -1500,26 +1529,39 @@ export default {
           
           
           this.newBook = {
-            isbn: '',
+            ISBN: '',
             nosaukums: '',
             autors: '',
             gads: '',
             lapu_skaits: '',
             apraksts: '',
-            zanra_id: null,
-            nodala_id: null,
+            Zanra_ID: null,
+            Nodala_ID: null,
             faila_pdf: '',
             vaku_attels: ''
           };
-        } else {
-          this.showNotification('add', 'Kļūda pievienojot grāmatu', false);
+         } else if (response.status === 422) {
+          
+          console.error('❌ Validation errors:', data.errors || data);
+          
+          let errorText = 'Validācijas kļūda: ';
+          if (data.errors) {
+            errorText += Object.values(data.errors).flat().join(' | ');
+          } else if (data.message) {
+            errorText += data.message;
+          }
+          this.showNotification('add', errorText, false);
+        } 
+        else {
+          this.showNotification('add', data.message || 'Kļūda pievienojot grāmatu', false);
         }
       } catch (error) {
         console.error('Kļūda pievienojot grāmatu:', error);
-        this.showNotification('add', 'Kļūda pievienojot grāmatu', false);
+        this.showNotification('add', 'Servera kļūda', false);
       }
     }
   }
 }
+
 </script>
 
