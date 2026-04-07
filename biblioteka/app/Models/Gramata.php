@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\DB;
 
 class Gramata extends Model
 {
-     use HasFactory;
+    use HasFactory;
 
-    protected $table = 'Gramata';       // tabula vards
+    protected $table = 'gramata';       // tabula vards
     protected $primaryKey = 'ISBN';     // primara atslega
     public $incrementing = false;       // ISBN nav autoinkrements
     protected $keyType = 'integer';     // atslegas tips
@@ -67,7 +67,7 @@ class Gramata extends Model
     {
         $count = self::where('Zanra_ID', $zanraId)->count();
         
-        DB::table('Zanrs')
+        DB::table('zanrs')
             ->where('Zanra_ID', $zanraId)
             ->update(['gramatu_skaits' => $count]);
     }

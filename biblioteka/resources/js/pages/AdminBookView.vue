@@ -284,7 +284,7 @@
             ></v-textarea>
             
             <v-select
-              v-model="editBookData.nodala_id"
+              v-model="editBookData.Nodala_ID"
               :items="nodalaOptions"
               item-text="tips"
               item-value="Nodala_ID"
@@ -296,7 +296,7 @@
             ></v-select>
             
             <v-select
-              v-model="editBookData.zanra_id"
+              v-model="editBookData.Zanra_ID"
               :items="genreOptions"
               item-text="nosaukums"
               item-value="Zanra_ID"
@@ -538,14 +538,14 @@ export default {
 
     openEditForm() {
       this.editBookData = {
-        isbn: this.book.isbn,
+        ISBN: this.book.isbn,
         nosaukums: this.book.nosaukums,
         autors: this.book.autors,
         gads: this.book.gads || '',
         lapu_skaits: this.book.lapu_skaits || '',
         apraksts: this.book.apraksts || '',
-        nodala_id: this.book.nodala_id || 1,
-        zanra_id: this.book.zanra_id || null,
+        Nodala_id: this.book.nodala_id || 1,
+        Zanra_id: this.book.zanra_id || null,
         faila_pdf: this.book.faila_pdf || '',
         vaku_attels: this.book.vaku_attels || ''
       };
@@ -566,13 +566,27 @@ export default {
         const data = await response.json();
         
         if (data.success) {
-          this.book = { ...this.book, ...this.editBookData };
-          this.showEditForm = false;
+          this.showNotification('Grāmata veiksmīgi atjaunota!', true); 
           
-          this.$emit('notification', 'Grāmata veiksmīgi atjaunota!');
+         
+          await this.loadBookDetails();
+          
+          this.showEditForm = false;
+        } else {
+          console.error(' Kļūda atjauninot grāmatu:', data);
+          this.showNotification(data.message || 'Kļūda saglabājot izmaiņas', false);
         }
+        
       } catch (error) {
         console.error('Error updating book:', error);
+      }
+    },
+
+    showNotification(message, isSuccess = true) {
+      if (isSuccess) {
+        alert('✅ ' + message);
+      } else {
+        alert('❌ ' + message);
       }
     },
 

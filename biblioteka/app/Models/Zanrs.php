@@ -9,7 +9,7 @@ class Zanrs extends Model
 {
     use HasFactory;
 
-    protected $table = 'Zanrs';
+    protected $table = 'zanrs';
     protected $primaryKey = 'Zanra_ID';
     public $incrementing = true;
     protected $keyType = 'integer';

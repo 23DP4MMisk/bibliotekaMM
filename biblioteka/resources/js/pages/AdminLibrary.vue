@@ -731,6 +731,39 @@
       </v-card>
     </v-dialog>
 
+  
+
+    <v-dialog v-model="deleteGenreConfirmation.show" max-width="500" persistent>
+      <v-card>
+        <v-card-title class="headline" style="background-color: #003D3A; color: white;">
+          Žanra dzēšana
+          <v-spacer></v-spacer>
+          <v-btn icon dark @click="deleteGenreConfirmation.show = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        
+        <v-card-text class="pt-6 pb-2 text-center">
+          <p class="text-lg">
+            Vai tiešām vēlaties dzēst žanru 
+            <strong>"{{ deleteGenreConfirmation.genre?.nosaukums || deleteGenreConfirmation.genre?.name || 'nezināms' }}"</strong>?
+          </p>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="grey darken-1" text @click="deleteGenreConfirmation.show = false">
+            Atcelt
+          </v-btn>
+          <v-btn color="#003D3A" dark @click="confirmDeleteGenre">
+            Dzēst
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+
+
   </v-app>
 </template>
 
@@ -804,7 +837,12 @@ export default {
       
       notifications: {
         add: { show: false, message: '', type: 'success' }
-      }
+      },
+
+      deleteGenreConfirmation: {
+        show: false,
+        genre: null
+      },
     };
   },
   computed: {
@@ -1188,14 +1226,17 @@ export default {
         this.showNotification('add', 'Kļūda: žanra ID nav atrasts', false);
         return;
       }
-      
-      
+      this.deleteGenreConfirmation.genre = genre;
+      this.deleteGenreConfirmation.show = true;
+    },
+
+    async confirmDeleteGenre() {
+      const genre = this.deleteGenreConfirmation.genre;
+      if (!genre) return;
+
+      const genreId = genre.Zanra_ID || genre.id;
       const genreName = genre.nosaukums || genre.name || `žanrs #${genreId}`;
-      
-      if (!confirm(`Vai tiešām vēlaties dzēst žanru "${genreName}"?`)) {
-        return;
-      }
-      
+
       try {
         const response = await fetch(`http://localhost:8000/api/admin/genres/${genre.id}`, {
           method: 'DELETE',
@@ -1209,25 +1250,26 @@ export default {
         if (data.success) {
           this.showNotification('add', 'Žanrs veiksmīgi dzēsts!', true);
           
-          
           if (this.selectedGenre === genre.id) {
             this.selectedGenre = null;
           }
           
-          
           await this.fetchGenres();
-          
-          
           await this.fetchBooks();
-          
         } else {
           this.showNotification('add', data.message || 'Kļūda dzēšot žanru', false);
         }
       } catch (error) {
         console.error('Kļūda dzēšot žanru:', error);
         this.showNotification('add', 'Kļūda dzēšot žanru', false);
+      } finally {
+        
+        this.deleteGenreConfirmation.show = false;
+        this.deleteGenreConfirmation.genre = null;
       }
     },
+      
+    
 
     openAddGenreForm() {
       this.newGenre = {
@@ -1258,7 +1300,7 @@ export default {
       
       if (!genre) {
         console.error('Invalid genre object');
-        this.showNotification('add', 'Ошибка: неверные данные жанра', false);
+        this.showNotification('add', 'Kļūda: nederīgs žanra objekts', false);
         return;
       }
       
@@ -1266,7 +1308,7 @@ export default {
       const genreId = genre.Zanra_ID || genre.id;
       if (!genreId) {
         console.error('Genre has no ID:', genre);
-        this.showNotification('add', 'Ошибка: ID жанра не найден', false);
+        this.showNotification('add', 'Kļūda: žanra ID nav atrasts', false);
         return;
       }
 
