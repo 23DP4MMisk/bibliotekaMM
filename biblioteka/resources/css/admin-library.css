@@ -577,7 +577,7 @@
 .statistics-table {
   width: 95%; 
   max-width: 1200px;
-  margin-left: 160px; 
+  margin-left: 140px;
   border-collapse: collapse;
 }
 
@@ -781,124 +781,195 @@
   box-shadow: none !important;
 }
 
+.v-dialog .v-card-text {
+  overflow-x: visible !important;
+}
 
-@media (max-width: 768px) {
-  .genre-header {
-    flex-direction: column;
-    gap: 10px;
-    align-items: stretch;
+
+@media (max-width: 480px) {
+
+  .top-nav-bar .v-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap; 
+  }
+
+  .main-content {
+    padding: 12px !important;
+  }
+
+  .library-name-btn {
+    order: 1;
+  }
+
+  
+  
+  .library-name {
+    font-size: 0.9rem;
+   
+  }
+
+  .search-container {
+    order: 3;
+    width: 100%;
+    display: block;
+  }
+
+  .search-field {
+    width: 100%;
+  }
+
+  .search-field .v-input__control {
+    width: 100%;
+  }
+
+  .search-field .v-input__slot {
+    width: 100%;
+  }
+
+  .v-text-field {
+    min-width: 0 !important;
+  }
+
+  .user-container {
+    order: 2;
+    margin-left: auto;
+  }
+
+  
+  .admin-btn {
+    
+    height: 36px;
+    padding: 0 10px !important;
+  }
+  
+  .admin-text {
+    font-size: 0.7rem;
+  }
+
+  .admin-btn .v-icon {
+    display: none;
+  }
+
+  .category-title {
+    font-size: 1.3rem;
   }
   
   .genre-item-wrapper {
     width: 100%;
-    justify-content: center;
-    margin: 5px 0;
-  }
-  
-  .genre-actions {
-    position: static;
-    opacity: 1;
-    transform: none;
-    margin-left: 10px;
-  }
-}
-
-
-@media (max-width: 960px) {
-  .search-container {
-    max-width: 400px;
-    margin: 0 20px;
-  }
-  
-  .library-name {
-    font-size: 1.8rem;
-  }
-  
-  .category-title {
-    font-size: 2.2rem;
-  }
-  
-  .error-title, .no-books-title {
-    font-size: 1.8rem;
   }
   
   .book-title {
-    font-size: 1.15rem;
+    font-size: 0.9rem;
   }
   
   .book-author {
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
 
-  .header-cell {
-    font-size: 0.9rem;
-    padding: 16px 12px !important;
+   .view-btn {
+    font-size: 0.85rem;
+    height: 38px;
+    max-width: 160px;
+  }
+  
+  .delete-book-btn {
+    font-size: 0.8rem;
+    height: 34px;
+  }
+  
+  .v-col {
+    padding: 4px !important;
   }
 
-  .cell-text, .cell-center{
-    padding: 14px 12px !important;
-    font-size: 0.95rem;
+  .stat-card {
+    min-height: 120px;
   }
-}
 
-@media (max-width: 768px) {
-  .category-menu {
-    flex-direction: column;
-    gap: 15px;
-    align-items: center;
+  .v-dialog .v-card-text {
+    overflow-x: visible !important;
   }
   
-  .admin-link {
-    margin-left: 0 !important;
-  }
-  
-  .nodala-menu {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  
-  .zanri-menu {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  
-  .book-cover-wrapper {
-    padding-top: 140%;
-  }
-}
-
-@media (max-width: 600px) {
-  .search-container {
-    display: none;
-  }
-  
-  .admin-btn {
-    min-width: 100px;
-    font-size: 0.9rem;
-    height: 40px;
-  }
-  
-  .library-name {
+  .stat-value {
     font-size: 1.5rem;
   }
   
-  .category-title {
-    font-size: 1.8rem;
-  }
-  
-  .book-title {
+  .v-dialog .v-card__title {
+    padding: 12px !important;
     font-size: 1.1rem;
   }
   
-  .error-container, .no-books-container {
-    padding: 30px 20px;
+  .statistics-title,
+  .lietotaji-title,
+  .addBook-title {
+    font-size: 1.1rem;
   }
+
+  .statistics-content {
+    padding: 12px !important;
+  }
+
+  .stat-card {
+    min-height: 100px;
+    padding: 12px;
+  }
+
+   .stat-value {
+    font-size: 1.4rem;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+  }
+
+ 
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    display: flex;
+    justify-content: center;
+  }
+
+  .statistics-table {
+    min-width: 900px; 
+    width: max-content; 
+    
+    
+  }
+
+  .book-name {
+    max-width: 120px;
+  }
+
   
-  .error-title, .no-books-title {
-    font-size: 1.6rem;
+  .stat-chip {
+    min-width: 50px;
+    font-size: 0.7rem;
   }
+
+  .ratio-indicator {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+
   
-  .view-btn, .delete-book-btn {
-    max-width: 100%;
+  .header-cell {
+    font-size: 0.75rem;
+    padding: 10px 8px !important;
   }
+
+  .cell-text,
+  .cell-center {
+    font-size: 0.75rem;
+    padding: 10px 8px !important;
+  }
+
+
+
 }
+  
+  
+  

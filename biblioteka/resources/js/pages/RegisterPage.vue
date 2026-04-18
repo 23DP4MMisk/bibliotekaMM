@@ -150,7 +150,7 @@ export default {
     };
   },
   methods: {
-    async handleRegister() {
+  async handleRegister() {
   
   if (!this.email || !this.username || !this.password) {
     this.errorMessage = 'Lūdzu, aizpildiet visus laukus';
@@ -180,6 +180,25 @@ export default {
   
   try {
     console.log('Sending registration request...');
+
+    const checkResponse = await fetch('http://localhost:8000/api/check-user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        epasts: this.email
+      })
+    });
+    
+    const checkData = await checkResponse.json();
+    
+    if (checkData.exists) {
+      this.errorMessage = 'Lietotājs ar šo e-pasta adresi jau eksistē';
+      this.loading = false;
+      return;
+    }
     
    
     const response = await fetch('http://localhost:8000/api/register', {

@@ -1055,7 +1055,7 @@ export default {
       },
 
       // Jauns metods priekš gramatas dzešanai
-      async confirmDelete() {
+     async confirmDelete() {
         const bookId = this.deleteConfirmation.bookId;
         const token = this.authToken;
         
@@ -1261,12 +1261,13 @@ export default {
       this.selectNodala(category);
     },
     
-    showAllBooks() {
+    async showAllBooks() {
       this.activeCategory = 'all';
       this.selectedNodala = null;
       this.selectedGenre = null;
       this.searchQuery = '';
-      this.fetchBooks();
+
+      await this.fetchBooks();
     },
     
    

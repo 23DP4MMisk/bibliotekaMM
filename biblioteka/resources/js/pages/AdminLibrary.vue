@@ -1,7 +1,7 @@
 <template>
   <v-app>
     
-    <v-app-bar app flat height="80" class="top-nav-bar" fixed>
+    <v-app-bar app flat height="130" class="top-nav-bar" fixed>
       <v-container class="d-flex align-center justify-space-between px-8">
         
         
@@ -93,44 +93,33 @@
             <div class="category-menu">
               
               
-              <div class="nodala-dropdown">
-                <v-btn 
-                  variant="text"
-                  class="category-btn"
-                  @mouseenter="showNodalaMenu = true"
-                  @mouseleave="startCloseMenuTimer"
-                >
-                  Nodaļas
-                  <v-icon right>mdi-chevron-down</v-icon>
-                </v-btn>
-                
-                <div 
-                  v-if="showNodalaMenu" 
-                  class="nodala-menu"
-                  @mouseenter="showNodalaMenu = true"
-                  @mouseleave="startCloseMenuTimer"
-                >
-                  <v-list class="py-0">
-                    <v-list-item 
-                      @click="selectNodala('academic')"
-                      class="menu-item"
-                    >
-                      <v-list-item-title class="text-left">
-                        Akademiskas grāmatas
-                      </v-list-item-title>
-                    </v-list-item>
-                    <v-divider></v-divider>
-                    <v-list-item 
-                      @click="selectNodala('leisure')"
-                      class="menu-item"
-                    >
-                      <v-list-item-title class="text-left">
-                        Grāmatas atpūtai
-                      </v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </div>
-              </div>
+           
+              <v-menu offset-y>
+                <template v-slot:activator="{ props }">
+                  <v-btn 
+                    variant="text"
+                    class="category-btn"
+                    v-bind="props"
+                  >
+                    Nodaļas
+                    <v-icon right>mdi-chevron-down</v-icon>
+                  </v-btn>
+                </template>
+
+                <v-list class="py-0">
+                  <v-list-item @click="selectNodala('academic')">
+                    <v-list-item-title class="text-left">
+                      Akademiskas grāmatas
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-divider></v-divider>
+                  <v-list-item @click="selectNodala('leisure')">
+                    <v-list-item-title class="text-left">
+                      Grāmatas atpūtai
+                    </v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
 
               
               <a 
@@ -360,6 +349,8 @@
               outlined
               dense
               class="mb-3"
+              :error-messages="validationErrors.ISBN"
+              @input="validationErrors.ISBN = []"
             ></v-text-field>
             
             <v-text-field
@@ -369,6 +360,8 @@
               outlined
               dense
               class="mb-3"
+              :error-messages="validationErrors.nosaukums"
+              @input="validationErrors.nosaukums = []"
             ></v-text-field>
             
             <v-text-field
@@ -378,6 +371,8 @@
               outlined
               dense
               class="mb-3"
+              :error-messages="validationErrors.autors"
+              @input="validationErrors.autors = []"
             ></v-text-field>
             
             <v-row>
@@ -387,6 +382,8 @@
                   label="Gads"
                   outlined
                   dense
+                  :error-messages="validationErrors.gads"
+                  @input="validationErrors.gads = []"
                 ></v-text-field>
               </v-col>
               <v-col cols="6">
@@ -396,6 +393,8 @@
                   type="number"
                   outlined
                   dense
+                  :error-messages="validationErrors.lapu_skaits"
+                  @input="validationErrors.lapu_skaits = []"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -407,25 +406,29 @@
               dense
               rows="3"
               class="mb-3"
+              :error-messages="validationErrors.apraksts"
+              @input="validationErrors.apraksts = []"
             ></v-textarea>
             
             <v-select
               v-model="newBook.Nodala_ID"
               :items="nodalaOptions"
-              item-text="tips"
-              item-value="Nodala_ID"
+              item-title="text"
+              item-value="value"
               :return-object="false"
               label="Nodaļa *"
               outlined
               dense
               class="mb-3"
               required
+              :error-messages="validationErrors.Nodala_ID"
+              @update:model-value="validationErrors.Nodala_ID = []"
             ></v-select>
             
             <v-select
               v-model="newBook.Zanra_ID"
               :items="genreOptions"
-              item-text="nosaukums"
+              item-title="nosaukums"
               item-value="Zanra_ID"
               :return-object="false"
               label="Žanrs *"
@@ -433,6 +436,8 @@
               dense
               class="mb-3"
               required
+              :error-messages="validationErrors.Zanra_ID"
+              @update:model-value="validationErrors.Zanra_ID = []"
             ></v-select>
             
             <v-text-field
@@ -441,6 +446,8 @@
               outlined
               dense
               class="mb-3"
+              :error-messages="validationErrors.faila_pdf"
+              @input="validationErrors.faila_pdf = []"
               placeholder="pdf/12345623.pdf"
             ></v-text-field>
             
@@ -450,6 +457,8 @@
               outlined
               dense
               class="mb-3"
+              :error-messages="validationErrors.vaku_attels"
+              @input="validationErrors.vaku_attels = []"
               placeholder="uploids/cover/12345623.jpg"
             ></v-text-field>
           </v-form>
@@ -518,7 +527,7 @@
     </v-dialog>
 
     
-    <v-dialog v-model="showStatistics" max-width="1200" scrollable>
+    <v-dialog v-model="showStatistics" max-width="1200" >
       <v-card class="statistics-card">
         <v-card-title class="statistics-header">
           <div class="header-content">
@@ -662,8 +671,9 @@
             <v-select
               v-model="newGenre.nodala_id"
               :items="nodalaOptions"
-              item-text="tips"
-              item-value="Nodala_ID"
+              item-title="text"
+              item-value="value"
+              :return-object="false"
               label="Nodaļa *"
               outlined
               dense
@@ -705,8 +715,8 @@
               dense
               class="mb-3"
             ></v-text-field>
-                <v-select
-              v-model="editingGenre.nodala"
+              <v-select
+              v-model="editingGenre.nodala_id"
               :items="nodalaOptions"
               item-text="tips"
               item-value="Nodala_ID"
@@ -776,13 +786,13 @@ export default {
     return {
       activeCategory: 'all',
       searchQuery: '',
-      showNodalaMenu: false,
+     
       showZanriMenu: false,
       loading: true,
       error: false,
       errorMessage: '',
       allBooks: [],
-      closeMenuTimer: null,
+     
       closeZanriMenuTimer: null,
       searchTimeout: null,
 
@@ -811,6 +821,19 @@ export default {
         Nodala_ID: null,
         faila_pdf: '',
         vaku_attels: ''
+      },
+
+      validationErrors: {
+        ISBN: [],
+        nosaukums: [],
+        autors: [],
+        gads: [],
+        lapu_skaits: [],
+        apraksts: [],
+        Zanra_ID: [],
+        Nodala_ID: [],
+        faila_pdf: [],
+        vaku_attels: []
       },
 
       stats: {
@@ -918,8 +941,8 @@ export default {
     
     nodalaOptions() {
       return [
-        { Nodala_ID: 1, tips: 'Akadēmiskā' },
-        { Nodala_ID: 2, tips: 'Atpūtas' }
+        { text: 'Akadēmiskā', value: 1 },
+        { text: 'Atpūtas', value: 2 }
       ];
     },
     
@@ -1124,7 +1147,7 @@ export default {
           },
           body: JSON.stringify({
             nosaukums: this.newGenre.nosaukums,
-            Nodala: this.newGenre.Nodala
+            Nodala: this.newGenre.nodala_id
           })
         });
         
@@ -1274,7 +1297,7 @@ export default {
     openAddGenreForm() {
       this.newGenre = {
         nosaukums: '',
-        Nodala: this.selectedNodala === 'academic' ? 1 : 2
+        nodala_id: null
       };
       this.showAddGenreForm = true;
     },
@@ -1347,19 +1370,16 @@ export default {
       console.log('Izvēlēts žanrs ID:', genreId);
     },
     
-    showAllBooks() {
+    async showAllBooks() {
       this.activeCategory = 'all';
       this.selectedNodala = null;
       this.selectedGenre = null;
       this.searchQuery = '';
+
+      await this.fetchBooks();
     },
     
-    startCloseMenuTimer() {
-      clearTimeout(this.closeMenuTimer);
-      this.closeMenuTimer = setTimeout(() => {
-        this.showNodalaMenu = false;
-      }, 300);
-    },
+   
     
     startCloseZanriMenuTimer() {
       clearTimeout(this.closeZanriMenuTimer);
@@ -1552,6 +1572,10 @@ export default {
     },
 
     async addBook() {
+
+      this.clearValidationErrors();
+
+
       try {
         const response = await fetch('http://localhost:8000/api/admin/books', {
           method: 'POST',
@@ -1583,6 +1607,9 @@ export default {
             vaku_attels: ''
           };
          } else if (response.status === 422) {
+
+          this.handleValidationErrors(data.errors);
+          this.showNotification('add', 'Lūdzu, izlabojiet atzīmētās kļūdas', false);
           
           console.error('❌ Validation errors:', data.errors || data);
           
@@ -1601,9 +1628,40 @@ export default {
         console.error('Kļūda pievienojot grāmatu:', error);
         this.showNotification('add', 'Servera kļūda', false);
       }
+    },
+
+    clearValidationErrors() {
+      for (let field in this.validationErrors) {
+        this.validationErrors[field] = [];
+      }
+    },
+
+
+    handleValidationErrors(errors) {
+      // Notīrīt vecās kļūdas
+      this.clearValidationErrors();
+
+      const fieldMapping = {
+        'ISBN': 'ISBN',
+        'nosaukums': 'nosaukums',
+        'autors': 'autors',
+        'gads': 'gads',
+        'lapu_skaits': 'lapu_skaits',
+        'apraksts': 'apraksts',
+        'Zanra_ID': 'Zanra_ID',
+        'Nodala_ID': 'Nodala_ID',
+        'faila_pdf': 'faila_pdf',
+        'vaku_attels': 'vaku_attels'
+      };
+
+      for (let [serverField, messages] of Object.entries(errors)) {
+        const frontendField = fieldMapping[serverField] || serverField;
+        if (this.validationErrors[frontendField]) {
+          this.validationErrors[frontendField] = messages;
+        }
+      }
     }
   }
 }
-
 </script>
 

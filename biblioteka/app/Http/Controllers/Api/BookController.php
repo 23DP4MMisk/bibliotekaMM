@@ -116,7 +116,7 @@ class BookController extends Controller
         }
     }
 
-      public function search($query)
+    public function search($query)
     {
         try {
             $books = Gramata::where('nosaukums', 'like', '%' . $query . '%')

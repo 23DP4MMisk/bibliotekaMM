@@ -286,7 +286,7 @@
             <v-select
               v-model="editBookData.Nodala_ID"
               :items="nodalaOptions"
-              item-text="tips"
+              item-title="tips"
               item-value="Nodala_ID"
               label="Nodaļa *"
               outlined
@@ -298,7 +298,7 @@
             <v-select
               v-model="editBookData.Zanra_ID"
               :items="genreOptions"
-              item-text="nosaukums"
+              item-title="nosaukums"
               item-value="Zanra_ID"
               label="Žanrs *"
               outlined
@@ -336,6 +336,28 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      timeout="4000"
+      top
+      right
+      elevation="6"
+    >
+      {{ snackbar.text }}
+      
+      <template v-slot:action="{ attrs }">
+        <v-btn
+          text
+          v-bind="attrs"
+          @click="snackbar.show = false"
+          color="white"
+        >
+          OK
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-app>
 </template>
 
@@ -357,7 +379,13 @@ export default {
       reviewsLoading: true,
       
       showEditForm: false,
-      editBookData: {}
+      editBookData: {},
+
+      snackbar: {
+        show: false,
+        text: '',
+        color: 'success'
+      },
     };
   },
   computed: {
@@ -583,11 +611,11 @@ export default {
     },
 
     showNotification(message, isSuccess = true) {
-      if (isSuccess) {
-        alert('✅ ' + message);
-      } else {
-        alert('❌ ' + message);
-      }
+     this.snackbar = {
+        show: true,
+        text: message,
+        color: isSuccess ? 'success' : 'error'
+      };
     },
 
     async logout() {

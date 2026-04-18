@@ -13,6 +13,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/reģistrēties', [AuthController::class, 'register']);
 Route::post('/pieslēgties', [AuthController::class, 'login']);
 Route::get('/check-auth', [AuthController::class, 'checkAuth']);
+Route::post('/check-user', [AuthController::class, 'checkUser']);
 
 Route::post('/reviews', [ReviewController::class, 'store']);
 Route::get('/reviews/check/{bookId}', [ReviewController::class, 'check']);

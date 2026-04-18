@@ -68,6 +68,26 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    public function checkUser(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'epasts' => 'required|email'
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'exists' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+        
+        $user = Lietotajs::where('epasts', $request->epasts)->first();
+        
+        return response()->json([
+            'exists' => $user !== null
+        ]);
+    }
     
     public function login(Request $request)
     {

@@ -209,7 +209,7 @@ class AdminController extends Controller
         $validator = Validator::make($request->all(), [
             'ISBN' => 'required|integer|unique:Gramata,ISBN',
             'nosaukums' => 'required|string|max:50',
-            'autors' => 'required|string|max:255',
+            'autors' => ['required', 'string', 'max:255', 'regex:/^[^\d]*$/'],
             'gads' => 'nullable|string|size:4',
             'lapu_skaits' => 'nullable|integer|min:1',
             'apraksts' => 'nullable|string|max:1000',
