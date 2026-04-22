@@ -23,6 +23,6 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 
 RUN npm install && npm run build
 
-EXPOSE 80
+EXPOSE 8000
 
 CMD php artisan serve --host=0.0.0.0 --port=8000
