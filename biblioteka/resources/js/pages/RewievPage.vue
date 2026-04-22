@@ -273,7 +273,7 @@ export default {
           headers['Authorization'] = 'Bearer ' + token;
         }
         
-        const response = await fetch(`http://localhost:8000/api/books/${this.bookId}`, {
+        const response = await fetch(`/api/books/${this.bookId}`, {
           method: 'GET',
           headers: headers
         });
@@ -305,7 +305,7 @@ export default {
       try {
         const token = this.authToken;
         
-        const response = await fetch(`http://localhost:8000/api/reviews/check/${this.bookId}`, {
+        const response = await fetch(`/api/reviews/check/${this.bookId}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -357,7 +357,7 @@ export default {
       }
       
       try {
-        const response = await fetch('http://localhost:8000/api/check-auth', {
+        const response = await fetch('/api/check-auth', {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -387,7 +387,7 @@ export default {
       
       try {
         if (token) {
-          await fetch('http://localhost:8000/api/izrakstīties', {
+          await fetch('/api/izrakstīties', {
             method: 'POST',
             headers: {
               'Accept': 'application/json',
@@ -413,7 +413,7 @@ export default {
       this.submitting = true;
       
       try {
-        const response = await fetch('http://localhost:8000/api/reviews', {
+        const response = await fetch('/api/reviews', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

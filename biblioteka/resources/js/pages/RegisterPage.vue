@@ -181,7 +181,7 @@ export default {
   try {
     console.log('Sending registration request...');
 
-    const checkResponse = await fetch('http://localhost:8000/api/check-user', {
+    const checkResponse = await fetch('/api/check-user', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -201,7 +201,7 @@ export default {
     }
     
    
-    const response = await fetch('http://localhost:8000/api/register', {
+    const response = await fetch('/api/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

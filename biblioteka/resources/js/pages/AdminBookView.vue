@@ -425,7 +425,7 @@ export default {
         return;
       }
       try {
-        const response = await fetch('http://localhost:8000/api/check-auth', {
+        const response = await fetch('/api/check-auth', {
           headers: { 'Authorization': 'Bearer ' + token }
         });
         const data = await response.json();
@@ -445,7 +445,7 @@ export default {
 
     async fetchGenres() {
       try {
-        const response = await fetch('http://localhost:8000/api/genres');
+        const response = await fetch('/api/genres');
         const data = await response.json();
         if (data.success && data.data) {
           this.genres = data.data.map(genre => ({
@@ -473,7 +473,7 @@ export default {
           'Authorization': 'Bearer ' + this.authToken
         };
         
-        const response = await fetch(`http://localhost:8000/api/books/${isbn}`, {
+        const response = await fetch(`/api/books/${isbn}`, {
           method: 'GET',
           headers: headers
         });
@@ -503,7 +503,7 @@ export default {
 
     async loadBookStats() {
         try {
-            const response = await fetch(`http://localhost:8000/api/admin/stats/books/${this.$route.params.isbn}`, {
+            const response = await fetch(`/api/admin/stats/books/${this.$route.params.isbn}`, {
             headers: {
                 'Authorization': 'Bearer ' + this.authToken
             }
@@ -524,7 +524,7 @@ export default {
       this.reviewsLoading = true; 
       try {
         const isbn = this.$route.params.isbn;
-        const response = await fetch(`http://localhost:8000/api/books/${isbn}/reviews`);
+        const response = await fetch(`/api/books/${isbn}/reviews`);
         const data = await response.json();
         
         if (data.success && data.data) {
@@ -582,7 +582,7 @@ export default {
 
     async updateBook() {
       try {
-        const response = await fetch(`http://localhost:8000/api/admin/books/${this.book.isbn}`, {
+        const response = await fetch(`/api/admin/books/${this.book.isbn}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -622,7 +622,7 @@ export default {
       const token = this.authToken;
       try {
         if (token) {
-          await fetch('http://localhost:8000/api/izrakstīties', {
+          await fetch('/api/izrakstīties', {
             method: 'POST',
             headers: {
               'Accept': 'application/json',

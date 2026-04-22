@@ -151,7 +151,7 @@ export default {
       try {
         console.log('🔐 Sūtu pieslēgšanās pieprasījumu...');
         
-        const response = await fetch('http://localhost:8000/api/pieslēgties', {
+        const response = await fetch('/api/pieslēgties', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

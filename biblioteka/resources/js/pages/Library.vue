@@ -670,7 +670,7 @@ export default {
         console.log('👑 Atrasts administrators localStorage, pārbaudu ar serveri...');
         
         try {
-          const response = await fetch('http://localhost:8000/api/check-auth', {
+          const response = await fetch('/api/check-auth', {
             method: 'GET',
             headers: {
               'Accept': 'application/json',
@@ -759,7 +759,7 @@ export default {
 
     async fetchGenres() {
       try {
-        const response = await fetch('http://localhost:8000/api/genres');
+        const response = await fetch('/api/genres');
         const data = await response.json();
         
         if (data.success && data.data) {
@@ -811,7 +811,7 @@ export default {
 
       try {
         console.log('Atsūtu pieprasijumu tokenam:', 'Bearer ' + token.substring(0, 20) + '...');
-        const response = await fetch('http://localhost:8000/api/check-auth', {
+        const response = await fetch('/api/check-auth', {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -856,7 +856,7 @@ export default {
       
       try {
        if(token) {
-        const response = await fetch('http://localhost:8000/api/izrakstīties', {
+        const response = await fetch('/api/izrakstīties', {
           method: 'POST',
           credentials: 'include',
           headers: {
@@ -902,7 +902,7 @@ export default {
       const token = this.authToken;
      
       try {
-        const response = await fetch('http://localhost:8000/api/user/books', {
+        const response = await fetch('/api/user/books', {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -974,7 +974,7 @@ export default {
     
         console.log('Atsūtu datus:', requestBody);
     
-        const response = await fetch('http://localhost:8000/api/user/book/status', {
+        const response = await fetch('/api/user/book/status', {
         method: 'PUT',
         headers: {
          'Content-Type': 'application/json',
@@ -1062,7 +1062,7 @@ export default {
         this.deleteConfirmation.show = false;
         
         try {
-          const response = await fetch(`http://localhost:8000/api/user/book/${bookId}`, {
+          const response = await fetch(`/api/user/book/${bookId}`, {
             method: 'DELETE',
             headers: {
               'Accept': 'application/json',
@@ -1091,7 +1091,7 @@ export default {
         const bookIsbn = userBook.gramatas_id || userBook.ISBN || userBook.isbn;
         
         try {
-          const response = await fetch(`http://localhost:8000/api/admin/books/${bookIsbn}/download`, {
+          const response = await fetch(`/api/admin/books/${bookIsbn}/download`, {
             method: 'POST',
             headers: {
               'Authorization': 'Bearer ' + this.authToken,
@@ -1135,9 +1135,9 @@ export default {
         let apiUrl;
         
         if (searchQuery) {
-          apiUrl = `http://localhost:8000/api/books/search/${encodeURIComponent(searchQuery)}`;
+          apiUrl = `/api/books/search/${encodeURIComponent(searchQuery)}`;
         } else {
-          apiUrl = 'http://localhost:8000/api/books';
+          apiUrl = '/api/books';
         }
         
         console.log('📡 Sūtu pieprasījumu:', apiUrl);

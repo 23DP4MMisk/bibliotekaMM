@@ -378,7 +378,7 @@ export default {
         const isbn = this.$route.params.isbn;
         console.log('📝 Ielādē atsauksmes grāmatai:', isbn);
         
-        const response = await fetch(`http://localhost:8000/api/books/${isbn}/reviews`);
+        const response = await fetch(`/api/books/${isbn}/reviews`);
         const data = await response.json();
         
         if (data.success && data.data) {
@@ -440,7 +440,7 @@ export default {
       }
       
       try {
-        const response = await fetch('http://localhost:8000/api/check-auth', {
+        const response = await fetch('/api/check-auth', {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -481,7 +481,7 @@ export default {
       
       try {
        if (token) {  
-        const response = await fetch('http://localhost:8000/api/izrakstīties', {
+        const response = await fetch('/api/izrakstīties', {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
@@ -525,7 +525,7 @@ export default {
           headers['Authorization'] = 'Bearer ' + token;
         }
         
-        const response = await fetch(`http://localhost:8000/api/books/${isbn}`, {
+        const response = await fetch(`/api/books/${isbn}`, {
           method: 'GET',
           headers: headers
         });
@@ -586,7 +586,7 @@ export default {
         console.log('Lejupielādē failu:', pdfPath);
         console.log('Faila nosaukums:', pdfFileName);
 
-        const trackResponse = await fetch(`http://localhost:8000/api/admin/books/${this.book.isbn}/download`, {
+        const trackResponse = await fetch(`/api/admin/books/${this.book.isbn}/download`, {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer ' + authToken,
@@ -645,7 +645,7 @@ export default {
         
         console.log('Atsūtu ISBN:', requestBody.isbn);
         
-        const response = await fetch('http://localhost:8000/api/user/books/add', {
+        const response = await fetch('/api/user/books/add', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

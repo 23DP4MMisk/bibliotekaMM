@@ -974,7 +974,7 @@ export default {
    
     async loadStats() {
       try {
-        const response = await fetch('http://localhost:8000/api/admin/stats', {
+        const response = await fetch('/api/admin/stats', {
           method: 'GET',
           headers: {
             'Authorization': 'Bearer ' + this.authToken,
@@ -999,7 +999,7 @@ export default {
 
     async debugToken() {
       try {
-        const response = await fetch('http://localhost:8000/api/debug-token', {
+        const response = await fetch('/api/debug-token', {
           headers: {
             'Authorization': 'Bearer ' + this.authToken
           }
@@ -1013,7 +1013,7 @@ export default {
     
     async debugUserToken() {
     try {
-      const response = await fetch('http://localhost:8000/api/debug-user-from-token', {
+      const response = await fetch('/api/debug-user-from-token', {
         headers: {
           'Authorization': 'Bearer ' + this.authToken
         }
@@ -1047,7 +1047,7 @@ export default {
       }
 
       try {
-        const response = await fetch('http://localhost:8000/api/check-auth', {
+        const response = await fetch('/api/check-auth', {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -1087,7 +1087,7 @@ export default {
       
       try {
         if(token) {
-          await fetch('http://localhost:8000/api/izrakstīties', {
+          await fetch('/api/izrakstīties', {
             method: 'POST',
             headers: {
               'Accept': 'application/json',
@@ -1106,7 +1106,7 @@ export default {
 
     async fetchGenres() {
       try {
-        const response = await fetch('http://localhost:8000/api/genres');
+        const response = await fetch('/api/genres');
         const data = await response.json();
 
         console.log('📦 RAW DATA FROM SERVER:', data);
@@ -1139,7 +1139,7 @@ export default {
       }
 
       try {
-        const response = await fetch('http://localhost:8000/api/admin/genres', {
+        const response = await fetch('/api/admin/genres', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1198,7 +1198,7 @@ export default {
       }
 
       try {
-        const response = await fetch(`http://localhost:8000/api/admin/genres/${genreId}`, {
+        const response = await fetch(`/api/admin/genres/${genreId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -1261,7 +1261,7 @@ export default {
       const genreName = genre.nosaukums || genre.name || `žanrs #${genreId}`;
 
       try {
-        const response = await fetch(`http://localhost:8000/api/admin/genres/${genre.id}`, {
+        const response = await fetch(`/api/admin/genres/${genre.id}`, {
           method: 'DELETE',
           headers: {
             'Authorization': 'Bearer ' + this.authToken
@@ -1394,8 +1394,8 @@ export default {
       
       try {
         let apiUrl = searchQuery 
-          ? `http://localhost:8000/api/books/search/${encodeURIComponent(searchQuery)}`
-          : 'http://localhost:8000/api/books';
+          ? `/api/books/search/${encodeURIComponent(searchQuery)}`
+          : '/api/books';
         
         const response = await fetch(apiUrl);
         const data = await response.json();
@@ -1471,7 +1471,7 @@ export default {
       }
     
       try {
-        const response = await fetch('http://localhost:8000/api/admin/users', {
+        const response = await fetch('/api/admin/users', {
           method: 'GET',
           headers: {
             'Authorization': 'Bearer ' + this.authToken,
@@ -1509,7 +1509,7 @@ export default {
     async toggleUserStatus(user) {
       try {
         const newStatus = user.status === 'aktivs' ? 'blokets' : 'aktivs';
-        const response = await fetch(`http://localhost:8000/api/admin/users/${user.kodsID}/status`, {
+        const response = await fetch(`/api/admin/users/${user.kodsID}/status`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -1538,7 +1538,7 @@ export default {
 
     async deleteBook() {
       try {
-        const response = await fetch(`http://localhost:8000/api/admin/books/${this.deleteBookConfirmation.bookIsbn}`, {
+        const response = await fetch(`/api/admin/books/${this.deleteBookConfirmation.bookIsbn}`, {
           method: 'DELETE',
           headers: {
             'Authorization': 'Bearer ' + this.authToken
@@ -1577,7 +1577,7 @@ export default {
 
 
       try {
-        const response = await fetch('http://localhost:8000/api/admin/books', {
+        const response = await fetch('/api/admin/books', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
