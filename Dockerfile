@@ -10,12 +10,9 @@ RUN a2enmod rewrite
 
 COPY . /var/www/html/
 
-# ЭТИ СТРОКИ УБРАНЫ (будут созданы автоматически при запуске)
-# RUN chown -R www-data:www-data /var/www/html \
-#     && chmod -R 755 /var/www/html/storage \
-#     && chmod -R 755 /var/www/html/bootstrap/cache
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+
 RUN npm install && npm run build
 
 EXPOSE 80
