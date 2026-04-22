@@ -7,11 +7,15 @@ RUN apt-get update && apt-get install -y \
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf \
-    && a2dismod mpm_event || true \
-    && a2enmod mpm_prefork \
-    && a2enmod rewrite
-RUN rm -f /etc/apache2/mods-enabled/mpm_*.load /etc/apache2/mods-enabled/mpm_*.conf || true
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf && \
+   
+    rm -f /etc/apache2/mods-available/mpm_*.load && \
+    rm -f /etc/apache2/mods-available/mpm_*.conf && \
+    rm -f /etc/apache2/mods-enabled/mpm_*.load && \
+    rm -f /etc/apache2/mods-enabled/mpm_*.conf && \
+    
+    a2enmod mpm_prefork && \
+    a2enmod rewrite
 
 COPY biblioteka/ /var/www/html/
 
