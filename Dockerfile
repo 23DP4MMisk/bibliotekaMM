@@ -6,17 +6,23 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 RUN a2enmod rewrite
 
-RUN composer install -vvv
+
 COPY biblioteka/ /var/www/html/
 
+WORKDIR /var/www/html
+
+
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
+# Node
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
-
 
 RUN npm install && npm run build
 
 EXPOSE 80
 
-CMD php artisan migrate --force && php artisan storage:link && apache2-foreground
+CMD apache2-foreground
