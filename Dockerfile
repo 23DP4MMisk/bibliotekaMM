@@ -9,6 +9,10 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 RUN a2enmod rewrite
 
+RUN a2dismod mpm_event || true \
+    && a2dismod mpm_worker || true \
+    && a2enmod mpm_prefork
+
 
 COPY biblioteka/ /var/www/html/
 
