@@ -25,4 +25,4 @@ RUN npm install && npm run build
 
 EXPOSE 80
 
-CMD apache2-foreground
+CMD php artisan serve --host=0.0.0.0 --port=8000
