@@ -9,7 +9,7 @@ class ZanrsSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('Zanrs')->insert([
+        DB::table('Zanrs')->insertOrIgnore([
             // akademiskas gramatas (Nodala_ID = 1)
             [
                 'Zanra_ID' => 1,

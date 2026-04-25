@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class GramatSeeders extends Seeder
 {
     public function run(): void{
-        DB::table('Gramata')->insert([
+        DB::table('Gramata')->insertOrIgnore([
             // Akademiskas gramatas
             [
              'ISBN' => '12345623',

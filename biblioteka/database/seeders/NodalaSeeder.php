@@ -8,7 +8,7 @@ class NodalaSeeder extends Seeder
 {
     public function run(): void 
     {
-        DB::table('Nodala')->insert([
+        DB::table('Nodala')->insertOrIgnore([
             [
              'tips' => 'akademiska',
              'created_at' => now(),
