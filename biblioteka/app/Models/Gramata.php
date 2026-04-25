@@ -10,7 +10,7 @@ class Gramata extends Model
 {
     use HasFactory;
 
-    protected $table = 'gramata';       // tabula vards
+    protected $table = 'Gramata';       // tabula vards
     protected $primaryKey = 'ISBN';     // primara atslega
     public $incrementing = false;       // ISBN nav autoinkrements
     protected $keyType = 'integer';     // atslegas tips
