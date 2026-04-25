@@ -1107,8 +1107,12 @@ export default {
         
         const bookTitle = userBook.nosaukums || userBook.title || 'gramata';
         const fileName = `${bookTitle}.pdf`;
+        const fileResponse = await fetch(`/${userBook.faila_pdf}`);
+        const blob = await fileResponse.blob();
+        const url = window.URL.createObjectURL(blob);
+        
         const link = document.createElement('a');
-        link.href = `http://localhost:8000/${userBook.faila_pdf}`;
+        link.href = url;
         link.download = fileName;
         document.body.appendChild(link);
         link.click();
