@@ -67,7 +67,7 @@ class Gramata extends Model
     {
         $count = self::where('Zanra_ID', $zanraId)->count();
         
-        DB::table('zanrs')
+        DB::table('Zanrs')
             ->where('Zanra_ID', $zanraId)
             ->update(['gramatu_skaits' => $count]);
     }
