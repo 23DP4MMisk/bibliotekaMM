@@ -593,8 +593,10 @@ export default {
           'Content-Type': 'application/json'
         }
         });
+        
+        const fileUrl = pdfPath.startsWith('http') ? pdfPath : `/${pdfPath}`;
 
-        const response = await fetch(`/${pdfPath}`);
+        const response = await fetch(fileUrl);
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const trackData = await trackResponse.json();
