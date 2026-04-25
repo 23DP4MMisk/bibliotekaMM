@@ -17,7 +17,7 @@ WORKDIR /var/www/html
 
 
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+RUN composer install --optimize-autoloader --no-interaction --no-scripts
 
 # Node
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
