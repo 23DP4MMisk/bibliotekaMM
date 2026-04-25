@@ -594,6 +594,7 @@ export default {
         }
         });
 
+        const response = await fetch(`/${pdfPath}`);
         const trackData = await trackResponse.json();
         console.log('Download tracked:', trackData);
 
@@ -602,7 +603,7 @@ export default {
         }
         
         const link = document.createElement('a');
-        link.href = `http://localhost:8000/${pdfPath}`;
+        link.href = url;
         link.download = `${bookTitle}.pdf`; 
         document.body.appendChild(link);
         link.click();
