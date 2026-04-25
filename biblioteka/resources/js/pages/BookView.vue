@@ -595,6 +595,8 @@ export default {
         });
 
         const response = await fetch(`/${pdfPath}`);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
         const trackData = await trackResponse.json();
         console.log('Download tracked:', trackData);
 
