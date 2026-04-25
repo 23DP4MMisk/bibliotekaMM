@@ -1,7 +1,7 @@
 FROM php:8.3-cli
 
 RUN apt-get update && apt-get install -y \
-    nodejs npm zip unzip git curl \
+    nodejs npm zip unzip git curl git-lfs \
     libpng-dev libonig-dev libxml2-dev \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd \
     && git lfs install
