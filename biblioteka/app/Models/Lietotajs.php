@@ -11,7 +11,7 @@ class Lietotajs extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
 
-    protected $table = 'lietotajs';
+    protected $table = 'Lietotajs';
     protected $primaryKey = 'kodsID';
     public $incrementing = true;
     protected $keyType = 'int';
