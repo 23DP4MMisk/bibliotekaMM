@@ -569,7 +569,7 @@ export default {
           return imagePath;
         } else {
           const cleanPath = imagePath.replace(/^\/+/, '');
-          return `http://localhost:8000/${cleanPath}`;
+          return `/${cleanPath}`;
         }
       }
       

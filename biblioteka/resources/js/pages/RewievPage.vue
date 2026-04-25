@@ -244,7 +244,7 @@ export default {
   },
   async mounted() {
     this.bookId = this.$route.params.isbn;
-    console.log('📚 Загружаем книгу с ISBN:', this.bookId);
+    console.log('📚 Ieladejam gramatu ISBN:', this.bookId);
     
     await this.checkAuth();
     
@@ -318,13 +318,13 @@ export default {
         if (data.exists) {
           this.existingReview = true;
           this.userReview = data.review;
-          console.log('📝 Отзыв уже существует:', this.userReview);
+          console.log('📝 Atsauksme jau pastāv:', this.userReview);
         } else {
           this.existingReview = false;
-          console.log('📝 Отзыва еще нет');
+          console.log('📝 Atsauksme vēl nav ievadīta');
         }
       } catch (error) {
-        console.error('Ошибка проверки отзыва:', error);
+        console.error('Kļūda pārbaudot atsauksmi:', error);
       }
     },
     
@@ -336,7 +336,7 @@ export default {
           return imagePath;
         } else {
           const cleanPath = imagePath.replace(/^\/+/, '');
-          return `http://localhost:8000/${cleanPath}`;
+          return `/${cleanPath}`;
         }
       }
       

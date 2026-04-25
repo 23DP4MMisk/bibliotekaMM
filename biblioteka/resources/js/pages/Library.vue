@@ -1193,7 +1193,7 @@ export default {
           return imagePath;
         } else {
           const cleanPath = imagePath.replace(/^\/+/, '');
-          return `http://localhost:8000/${cleanPath}`;
+          return `/${cleanPath}`;
         }
       }
 
@@ -1205,7 +1205,7 @@ export default {
           return book.vaku_attels;
         } else {
           const cleanPath = book.vaku_attels.replace(/^\/+/, '');
-          return `http://localhost:8000/${cleanPath}`;
+          return `/${cleanPath}`;
           
         }
       }

@@ -1449,7 +1449,7 @@ export default {
           return imagePath;
         } else {
           const cleanPath = imagePath.replace(/^\/+/, '');
-          return `http://localhost:8000/${cleanPath}`;
+          return `/${cleanPath}`;
         }
       }
       return 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=600&fit=crop';
