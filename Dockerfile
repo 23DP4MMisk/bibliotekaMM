@@ -3,7 +3,8 @@ FROM php:8.3-cli
 RUN apt-get update && apt-get install -y \
     nodejs npm zip unzip git curl \
     libpng-dev libonig-dev libxml2-dev \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd \
+    && git lfs install
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -12,6 +13,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY biblioteka/ /var/www/html/
 
 WORKDIR /var/www/html
+
+RUN git lfs pull
 
 
 
@@ -25,4 +28,4 @@ RUN npm install && npm run build
 
 EXPOSE 8000
 
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000
+CMD php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=8000
