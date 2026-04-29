@@ -244,7 +244,7 @@ export default {
   },
   async mounted() {
     this.bookId = this.$route.params.isbn;
-    console.log('📚 Ieladejam gramatu ISBN:', this.bookId);
+    ('📚 Ieladejam gramatu ISBN:', this.bookId);
     
     await this.checkAuth();
     
@@ -283,11 +283,11 @@ export default {
         }
         
         const data = await response.json();
-        console.log('📊 Saņemtie dati:', data);
+        ('📊 Saņemtie dati:', data);
         
         if (data.success && data.data) {
           this.book = data.data;
-          console.log('📖 Grāmata ielādēta:', this.book);
+          ('📖 Grāmata ielādēta:', this.book);
         } else {
           throw new Error('Grāmata nav atrasta');
         }
@@ -318,10 +318,10 @@ export default {
         if (data.exists) {
           this.existingReview = true;
           this.userReview = data.review;
-          console.log('📝 Atsauksme jau pastāv:', this.userReview);
+          ('📝 Atsauksme jau pastāv:', this.userReview);
         } else {
           this.existingReview = false;
-          console.log('📝 Atsauksme vēl nav ievadīta');
+          ('📝 Atsauksme vēl nav ievadīta');
         }
       } catch (error) {
         console.error('Kļūda pārbaudot atsauksmi:', error);

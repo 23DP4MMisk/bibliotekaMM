@@ -145,19 +145,19 @@ export default {
     // Ritināšanas apstrādātāja pievienošana
     window.addEventListener('scroll', this.handleScroll);
     
-    console.log('Attēlu ceļu pārbaude:');
-    console.log('1. /images/academikbook.gif');
-    console.log('2. /images/funnybook.gif');
-    console.log('3. /images/bookshelf.jpg');
-    console.log('Pilnais URL:', window.location.origin);
+    ('Attēlu ceļu pārbaude:');
+    ('1. /images/academikbook.gif');
+    ('2. /images/funnybook.gif');
+    ('3. /images/bookshelf.jpg');
+    ('Pilnais URL:', window.location.origin);
     
     // Faila esamības pārbaude
     const images = ['/images/academikbook.gif', '/images/funnybook.gif', '/images/bookshelf.jpg'];
     images.forEach(src => {
       const img = new Image();
       img.src = src;
-      img.onload = () => console.log(`✓ Attēls augšupielādēts: ${src}`);
-      img.onerror = () => console.log(`✗ Attēls nav atrasts: ${src}`);
+      img.onload = () => (`✓ Attēls augšupielādēts: ${src}`);
+      img.onerror = () => (`✗ Attēls nav atrasts: ${src}`);
     });
   },
   beforeUnmount() {

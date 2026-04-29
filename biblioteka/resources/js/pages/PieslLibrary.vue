@@ -149,7 +149,7 @@ export default {
       this.loading = true;
       this.errorMessage = '';
       try {
-        console.log('🔐 Sūtu pieslēgšanās pieprasījumu...');
+        ('🔐 Sūtu pieslēgšanās pieprasījumu...');
         
         const response = await fetch('/api/pieslēgties', {
           method: 'POST',
@@ -164,7 +164,7 @@ export default {
           })
         });
         const data = await response.json();
-        console.log('📊 Atbilde:', data);
+        ('📊 Atbilde:', data);
 
         if (data.lietotajs && data.lietotajs.status !== 'aktivs') {
           this.errorMessage = 'Jūsu konts ir bloķēts. Sazinieties ar administratoru.';
@@ -173,7 +173,7 @@ export default {
         }
 
         if (data.success) {
-          console.log('✅ Pieslēgšanās veiksmīga!');
+          ('✅ Pieslēgšanās veiksmīga!');
           
 
           localStorage.setItem('auth_token', data.token);
@@ -181,12 +181,12 @@ export default {
           this.showLoginSuccess = true;
 
           
-          console.log('🏠 Pāreja uz bibliotēkas lapu...');
+          ('🏠 Pāreja uz bibliotēkas lapu...');
 
           const userRole = data.lietotajs.loma;
           if (userRole === 'admins' || userRole === 'admin') {
             
-            console.log('👑 Administrators atpazīts, pāreja uz admin paneli');
+            ('👑 Administrators atpazīts, pāreja uz admin paneli');
             this.$router.push('/admin');
           } else {
             

@@ -362,7 +362,7 @@ export default {
     const isAuthenticated = await this.checkAuth();
 
     if (!isAuthenticated && localStorage.getItem('user')) {
-      console.log('⚠️ localStorage ir lietotājs, bet sesija ir beigusies');
+      ('⚠️ localStorage ir lietotājs, bet sesija ir beigusies');
       localStorage.removeItem('user');
       this.isLoggedIn = false;
       this.user = null;
@@ -376,14 +376,14 @@ export default {
       this.reviewsLoading = true; 
       try {
         const isbn = this.$route.params.isbn;
-        console.log('📝 Ielādē atsauksmes grāmatai:', isbn);
+        ('📝 Ielādē atsauksmes grāmatai:', isbn);
         
         const response = await fetch(`/api/books/${isbn}/reviews`);
         const data = await response.json();
         
         if (data.success && data.data) {
           this.reviews = data.data;
-          console.log('✅ Ielādētas', this.reviews.length, 'atsauksmes');
+          ('✅ Ielādētas', this.reviews.length, 'atsauksmes');
         } else {
           this.reviews = [];
         }
@@ -416,7 +416,7 @@ export default {
           const user = JSON.parse(savedUser);
           this.isLoggedIn = true;
           this.user = user;
-          console.log('✅ Lietotājs ielādēts no localStorage:', user.lietotaja_vards);
+          ('✅ Lietotājs ielādēts no localStorage:', user.lietotaja_vards);
         } catch (e) {
           console.error('Kļūda ielādējot lietotāju:', e);
         }
@@ -427,10 +427,10 @@ export default {
       if (this.authLoading) return;
       
       this.authLoading = true;
-      console.log('🔐 Pārbaudu autentifikāciju...');
+      ('🔐 Pārbaudu autentifikāciju...');
       
       const token = this.authToken;
-      console.log('Tokens parbaudei:', token ? token.substring(0, 20) + '...' : 'nē');
+      ('Tokens parbaudei:', token ? token.substring(0, 20) + '...' : 'nē');
       
       if (!token) {
        this.isLoggedIn = false;
@@ -449,16 +449,16 @@ export default {
         });
         
         const data = await response.json();
-        console.log('Auth check atbilde:', data);
+        ('Auth check atbilde:', data);
         
         if (data.authenticated && data.lietotajs) {
           this.isLoggedIn = true;
           this.user = data.lietotajs;
           localStorage.setItem('user', JSON.stringify(data.lietotajs));
-          console.log('✅ Lietotājs autentificēts:', this.userName);
+          ('✅ Lietotājs autentificēts:', this.userName);
           return true;
         } else {
-         console.log('❌ Lietotājs NAV autentificēts pēc API');
+         ('❌ Lietotājs NAV autentificēts pēc API');
          this.isLoggedIn = false;
          this.user = null;
          localStorage.removeItem('auth_token');
@@ -475,7 +475,7 @@ export default {
     },
 
     async logout() {
-      console.log('🚪 Mēģinu izrakstīties...');
+      ('🚪 Mēģinu izrakstīties...');
 
       const token = this.authToken;
       
@@ -511,10 +511,10 @@ export default {
       
       try {
         const isbn = this.$route.params.isbn;
-        console.log('📡 Ielādē grāmatu ar ISBN:', isbn);
+        ('📡 Ielādē grāmatu ar ISBN:', isbn);
 
         const token = this.authToken; 
-        console.log('Tokens par grāmatas ielādi:', token ? 'ir' : 'nav');
+        ('Tokens par grāmatas ielādi:', token ? 'ir' : 'nav');
 
         const headers = {
           'Accept': 'application/json',
@@ -535,19 +535,19 @@ export default {
         }
         
         const data = await response.json();
-        console.log('📊 Saņemtie dati:', data);
+        ('📊 Saņemtie dati:', data);
         
         if (data.success && data.data) {
           this.book = data.data;
-          console.log('📖 Grāmata no API:', this.book);
-          console.log('📖 ISBN no API:', this.book.isbn);
-          console.log('📖 ISBN tips:', typeof this.book.isbn);
-          console.log('📖 Grāmatas apraksts:', this.book.apraksts);
-          console.log('📖 isbn lauks:', this.book.isbn); 
-          console.log('📖 Gramatas_ID:', this.book.isbn);
-          console.log('📖 faila_pdf:', this.book.faila_pdf);
-          console.log('📖 in_library:', this.book.in_library);
-          console.log('📖 book_status:', this.book.book_status);
+          ('📖 Grāmata no API:', this.book);
+          ('📖 ISBN no API:', this.book.isbn);
+          ('📖 ISBN tips:', typeof this.book.isbn);
+          ('📖 Grāmatas apraksts:', this.book.apraksts);
+          ('📖 isbn lauks:', this.book.isbn); 
+          ('📖 Gramatas_ID:', this.book.isbn);
+          ('📖 faila_pdf:', this.book.faila_pdf);
+          ('📖 in_library:', this.book.in_library);
+          ('📖 book_status:', this.book.book_status);
         } else {
           throw new Error('Grāmata nav atrasta');
         }
@@ -583,8 +583,8 @@ export default {
         const pdfFileName = pdfPath.split('/').pop() || 'book.pdf';
         const authToken = localStorage.getItem('auth_token');
         
-        console.log('Lejupielādē failu:', pdfPath);
-        console.log('Faila nosaukums:', pdfFileName);
+        ('Lejupielādē failu:', pdfPath);
+        ('Faila nosaukums:', pdfFileName);
 
         const trackResponse = await fetch(`/api/admin/books/${this.book.isbn}/download`, {
         method: 'POST',
@@ -600,7 +600,7 @@ export default {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const trackData = await trackResponse.json();
-        console.log('Download tracked:', trackData);
+        ('Download tracked:', trackData);
 
         if (this.loadStats) {
          await this.loadStats();
@@ -622,12 +622,12 @@ export default {
 
     async addToLibrary() {
       
-      console.log('📤 Mēģinu pievienot grāmatu bibliotēkai...');
+      ('📤 Mēģinu pievienot grāmatu bibliotēkai...');
       
       const token = this.authToken;
-      console.log('Tokiens priekš pievienošanas:', token ? token.substring(0, 20) + '...' : 'nē');
-      console.log('ISBN no grāmatas:', this.book?.isbn); 
-      console.log('ISBN tips:', typeof this.book?.isbn);
+      ('Tokiens priekš pievienošanas:', token ? token.substring(0, 20) + '...' : 'nē');
+      ('ISBN no grāmatas:', this.book?.isbn); 
+      ('ISBN tips:', typeof this.book?.isbn);
       
       if (!token) {
         this.showNotification('add', 'Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.', false);
@@ -648,7 +648,7 @@ export default {
           statuss: 'vel nelasiju'
         };
         
-        console.log('Atsūtu ISBN:', requestBody.isbn);
+        ('Atsūtu ISBN:', requestBody.isbn);
         
         const response = await fetch('/api/user/books/add', {
           method: 'POST',
@@ -662,12 +662,12 @@ export default {
 
         
         const responseText = await response.text();
-        console.log('Atbilde no servera(teksts):', responseText);
+        ('Atbilde no servera(teksts):', responseText);
         
         let data;
         try {
           data = JSON.parse(responseText);
-          console.log('Atbilde no servera(JSON):', data);
+          ('Atbilde no servera(JSON):', data);
         } catch (e) {
           console.error('Kļuda no parsinga:', e);
           this.showNotification('add', 'Servera atbilde nav JSON formātā', false);
@@ -675,7 +675,7 @@ export default {
         }
 
         if (response.status === 401) {
-          console.log('❌ Sesija beigusies, nepieciešama atkārtota autentifikācija');
+          ('❌ Sesija beigusies, nepieciešama atkārtota autentifikācija');
           this.isLoggedIn = false;
           this.user = null;
           localStorage.removeItem('auth_token');
@@ -686,8 +686,8 @@ export default {
         }
 
         if (response.status === 422) {
-          console.log('❌ 422 Unprocessable Entity');
-          console.log('Validacijas kļudas:', data?.errors);
+          ('❌ 422 Unprocessable Entity');
+          ('Validacijas kļudas:', data?.errors);
           
           let errorMessage = 'Validācijas kļūda:\n';
           if (data?.errors) {
@@ -705,7 +705,7 @@ export default {
         }
 
         if (response.status === 500) {
-          console.log('❌ Servera kļūda 500');
+          ('❌ Servera kļūda 500');
           this.showNotification('add', 'Servera kļūda. Lūdzu, mēģiniet vēlāk.', false);
           return;
         }

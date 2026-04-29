@@ -469,7 +469,7 @@ export default {
       
       try {
         const isbn = this.$route.params.isbn;
-        console.log('📡 Ielādē grāmatu ar ISBN:', isbn);
+        ('📡 Ielādē grāmatu ar ISBN:', isbn);
 
         const headers = {
           'Accept': 'application/json',
@@ -490,7 +490,7 @@ export default {
         
         if (data.success && data.data) {
           this.book = data.data;
-          console.log('📖 Grāmata ielādēta:', this.book);
+          ('📖 Grāmata ielādēta:', this.book);
           await this.loadBookStats();
         } else {
           throw new Error('Grāmata nav atrasta');
@@ -517,7 +517,7 @@ export default {
             if (data.data) {
             this.book.views = data.data.views || 0;
             this.book.downloads = data.data.downloads || 0;
-            console.log('📊 Statistika ielādēta:', data.data);
+            ('📊 Statistika ielādēta:', data.data);
             }
         } catch (error) {
             console.error('❌ Kļūda ielādējot statistiku:', error);

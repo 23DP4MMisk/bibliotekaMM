@@ -179,7 +179,7 @@ export default {
   this.errorMessage = '';
   
   try {
-    console.log('Sending registration request...');
+    ('Sending registration request...');
 
     const checkResponse = await fetch('/api/check-user', {
       method: 'POST',
@@ -215,12 +215,12 @@ export default {
       })
     });
 
-    console.log('📨 Atbilde no servera:', response.status);
+    ('📨 Atbilde no servera:', response.status);
     
     const data = await response.json();
-    console.log('📊 Atbildes dati:', data);
+    ('📊 Atbildes dati:', data);
     if (data.success) {
-      console.log('✅ Reģistrācija veiksmīga!');
+      ('✅ Reģistrācija veiksmīga!');
 
           
      
@@ -236,7 +236,7 @@ export default {
      
 
      
-      console.log('🏠 Pāreja uz pieslēgšanās lapu...');
+      ('🏠 Pāreja uz pieslēgšanās lapu...');
       this.$router.push({
         path: '/login',
         query: { registered: 'true' }

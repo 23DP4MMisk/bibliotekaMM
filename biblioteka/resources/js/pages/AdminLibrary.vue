@@ -960,8 +960,8 @@ export default {
  
 
   async mounted() {
-    console.log('📌 AdminLibraryPage mounted');
-    console.log('Auth token:', this.authToken);
+    ('📌 AdminLibraryPage mounted');
+    ('Auth token:', this.authToken);
     await this.debugToken();
     
     await this.checkAuth();
@@ -1008,7 +1008,7 @@ export default {
           }
         });
         const data = await response.json();
-        console.log('🔍 DEBUG token:', data);
+        ('🔍 DEBUG token:', data);
       } catch (error) {
         console.error('Debug token error:', error);
       }
@@ -1022,7 +1022,7 @@ export default {
         }
       });
       const data = await response.json();
-      console.log('🔍 DEBUG token info:', data);
+      ('🔍 DEBUG token info:', data);
       return data;
     } catch (error) {
       console.error('Debug kļūda:', error);
@@ -1064,7 +1064,7 @@ export default {
           this.user = data.lietotajs;
 
           if (this.user.status !== 'aktivs') {
-            console.log('Lietotajs ir bloķēts, izpildam logout');
+            ('Lietotajs ir bloķēts, izpildam logout');
             localStorage.removeItem('auth_token');
             localStorage.removeItem('user');
             this.$router.push('/login?blocked=true');
@@ -1112,12 +1112,12 @@ export default {
         const response = await fetch('/api/genres');
         const data = await response.json();
 
-        console.log('📦 RAW DATA FROM SERVER:', data);
+        ('📦 RAW DATA FROM SERVER:', data);
 
 
         
         if (data.success && data.data) {
-          console.log('📚 First genre from server:', data.data[0]); 
+          ('📚 First genre from server:', data.data[0]); 
           this.genres = data.data.map(genre => ({
             id: genre.Zanra_ID,
             Zanra_ID: genre.Zanra_ID,
@@ -1125,8 +1125,8 @@ export default {
             nodala: genre.Nodala,
             count: genre.gramatu_skaits || 0
           }));
-          console.log('✅ Ielādēti žanri:', this.genres);
-          console.log('✅ First genre nodala:', this.genres[0]?.nodala);
+          ('✅ Ielādēti žanri:', this.genres);
+          ('✅ First genre nodala:', this.genres[0]?.nodala);
         }
       } catch (error) {
         console.error('❌ Kļūda ielādējot žanrus:', error);
@@ -1193,8 +1193,8 @@ export default {
       }
 
       const genreName = this.editingGenre.nosaukums || this.editingGenre.name;
-      console.log('2. New genre name from form:', genreName);
-      console.log('3. Original genre name in DB:', this.editingGenre.originalName || 'unknown');
+      ('2. New genre name from form:', genreName);
+      ('3. Original genre name in DB:', this.editingGenre.originalName || 'unknown');
       if (!genreName || !genreName.trim()) {
         this.showNotification('add', 'Lūdzu, ievadiet žanra nosaukumu!', false);
         return;
@@ -1214,7 +1214,7 @@ export default {
         });
         
         const data = await response.json();
-        console.log('Update genre response:', data);
+        ('Update genre response:', data);
         
         if (data.success) {
           this.showNotification('add', 'Žanrs veiksmīgi atjaunināts!', true);
@@ -1224,8 +1224,8 @@ export default {
           await this.fetchGenres();
 
           const updatedGenre = this.genres.find(g => g.id === genreId);
-          console.log('11. Genre after refresh:', updatedGenre);
-          console.log('12. Name in DB after refresh:', updatedGenre?.name);
+          ('11. Genre after refresh:', updatedGenre);
+          ('12. Name in DB after refresh:', updatedGenre?.name);
           
         } else {
           this.showNotification('add', data.message || 'Kļūda atjauninot žanru', false);
@@ -1237,7 +1237,7 @@ export default {
     },
 
     async deleteGenre(genre) {
-      console.log('deleteGenre called with:', genre);
+      ('deleteGenre called with:', genre);
   
       if (!genre) {
         console.error('deleteGenre: genre is undefined');
@@ -1322,7 +1322,7 @@ export default {
     },
 
    openEditGenreForm(genre) {
-      console.log('Opening edit form for genre:', genre);
+      ('Opening edit form for genre:', genre);
       
       if (!genre) {
         console.error('Invalid genre object');
@@ -1341,8 +1341,8 @@ export default {
       const originalName = genre.nosaukums || genre.name;
       const newName = genre.name || originalName; 
       
-      console.log('Original name from DB:', originalName);
-      console.log('Current name in form:', newName);
+      ('Original name from DB:', originalName);
+      ('Current name in form:', newName);
   
       this.editingGenre = { 
         Zanra_ID: genreId,
@@ -1355,7 +1355,7 @@ export default {
       
    
       
-      console.log('Editing genre prepared:', this.editingGenre);
+      ('Editing genre prepared:', this.editingGenre);
       this.showEditGenreForm = true;
     },
 
@@ -1370,7 +1370,7 @@ export default {
     selectGenre(genreId) {
       this.selectedGenre = genreId;
       this.showZanriMenu = false;
-      console.log('Izvēlēts žanrs ID:', genreId);
+      ('Izvēlēts žanrs ID:', genreId);
     },
     
     async showAllBooks() {
@@ -1415,7 +1415,7 @@ export default {
             downloads: book.downloads || 0
           }));
           
-          console.log(`✅ Ielādētas ${this.allBooks.length} grāmatas`);
+          (`✅ Ielādētas ${this.allBooks.length} grāmatas`);
         }
       } catch (error) {
         console.error('❌ Kļūda:', error);
@@ -1464,9 +1464,9 @@ export default {
 
     
     async loadUsersList() {
-      console.log('Mēģinu ielādēt lietotājus...');
-      console.log('Auth token:', this.authToken);
-      console.log('Lietotājs no this.user:', this.user);
+      ('Mēģinu ielādēt lietotājus...');
+      ('Auth token:', this.authToken);
+      ('Lietotājs no this.user:', this.user);
         
       if (!this.authToken) {
         console.error('Nav auth token');
@@ -1483,7 +1483,7 @@ export default {
           }
         });
 
-      console.log('Response status:', response.status);
+      ('Response status:', response.status);
     
       // Pārbaudām vai atbilde ir JSON
       const contentType = response.headers.get('content-type');
@@ -1494,11 +1494,11 @@ export default {
       }
     
       const data = await response.json();
-      console.log('Saņemtie dati:', data);
+      ('Saņemtie dati:', data);
       
       if (data.success) {
         this.usersList = data.data;
-        console.log('Lietotāji ielādēti:', this.usersList);
+        ('Lietotāji ielādēti:', this.usersList);
       } else {
         console.error('Kļūda ielādējot lietotājus:', data.message);
       }
