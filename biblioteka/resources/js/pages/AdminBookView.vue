@@ -309,7 +309,9 @@
             
             <v-text-field
               v-model="editBookData.faila_pdf"
-              label="PDF fails (ceļš)"
+              label="PDF fails (ID)"
+              placeholder="12345623"
+              hint="Ievadiet faila ID (piemēram, 12345623)"
               outlined
               dense
               class="mb-3"
@@ -386,6 +388,8 @@ export default {
         text: '',
         color: 'success'
       },
+
+      cloudflareBaseUrl: 'https://pub-6f170bacdf6a417ca301be11f05629c4.r2.dev',
     };
   },
   computed: {
@@ -588,7 +592,10 @@ export default {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + this.authToken
           },
-          body: JSON.stringify(this.editBookData)
+          body: JSON.stringify({
+            ...this.editBookData,
+            faila_pdf: this.editBookData.faila_pdf ? `https://pub-6f170bacdf6a417ca301be11f05629c4.r2.dev/${this.editBookData.faila_pdf}` : ''
+          })
         });
         
         const data = await response.json();

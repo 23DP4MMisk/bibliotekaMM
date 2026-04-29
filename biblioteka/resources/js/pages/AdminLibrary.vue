@@ -442,13 +442,14 @@
             
             <v-text-field
               v-model="newBook.faila_pdf"
-              label="PDF fails (ceļš)"
+              label="PDF fails (ID)"
               outlined
               dense
               class="mb-3"
               :error-messages="validationErrors.faila_pdf"
               @input="validationErrors.faila_pdf = []"
-              placeholder="pdf/12345623.pdf"
+              placeholder="12345623"
+              hint="Ievadiet faila ID (piemēram, 12345623)"
             ></v-text-field>
             
             <v-text-field
@@ -866,6 +867,8 @@ export default {
         show: false,
         genre: null
       },
+
+      cloudflareBaseUrl: 'https://pub-6f170bacdf6a417ca301be11f05629c4.r2.dev',
     };
   },
   computed: {
@@ -1583,7 +1586,10 @@ export default {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + this.authToken
           },
-          body: JSON.stringify(this.newBook)
+          body: JSON.stringify({
+            ...this.newBook,
+            faila_pdf: this.newBook.faila_pdf ? `https://pub-6f170bacdf6a417ca301be11f05629c4.r2.dev/${this.newBook.faila_pdf}` : ''
+          })
         });
         
         const data = await response.json();
