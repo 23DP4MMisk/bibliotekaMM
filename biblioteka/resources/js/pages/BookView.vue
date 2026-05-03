@@ -362,7 +362,7 @@ export default {
     const isAuthenticated = await this.checkAuth();
 
     if (!isAuthenticated && localStorage.getItem('user')) {
-      ('⚠️ localStorage ir lietotājs, bet sesija ir beigusies');
+     
       localStorage.removeItem('user');
       this.isLoggedIn = false;
       this.user = null;
@@ -376,14 +376,14 @@ export default {
       this.reviewsLoading = true; 
       try {
         const isbn = this.$route.params.isbn;
-        ('📝 Ielādē atsauksmes grāmatai:', isbn);
+        
         
         const response = await fetch(`/api/books/${isbn}/reviews`);
         const data = await response.json();
         
         if (data.success && data.data) {
           this.reviews = data.data;
-          ('✅ Ielādētas', this.reviews.length, 'atsauksmes');
+         
         } else {
           this.reviews = [];
         }
@@ -416,7 +416,7 @@ export default {
           const user = JSON.parse(savedUser);
           this.isLoggedIn = true;
           this.user = user;
-          ('✅ Lietotājs ielādēts no localStorage:', user.lietotaja_vards);
+         
         } catch (e) {
           console.error('Kļūda ielādējot lietotāju:', e);
         }
@@ -427,10 +427,10 @@ export default {
       if (this.authLoading) return;
       
       this.authLoading = true;
-      ('🔐 Pārbaudu autentifikāciju...');
+      
       
       const token = this.authToken;
-      ('Tokens parbaudei:', token ? token.substring(0, 20) + '...' : 'nē');
+      
       
       if (!token) {
        this.isLoggedIn = false;
@@ -455,10 +455,10 @@ export default {
           this.isLoggedIn = true;
           this.user = data.lietotajs;
           localStorage.setItem('user', JSON.stringify(data.lietotajs));
-          ('✅ Lietotājs autentificēts:', this.userName);
+          
           return true;
         } else {
-         ('❌ Lietotājs NAV autentificēts pēc API');
+        
          this.isLoggedIn = false;
          this.user = null;
          localStorage.removeItem('auth_token');
@@ -475,7 +475,7 @@ export default {
     },
 
     async logout() {
-      ('🚪 Mēģinu izrakstīties...');
+     
 
       const token = this.authToken;
       
@@ -511,10 +511,10 @@ export default {
       
       try {
         const isbn = this.$route.params.isbn;
-        ('📡 Ielādē grāmatu ar ISBN:', isbn);
+        
 
         const token = this.authToken; 
-        ('Tokens par grāmatas ielādi:', token ? 'ir' : 'nav');
+       
 
         const headers = {
           'Accept': 'application/json',
@@ -535,19 +535,11 @@ export default {
         }
         
         const data = await response.json();
-        ('📊 Saņemtie dati:', data);
+       
         
         if (data.success && data.data) {
           this.book = data.data;
-          ('📖 Grāmata no API:', this.book);
-          ('📖 ISBN no API:', this.book.isbn);
-          ('📖 ISBN tips:', typeof this.book.isbn);
-          ('📖 Grāmatas apraksts:', this.book.apraksts);
-          ('📖 isbn lauks:', this.book.isbn); 
-          ('📖 Gramatas_ID:', this.book.isbn);
-          ('📖 faila_pdf:', this.book.faila_pdf);
-          ('📖 in_library:', this.book.in_library);
-          ('📖 book_status:', this.book.book_status);
+          
         } else {
           throw new Error('Grāmata nav atrasta');
         }
@@ -622,12 +614,10 @@ export default {
 
     async addToLibrary() {
       
-      ('📤 Mēģinu pievienot grāmatu bibliotēkai...');
+     
       
       const token = this.authToken;
-      ('Tokiens priekš pievienošanas:', token ? token.substring(0, 20) + '...' : 'nē');
-      ('ISBN no grāmatas:', this.book?.isbn); 
-      ('ISBN tips:', typeof this.book?.isbn);
+      
       
       if (!token) {
         this.showNotification('add', 'Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.', false);
@@ -648,7 +638,7 @@ export default {
           statuss: 'vel nelasiju'
         };
         
-        ('Atsūtu ISBN:', requestBody.isbn);
+        
         
         const response = await fetch('/api/user/books/add', {
           method: 'POST',
@@ -662,12 +652,12 @@ export default {
 
         
         const responseText = await response.text();
-        ('Atbilde no servera(teksts):', responseText);
+       
         
         let data;
         try {
           data = JSON.parse(responseText);
-          ('Atbilde no servera(JSON):', data);
+          
         } catch (e) {
           console.error('Kļuda no parsinga:', e);
           this.showNotification('add', 'Servera atbilde nav JSON formātā', false);
@@ -675,7 +665,7 @@ export default {
         }
 
         if (response.status === 401) {
-          ('❌ Sesija beigusies, nepieciešama atkārtota autentifikācija');
+         
           this.isLoggedIn = false;
           this.user = null;
           localStorage.removeItem('auth_token');
@@ -686,8 +676,7 @@ export default {
         }
 
         if (response.status === 422) {
-          ('❌ 422 Unprocessable Entity');
-          ('Validacijas kļudas:', data?.errors);
+          
           
           let errorMessage = 'Validācijas kļūda:\n';
           if (data?.errors) {
@@ -705,7 +694,7 @@ export default {
         }
 
         if (response.status === 500) {
-          ('❌ Servera kļūda 500');
+          
           this.showNotification('add', 'Servera kļūda. Lūdzu, mēģiniet vēlāk.', false);
           return;
         }

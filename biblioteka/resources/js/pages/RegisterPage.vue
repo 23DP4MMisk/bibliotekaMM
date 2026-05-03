@@ -215,12 +215,12 @@ export default {
       })
     });
 
-    ('📨 Atbilde no servera:', response.status);
+   
     
     const data = await response.json();
-    ('📊 Atbildes dati:', data);
+   
     if (data.success) {
-      ('✅ Reģistrācija veiksmīga!');
+      
 
           
      
@@ -236,7 +236,7 @@ export default {
      
 
      
-      ('🏠 Pāreja uz pieslēgšanās lapu...');
+     
       this.$router.push({
         path: '/login',
         query: { registered: 'true' }

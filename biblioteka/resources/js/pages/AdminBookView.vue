@@ -469,7 +469,7 @@ export default {
       
       try {
         const isbn = this.$route.params.isbn;
-        ('📡 Ielādē grāmatu ar ISBN:', isbn);
+        
 
         const headers = {
           'Accept': 'application/json',
@@ -490,7 +490,7 @@ export default {
         
         if (data.success && data.data) {
           this.book = data.data;
-          ('📖 Grāmata ielādēta:', this.book);
+         
           await this.loadBookStats();
         } else {
           throw new Error('Grāmata nav atrasta');

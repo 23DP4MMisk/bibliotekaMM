@@ -628,9 +628,24 @@
 }
 
 @media (max-width: 600px) {
-  .search-container {
-    display: none;
+  .v-app-bar .v-container {
+    flex-wrap: wrap !important;
   }
+
+  .search-container {
+    order: 3;
+    display: block !important; 
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 10px 0 0 0 !important;
+    flex: 0 0 100% !important;
+  }
+
+  .search-field {
+    width: 100% ;
+  }
+
+  
   
   .login-btn {
     min-width: 100px;
@@ -640,6 +655,18 @@
   
   .library-name {
     font-size: 1.5rem;
+    
+  }
+
+  .library-name-btn {
+    order: 1;
+    flex: 0 0 auto;
+  }
+
+  .user-container {
+    order: 2;
+    margin-left: auto;
+    flex: 0 0 auto;
   }
   
   .category-title {

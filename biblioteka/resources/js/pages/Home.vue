@@ -145,11 +145,7 @@ export default {
     // Ritināšanas apstrādātāja pievienošana
     window.addEventListener('scroll', this.handleScroll);
     
-    ('Attēlu ceļu pārbaude:');
-    ('1. /images/academikbook.gif');
-    ('2. /images/funnybook.gif');
-    ('3. /images/bookshelf.jpg');
-    ('Pilnais URL:', window.location.origin);
+    
     
     // Faila esamības pārbaude
     const images = ['/images/academikbook.gif', '/images/funnybook.gif', '/images/bookshelf.jpg'];

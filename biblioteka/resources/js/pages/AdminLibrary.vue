@@ -960,8 +960,8 @@ export default {
  
 
   async mounted() {
-    ('📌 AdminLibraryPage mounted');
-    ('Auth token:', this.authToken);
+    
+   
     await this.debugToken();
     
     await this.checkAuth();
@@ -1008,7 +1008,7 @@ export default {
           }
         });
         const data = await response.json();
-        ('🔍 DEBUG token:', data);
+        
       } catch (error) {
         console.error('Debug token error:', error);
       }
@@ -1022,7 +1022,7 @@ export default {
         }
       });
       const data = await response.json();
-      ('🔍 DEBUG token info:', data);
+      
       return data;
     } catch (error) {
       console.error('Debug kļūda:', error);
@@ -1112,12 +1112,9 @@ export default {
         const response = await fetch('/api/genres');
         const data = await response.json();
 
-        ('📦 RAW DATA FROM SERVER:', data);
-
-
         
         if (data.success && data.data) {
-          ('📚 First genre from server:', data.data[0]); 
+         
           this.genres = data.data.map(genre => ({
             id: genre.Zanra_ID,
             Zanra_ID: genre.Zanra_ID,
@@ -1125,8 +1122,7 @@ export default {
             nodala: genre.Nodala,
             count: genre.gramatu_skaits || 0
           }));
-          ('✅ Ielādēti žanri:', this.genres);
-          ('✅ First genre nodala:', this.genres[0]?.nodala);
+         
         }
       } catch (error) {
         console.error('❌ Kļūda ielādējot žanrus:', error);
@@ -1193,8 +1189,7 @@ export default {
       }
 
       const genreName = this.editingGenre.nosaukums || this.editingGenre.name;
-      ('2. New genre name from form:', genreName);
-      ('3. Original genre name in DB:', this.editingGenre.originalName || 'unknown');
+      
       if (!genreName || !genreName.trim()) {
         this.showNotification('add', 'Lūdzu, ievadiet žanra nosaukumu!', false);
         return;
@@ -1237,8 +1232,7 @@ export default {
     },
 
     async deleteGenre(genre) {
-      ('deleteGenre called with:', genre);
-  
+    
       if (!genre) {
         console.error('deleteGenre: genre is undefined');
         this.showNotification('add', 'Kļūda: žanrs nav atrasts', false);
@@ -1341,8 +1335,7 @@ export default {
       const originalName = genre.nosaukums || genre.name;
       const newName = genre.name || originalName; 
       
-      ('Original name from DB:', originalName);
-      ('Current name in form:', newName);
+      
   
       this.editingGenre = { 
         Zanra_ID: genreId,
@@ -1355,7 +1348,7 @@ export default {
       
    
       
-      ('Editing genre prepared:', this.editingGenre);
+     
       this.showEditGenreForm = true;
     },
 
@@ -1415,7 +1408,7 @@ export default {
             downloads: book.downloads || 0
           }));
           
-          (`✅ Ielādētas ${this.allBooks.length} grāmatas`);
+         
         }
       } catch (error) {
         console.error('❌ Kļūda:', error);
