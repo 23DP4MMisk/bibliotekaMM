@@ -46,7 +46,14 @@
                   rounded
                   v-bind="props"
                 >
-                  <span class="user-initial">{{ userInitial }}</span>
+                 <v-avatar size="40" color="#003D3A">
+                    <v-img
+                        v-if="user?.foto"
+                        :src="user.foto"
+                        cover
+                    ></v-img>
+                    <span v-else class="user-initial">{{ userInitial }}</span>
+                  </v-avatar>
                 </v-btn>
               </template>
       
@@ -68,6 +75,12 @@
                     <v-icon>mdi-book-multiple</v-icon>
                   </v-list-item-icon>
                   <v-list-item-title>Mana bibliotēka</v-list-item-title>
+                </v-list-item>
+                <v-list-item @click="goToProfile">
+                  <v-list-item-icon>
+                    <v-icon>mdi-account</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-title>Mans profils</v-list-item-title>
                 </v-list-item>
                 <v-divider></v-divider>
                 <v-list-item @click="logout">
@@ -649,7 +662,7 @@ export default {
       const savedUser = localStorage.getItem('user');
       
       if (!token || !savedUser) {
-        return; // Nav autorizēts, turpinām normāli
+        return; 
       }
       
       let isAdmin = false;
@@ -663,7 +676,7 @@ export default {
                   userData.role === 'administrator';
       } catch (e) {
         console.error('Error parsing user data:', e);
-        return; // Ja nevar parsēt, turpinām bez pārbaudes
+        return; // Ja nevar parsēt, turpinā bez pārbaudes
       }
 
       if (isAdmin) {
@@ -689,11 +702,11 @@ export default {
             if (serverIsAdmin) {
              
               
-              // Pārbauda, vai nav īpašs parametrs, kas atļauj palikt (piemēram, piespiedu režīms)
+              // Pārbauda, vai nav īpašs parametrs, kas atļauj palikt 
               const forceStay = this.$route.query.force === 'true';
               
               if (!forceStay) {
-                // Novirza uz administratora lapu
+                // Novirz uz administratora lapu
                 this.$router.replace({ 
                   path: '/admin', 
                   query: { redirect: 'library', message: 'Jūs jau esat pieslēdzies kā administrators' }
@@ -704,14 +717,14 @@ export default {
           }
         } catch (error) {
           console.error('Kļūda pārbaudot administratora statusu:', error);
-          // Kļūdas gadījumā turpinām normāli
+          
         }
       }
     },
 
 
     showNotification(type, bookId, message, isSuccess = true) {
-      // Atjaunojam notifikaciju konkretai  gramatai
+      // Atjaunoja notifikaciju konkretai  gramatai
       this.notifications[type] = {
         show: true,
         message: message,
@@ -719,7 +732,7 @@ export default {
         bookId: bookId
       };
       
-      // Automatiski paslēpt notifikaciju pēc 3 sekundem
+      // Automatiski paslēpa notifikaciju pēc 3 sekundem
       setTimeout(() => {
         if (this.notifications[type]?.bookId === bookId) {
           this.notifications[type].show = false;
@@ -771,7 +784,7 @@ export default {
           
         }
       } catch (error) {
-        console.error('❌ Kļūda ielādējot žanrus:', error);
+        console.error(' Kļūda ielādējot žanrus:', error);
       }
     },
 
@@ -827,7 +840,7 @@ export default {
           this.isLoggedIn = true;
           this.user = data.lietotajs;
           localStorage.setItem('user', JSON.stringify(data.lietotajs));
-          ('✅ Lietotājs autentificēts:', this.userName);
+          ('Lietotājs autentificēts:', this.userName);
           
           await this.loadUserBooks();
          
@@ -850,7 +863,7 @@ export default {
     },
     
     async logout() {
-      ('🚪 Mēģinu izrakstīties...');
+      ('Mēģinu izrakstīties');
 
       const token = this.authToken;
       
@@ -926,7 +939,7 @@ export default {
           this.userBooks = [];
         }
       } catch (error) {
-        console.error('❌ Kļūda ielādējot lietotāja grāmatas:', error);
+        console.error('Kļūda ielādējot lietotāja grāmatas:', error);
         this.userBooks = [];
       } finally {
         this.loading = false;
@@ -1034,19 +1047,19 @@ export default {
       
          this.showNotification('status', userBook.LietotajGramatas_ID, 'Statuss veiksmīgi mainīts!', true);
         } else {
-         ('❌ Kļūda no servera:', data.message);
+         ('Kļūda no servera:', data.message);
          this.showNotification('status', userBook.LietotajGramatas_ID, data.message || 'Neizdevās mainīt statusu', false);
         }
     
       } catch (error) {
-       console.error('❌ Kļūda fetch:', error);
+       console.error('Kļūda fetch:', error);
        this.showNotification('status', userBook.LietotajGramatas_ID, 'Neizdevās mainīt statusu: ' + error.message, false);
       } 
     },
 
     
       async deleteBook(userBook) {
-        // Paradam apstiprinajumu 
+        // Parada apstiprinajumu 
         this.deleteConfirmation = {
           show: true,
           bookId: userBook.LietotajGramatas_ID,
@@ -1054,7 +1067,7 @@ export default {
         };
       },
 
-      // Jauns metods priekš gramatas dzešanai
+      // metods priekš gramatas dzešanai
      async confirmDelete() {
         const bookId = this.deleteConfirmation.bookId;
         const token = this.authToken;
@@ -1170,7 +1183,7 @@ export default {
         }
         
       } catch (error) {
-        console.error('❌ Kļūda ielādējot grāmatas:', error.message);
+        console.error(' Kļūda ielādējot grāmatas:', error.message);
         this.error = true;
         this.errorMessage = this.getErrorMessage(error);
       } finally {
@@ -1274,7 +1287,9 @@ export default {
     },
     
    
-    
+    goToProfile() {
+      this.$router.push('/profile');
+    },
    
     
     goToMyLibrary() {

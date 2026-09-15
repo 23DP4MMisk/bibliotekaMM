@@ -99,7 +99,7 @@ class NodalaController extends Controller
         }
     }
 
-     public function search($query)
+    public function search($query)
     {
         try {
             $gramatas = Gramata::where('nosaukums', 'like', '%' . $query . '%')
@@ -136,7 +136,7 @@ class NodalaController extends Controller
         }
     }
 
-     public function allGramatas()
+    public function allGramatas()
     {
         return $this->allBooks();
     }

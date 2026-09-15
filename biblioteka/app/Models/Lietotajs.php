@@ -22,7 +22,11 @@ class Lietotajs extends Authenticatable implements JWTSubject
         'parole',
         'loma',
         'registresanas_datums',
-        'status'
+        'status',
+        'foto',
+        'bio',
+        'pilseta',
+        'dzim_datums'
     ];
 
     protected $hidden = [
@@ -31,6 +35,7 @@ class Lietotajs extends Authenticatable implements JWTSubject
 
     protected $casts = [
         'registresanas_datums' => 'date',
+        'dzim_datums' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];

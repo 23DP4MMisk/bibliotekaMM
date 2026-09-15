@@ -35,6 +35,14 @@
                 rounded
                 v-bind="props"
               >
+              <v-avatar size="32" color="#003D3A" class="mr-2">
+                <v-img
+                  v-if="user?.foto"
+                  :src="user.foto"
+                  cover
+                ></v-img>
+                <span v-else class="admin-avatar-text">{{ userInitial }}</span>
+              </v-avatar>
                 <span class="admin-text">ADMINS</span>
                 <v-icon right color="white">mdi-chevron-down</v-icon>
               </v-btn>
@@ -59,6 +67,13 @@
                   <v-icon>mdi-account-group</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Lietotāju saraksts</v-list-item-title>
+              </v-list-item>
+
+              <v-list-item @click="goToProfile">
+                <v-list-item-icon>
+                  <v-icon>mdi-account</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Mans profils</v-list-item-title>
               </v-list-item>
               
               <v-list-item @click="showStatistics = true">
@@ -974,6 +989,9 @@ export default {
 
   methods: {
 
+    goToProfile() {
+      this.$router.push('/profile');
+    },
    
     async loadStats() {
       try {
@@ -1125,7 +1143,7 @@ export default {
          
         }
       } catch (error) {
-        console.error('❌ Kļūda ielādējot žanrus:', error);
+        console.error(' Kļūda ielādējot žanrus:', error);
       }
     },
 
@@ -1177,14 +1195,14 @@ export default {
     async updateGenre() {
 
       if (!this.editingGenre) {
-        this.showNotification('add', 'Ошибка: жанр не выбран', false);
+        this.showNotification('add', 'Kļūda: žanrs nav atrasts', false);
         return;
       }
 
       const genreId = this.editingGenre.Zanra_ID || this.editingGenre.id;
       if (!genreId) {
         console.error('updateGenre: genre ID is undefined', this.editingGenre);
-        this.showNotification('add', 'Ошибка: ID жанра не найден', false);
+        this.showNotification('add', 'Kļūda: žanra ID nav atrasts', false);
         return;
       }
 
@@ -1411,7 +1429,7 @@ export default {
          
         }
       } catch (error) {
-        console.error('❌ Kļūda:', error);
+        console.error('Kļūda:', error);
         this.error = true;
         this.errorMessage = 'Neizdevās ielādēt grāmatas';
       } finally {
@@ -1478,7 +1496,7 @@ export default {
 
       ('Response status:', response.status);
     
-      // Pārbaudām vai atbilde ir JSON
+      // Pārbaudā vai atbilde ir JSON
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
@@ -1549,7 +1567,7 @@ export default {
           this.deleteBookConfirmation.show = false;
         } else if (response.status === 500 || response.status === 422) {
           
-          console.error('❌ Server error on delete:', data);
+          console.error('Server error on delete:', data);
           
           let errorMsg = data.message || 'Nezināma kļūda';
           if (errorMsg.includes('Kļūda:')) {
@@ -1610,7 +1628,7 @@ export default {
           this.handleValidationErrors(data.errors);
           this.showNotification('add', 'Lūdzu, izlabojiet atzīmētās kļūdas', false);
           
-          console.error('❌ Validation errors:', data.errors || data);
+          console.error('Validation errors:', data.errors || data);
           
           let errorText = 'Validācijas kļūda: ';
           if (data.errors) {
@@ -1637,7 +1655,7 @@ export default {
 
 
     handleValidationErrors(errors) {
-      // Notīrīt vecās kļūdas
+      // Notīra vecās kļūdas
       this.clearValidationErrors();
 
       const fieldMapping = {

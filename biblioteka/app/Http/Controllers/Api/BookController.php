@@ -14,7 +14,11 @@ use App\Models\Parskata;
 class BookController extends Controller
 {
 
-
+    /** 
+     * Graāmatas lejupielādes skaita palielināšana
+     * Kas dara: Palielina lejupielādes skaitu un ieraksta lejupielade datu baze
+     * Kad izmantojas: Kad lietotājs lejupielādē grāmatu
+     */
   
     public function incrementDownload(Request $request,$isbn) {
             $book = Gramata::where('ISBN', $isbn)->first();
@@ -26,7 +30,7 @@ class BookController extends Controller
         $user = $this->getUserFromToken($request);
         $userId = $user ? $user->kodsID : null;
 
-        \Log::info('📥 Download tracked', [
+        \Log::info(' Download tracked', [
             'isbn' => $isbn,
             'user_id' => $userId,
             'date' => now()->toDateString()
@@ -51,7 +55,11 @@ class BookController extends Controller
         }
     }
     
-
+    /** 
+     * Iegūst žanru sarakstu
+     * Kas dara: Atgriež visus žanrus no datu bāzes
+     * Kad izmantojas: Filtracijas lapuse un gramatu pievienošanas forma
+     */
     public function genres()
     {
         try {
@@ -115,7 +123,12 @@ class BookController extends Controller
             ], 500);
         }
     }
-
+    
+    /**
+     * Meklē grāmatas pēc nosaukuma, autora vai ISBN
+     * Kas dara: Atgriež grāmatas, kas atbilst meklēšanas vaicājumam
+     * Kad izmantojas: Meklēšanas laukuma
+     */
     public function search($query)
     {
         try {
@@ -173,7 +186,7 @@ class BookController extends Controller
 
             $user = $this->getUserFromToken($request);
 
-            \Log::info('=== BOOK SHOW DEBUG ===');
+            \Log::info('BOOK SHOW DEBUG');
             \Log::info('ISBN: ' . $isbn);
             \Log::info('User from token: ' . ($user ? 'YES (ID: ' . $user->kodsID . ')' : 'NO'));
 
@@ -249,11 +262,11 @@ class BookController extends Controller
         }
     }
 
-      // GET /api/homepage-books — gramatas galvenai lapai
+    // GET /api/homepage-books — gramatas galvenai lapai
     public function homepage()
     {
         try {
-            // Piemeram 6 pedejas gramatas
+           
             $books = Gramata::with('nodala')
                 ->orderBy('created_at', 'desc')
                 ->limit(6)
@@ -285,6 +298,12 @@ class BookController extends Controller
         }
     }
 
+    /**
+     * Iegūst lietotāju no Bearer token
+     * Kas dara: Atgriež lietotāju, ja token ir derīgs
+     * Kad izmantojas: Kad nepieciešams pārbaudīt lietotāja autentifikāciju
+     * Tokena formats: 'ID_laiks'
+    */
     private function getUserFromToken($request)
     {
         $authHeader = $request->header('Authorization');

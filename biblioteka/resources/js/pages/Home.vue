@@ -17,7 +17,7 @@
     </v-app-bar>
 
     <v-main>
-      <!-- Sekcija 1: Hero -->
+      
       <section id="hero" class="hero-section">
         
         <div class="hero-top">
@@ -42,12 +42,12 @@
         </div>
       </section>
 
-      <!-- Sekcija 2: Nodaļas -->
+      
       <section id="nodalas" class="nodala-section">
         <v-container>
           <h2 class="section-title mb-12 text-center">Nodaļas MyLibrary</h2>
           <div class="d-flex justify-center flex-wrap" style="gap: 40px;">
-            <!-- Karte 1 -->
+            
             <v-card class="category-card" width="400">
               <div class="gif-container">
                 <div 
@@ -68,7 +68,7 @@
               </v-card-text>
             </v-card>
 
-            <!-- Karte 2 -->
+           
             <v-card class="category-card" width="400">
               <div class="gif-container">
                 <div 
@@ -92,7 +92,7 @@
         </v-container>
       </section>
 
-      <!-- Sekcija 3: Par biblioteku -->
+      
       <section id="about" class="about-section">
         <v-container>
           <h2 class="section-title mb-8 text-center">Par biblioteku</h2>
@@ -125,13 +125,13 @@ export default {
   },
   methods: {
     goToLibrary() {
-      // novirzīt uz biblioteku lapu
+     
       this.$router.push('/library');
     },
     scrollToSection(sectionId) {
       const element = document.getElementById(sectionId);
       if (element) {
-        // Pievienojam atstarpi uz fiksēto navigāciju
+        // Pievienoja atstarpi uz fiksēto navigāciju
         const yOffset = -80;
         const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
         window.scrollTo({ top: y, behavior: 'smooth' });
@@ -147,7 +147,7 @@ export default {
     
     
     
-    // Faila esamības pārbaude
+    // Faila esamība pārbaude
     const images = ['/images/academikbook.gif', '/images/funnybook.gif', '/images/bookshelf.jpg'];
     images.forEach(src => {
       const img = new Image();
@@ -157,7 +157,7 @@ export default {
     });
   },
   beforeUnmount() {
-    // Apstrādātāja noņemšana, kad komponents ir iznīcināts
+    // noņemšana, kad komponents ir iznīcināts
     window.removeEventListener('scroll', this.handleScroll);
   }
 }

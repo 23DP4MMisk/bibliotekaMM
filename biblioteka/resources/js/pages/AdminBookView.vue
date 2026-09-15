@@ -17,6 +17,14 @@
                 rounded
                 v-bind="props"
               >
+              <v-avatar size="32" color="#003D3A" class="mr-2">
+                <v-img
+                  v-if="user?.foto"
+                  :src="user.foto"
+                  cover
+                ></v-img>
+                <span v-else class="admin-avatar-text">{{ userInitial }}</span>
+              </v-avatar>
                 <span class="admin-text">ADMINS</span>
                 <v-icon right color="white">mdi-chevron-down</v-icon>
               </v-btn>
@@ -41,6 +49,13 @@
                   <v-icon>mdi-view-dashboard</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Admin panelis</v-list-item-title>
+              </v-list-item>
+
+              <v-list-item @click="goToProfile">
+                <v-list-item-icon>
+                  <v-icon>mdi-account</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Mans profils</v-list-item-title>
               </v-list-item>
               
               <v-divider></v-divider>
@@ -369,26 +384,32 @@ export default {
   name: 'AdminBookView',
   data() {
     return {
+      // Gramatas dati
       book: null,
       loading: true,
       error: false,
       errorMessage: '',
       
+      // Lietotaja un žanri
       user: null,
       genres: [],
-
+      
+      // Atsauksmes
       reviews: [],
       reviewsLoading: true,
       
+      // Rediģēšana  
       showEditForm: false,
       editBookData: {},
-
+      
+      // Notifikācijas
       snackbar: {
         show: false,
         text: '',
         color: 'success'
       },
-
+      
+      // Cloudflare R2 bāzes URl
       cloudflareBaseUrl: 'https://pub-6f170bacdf6a417ca301be11f05629c4.r2.dev',
     };
   },
@@ -396,18 +417,22 @@ export default {
     userName() {
       return this.user?.lietotaja_vards || 'Admins';
     },
+    
     userEmail() {
       return this.user?.epasts || '';
     },
+    
     authToken() {
       return localStorage.getItem('auth_token');
     },
+    
     nodalaOptions() {
       return [
         { Nodala_ID: 1, tips: 'Akadēmiskā' },
         { Nodala_ID: 2, tips: 'Atpūtas' }
       ];
     },
+    
     genreOptions() {
       return this.genres.map(g => ({
         Zanra_ID: g.id,
@@ -415,20 +440,31 @@ export default {
       }));
     }
   },
+  
   async mounted() {
-    await this.checkAuth();
-    await this.fetchGenres();
+    await this.checkAuth(); // avtorizacijas parbauudišana
+    await this.fetchGenres(); // žanru ieladešana 
     await this.loadBookDetails();
     await this.loadBookReviews();
   },
+  
   methods: {
     async checkAuth() {
-      const token = this.authToken;
+      // Pārbauda, vai lietotājs ir autentificēts un vai viņam ir admina loma
+
+      const token = this.authToken; // tokenu ņemšana no localStorage
+      
+      // tokenu pārbaude, ja nav, tad pāradresē uz login
       if (!token) {
         this.$router.push('/login');
         return;
       }
+      
       try {
+        // Parbauda avtorizaciju
+        // 1. Nosūta pieprasījumu uz serveri ar tokenu
+        // 2. Parbauda atbildi
+        // 3. Ja lietotājs ir autentificēts un ir admins, tad turpinam
         const response = await fetch('/api/check-auth', {
           headers: { 'Authorization': 'Bearer ' + token }
         });
@@ -449,6 +485,10 @@ export default {
 
     async fetchGenres() {
       try {
+        // Lejupielade žanru sarakstu 
+        // 1. Pieprasijums uz Api
+        // 2. Saņema sarakstu
+        // 3. Pārveidoja datus uz vajadzīgo formātu
         const response = await fetch('/api/genres');
         const data = await response.json();
         if (data.success && data.data) {
@@ -468,6 +508,8 @@ export default {
       this.error = false;
       
       try {
+        // Lejupieladeja gramata datus no servera 
+
         const isbn = this.$route.params.isbn;
         
 
@@ -497,7 +539,7 @@ export default {
         }
         
       } catch (error) {
-        console.error('❌ Kļūda:', error.message);
+        console.error(' Kļūda:', error.message);
         this.error = true;
         this.errorMessage = 'Neizdevās ielādēt grāmatas informāciju';
       } finally {
@@ -507,6 +549,7 @@ export default {
 
     async loadBookStats() {
         try {
+          // Lejupieladeja gramatas statistiku
             const response = await fetch(`/api/admin/stats/books/${this.$route.params.isbn}`, {
             headers: {
                 'Authorization': 'Bearer ' + this.authToken
@@ -517,16 +560,17 @@ export default {
             if (data.data) {
             this.book.views = data.data.views || 0;
             this.book.downloads = data.data.downloads || 0;
-            ('📊 Statistika ielādēta:', data.data);
+            (' Statistika ielādēta:', data.data);
             }
         } catch (error) {
-            console.error('❌ Kļūda ielādējot statistiku:', error);
+            console.error(' Kļūda ielādējot statistiku:', error);
         }
     },
 
     async loadBookReviews() {
       this.reviewsLoading = true; 
       try {
+        // Lejupielade atsauksmes 
         const isbn = this.$route.params.isbn;
         const response = await fetch(`/api/books/${isbn}/reviews`);
         const data = await response.json();
@@ -537,7 +581,7 @@ export default {
           this.reviews = [];
         }
       } catch (error) {
-        console.error('❌ Kļūda ielādējot atsauksmes:', error);
+        console.error(' Kļūda ielādējot atsauksmes:', error);
         this.reviews = [];
       } finally {
         this.reviewsLoading = false;
@@ -648,6 +692,10 @@ export default {
 
     goToAdminLibrary() {
       this.$router.push('/admin');
+    },
+
+    goToProfile() {
+      this.$router.push('/profile');
     }
   }
 }

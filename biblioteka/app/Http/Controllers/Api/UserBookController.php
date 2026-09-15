@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Log;
 
 class UserBookController extends Controller
 {
+    /**
+     * Iegūst lietotāju no Bearer token
+     * Kas dara: Atgriež lietotāju, ja token ir derīgs
+     * Kad izmantojas: Kad nepieciešams pārbaudīt lietotāja autentifikāciju
+     * Tokena formats: 'ID_laiks'
+    */
     private function getUserFromToken($request)
     {
         $token = $request->header('Authorization');
@@ -33,10 +39,15 @@ class UserBookController extends Controller
         return null;
     }
     
+    /**
+     * Pievieno grāmatu lietotāja bibliotēkai
+     * Kas dara: Pievieno grāmatu lietotāja bibliotēkai ar statusu
+     * Kad izmantojas: Kad lietotājs vēlas pievienot grāmatu savai bibliotēkai
+    */
     public function add(Request $request)
     {
 
-        Log::info('=== ADD BOOK TO LIBRARY ===');
+        Log::info('ADD BOOK TO LIBRARY');
         Log::info('Request data:', $request->all());
         Log::info('Headers:', $request->headers->all());
         
@@ -97,6 +108,11 @@ class UserBookController extends Controller
         }
     }
     
+    /**
+     * Iegūst lietotāja grāmatas
+     * Kas dara: Atgriež visas gramatas, kuras lietotajs pievienoja sava biblioteka
+     * Kad izmanto: Timekļa lapa 'Mana biblioteka'
+     */
     public function index(Request $request)
     {
         try {
@@ -134,10 +150,15 @@ class UserBookController extends Controller
             ], 500);
         }
     }
-
+    
+    /**
+     * Atjaunina lietotāja grāmatas statusu
+     * Kas dara: Atjaunina statusu grāmatai lietotāja bibliotēkā
+     * Kad izmanto: Kad lietotājs maina statusu grāmatai (lasu, izlasiju, vel nelasiju)
+     */
     public function updateStatus(Request $request)
     {
-        Log::info('=== UPDATE BOOK STATUS ===');
+        Log::info('UPDATE BOOK STATUS');
         Log::info('Request data:', $request->all());
         
         try {
@@ -193,11 +214,16 @@ class UserBookController extends Controller
             ], 500);
         }
     }
+    
 
+    /**
+     * Dzēš grāmatu no lietotāja bibliotēkas
+     * Kas dara: Dzēš grāmatu no lietotāja bibliotēkas pēc ID
+     * Kad izmanto: Kad lietotājs vēlas dzēst grāmatu
+     */
     public function destroy($id, Request $request)
    {
-    Log::info('=== DELETE BOOK FROM LIBRARY ===');
-    Log::info('Book ID to delete: ' . $id);
+    
     
     try {
         $user = $this->getUserFromToken($request);

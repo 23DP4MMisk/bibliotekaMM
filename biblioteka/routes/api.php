@@ -170,7 +170,7 @@ Route::get('/debug-user-from-token', function(Request $request) {
     
     $token = str_replace('Bearer ', '', $authHeader);
     
-    // Parsējam tokenu (pieņemot, ka formāts ir "kodsID_timestamp")
+    // Parsēja tokenu (pieņemot, ka formāts ir "kodsID_timestamp")
     $tokenParts = explode('_', $token);
     $userId = $tokenParts[0] ?? null;
     
@@ -221,3 +221,19 @@ Route::get('/debug-token', function(Request $request) {
     
     return response()->json($result);
 });
+
+
+    
+    Route::get('/profile', [AuthController::class, 'getProfile']);
+
+   
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
+
+    
+    Route::post('/profile/avatar', [AuthController::class, 'uploadAvatar']);
+
+    
+    Route::post('/profile/change-password', [AuthController::class, 'changePassword']);
+
+    
+    Route::delete('/profile', [AuthController::class, 'deleteAccount']);

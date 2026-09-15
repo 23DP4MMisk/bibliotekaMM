@@ -7,6 +7,7 @@ import BookView from '../pages/BookView.vue';
 import RewievPage from '../pages/RewievPage.vue';
 import AdminLibrary from '../pages/AdminLibrary.vue';
 import AdminBookView from  '../pages/AdminBookView.vue';
+import ProfilePage from '../pages/ProfilePage.vue';
 
 
 const routes = [
@@ -49,6 +50,12 @@ const routes = [
         path: '/admin/book/:isbn',
         name: 'AdminBookView',
         component: AdminBookView
+    },
+    {
+        path: '/profile',
+        name: 'ProfilePage',
+        component: ProfilePage,
+        meta: { requiresAuth: true }
     }
 
 ];

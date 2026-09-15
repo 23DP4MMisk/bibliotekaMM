@@ -12,7 +12,13 @@ use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
-    
+    /** Parbauda administratora tiesibas 
+     * Kas dara: Parbauda, vai lietotajs ir admins
+     * Kad izmantojas: Pirms katra admina darbibas
+     * 
+     * @param Request $request
+     * @return bool true - ja ir admins, false - ja nav 
+     */
     private function checkAdmin($request)
     {
         $user = $this->userFromToken($request);
@@ -26,6 +32,11 @@ class AdminController extends Controller
         return true;
     }
 
+    /** Iegūst lietotaja no tokena
+     * Kas dara: Ņem lietotaja ID no tokena un atrod viņu datu bazē
+     * Kad izmantojas: Visos metodus, kur nepieciešams lietotajs
+     * Tokena forma: 'ID_laiks'(piemeram, '15_20260301')
+     */
     private function userFromToken(Request $request)
     {
         $authHeader = $request->header('Authorization');
@@ -43,8 +54,17 @@ class AdminController extends Controller
         return Lietotajs::where('kodsID', $userId)->first();
     }
 
+    /**  Admina statistika
+     * Kas dara: Sāvac sistemu statistikas kopumu 
+     * Kad izmantojas: Admin paneli
+     * Kas atgriež:
+     * totalViews - kopejas skatijuma skaits
+     * totalDowloads - kopejas lejupielades skaits
+     * totalbooks - kopejas gramatas skaits
+     * averageViews - videjais skatijuma skaits uz gramatiem
+     */
     public function getStats(Request $request)
-{
+ {
     if (!$this->checkAdmin($request)) {
         return response()->json(['success' => false, 'message' => 'Piekļuve liegta'], 403);
     }
@@ -63,9 +83,14 @@ class AdminController extends Controller
             'averageViews'   => $averageViews,
         ]
     ]);
-}
+ }
 
-   
+    /** 
+     * Iegūst visus lietotājus
+     * Kas dara: Atgriež visus lietotājus, izņemot pašreizējo adminu
+     * Kad izmantojas: Admin paneli, lietotāju pārvaldība
+     * Kas atgriež: ID, lietotaja_vards, epasts, loma, status
+    */
     public function getUsers(Request $request)
     {
         
@@ -151,8 +176,10 @@ class AdminController extends Controller
         }
     }
     
-
-    
+    /** 
+      * blokē vai aktivizē lietotāju
+      * Kas dara: Maina lietotāja statusu uz 'aktivs' vai 'blokets'
+    */
     public function updateUserStatus(Request $request, $id)
     {
         if (!$this->checkAdmin($request)) {
@@ -199,7 +226,11 @@ class AdminController extends Controller
         }
     }
 
-   
+    /** 
+     * Pievieno jaunu grāmatu
+     * Kas dara: Pievieno jaunu grāmatu datu bāzē
+     * Kad izmantojas: Admin paneli, gramatu pievienošanas forma
+    */
     public function storeBook(Request $request)
     {
         if (!$this->checkAdmin($request)) {
@@ -241,7 +272,11 @@ class AdminController extends Controller
         }
     }
 
-    
+    /** 
+     * Atjaunina grāmatas informāciju
+     * Kas dara: Atjaunina grāmatas informāciju datu bāz
+     * Kad izmantojas: Admin paneli, gramatu rediģēšanas forma
+     */
     public function updateBook(Request $request, $isbn)
     {
         if (!$this->checkAdmin($request)) {
@@ -294,7 +329,12 @@ class AdminController extends Controller
         }
     }
 
-  
+
+    /**
+     * Dzēš grāmatu pēc ISBN
+     * Kas dara: Dzēš grāmatu no datu bāzes un atjaunina žanra grāmatu skaitu
+     * Kad izmantojas: Admin paneli, gramatu dzēšanas funkcija
+    */
     public function deleteBook(Request $request, $isbn)
     {
         if (!$this->checkAdmin($request)) {
@@ -325,7 +365,11 @@ class AdminController extends Controller
         }
     }
 
-   
+   /** 
+    * Pievieno jaunu žanru
+    * Kas dara: Pievieno jaunu žanru datu bāzē
+    * Kad izmantojas: Admin paneli, žanru pievienošanas forma
+   */
     public function storeGenre(Request $request)
     {
         if (!$this->checkAdmin($request)) {
@@ -361,7 +405,11 @@ class AdminController extends Controller
         }
     }
 
-   
+   /** 
+    * Gramatu redigešanas funkcija
+    * Kas dara: Atjaunina žanra informāciju datu bāzē
+    * Kad izmantojas: Admin paneli, žanru rediģēšanas forma
+    */
     public function updateGenre(Request $request, $id)
     {
 
@@ -434,7 +482,11 @@ class AdminController extends Controller
         }
     }
 
-    
+    /**
+     * Dzēš žanru pēc ID
+     * Kas dara: Dzēš žanru no datu bāzes
+     * Kad izmantojas: Admin paneli, žanru dzēšanas funkcija
+     */
     public function deleteGenre(Request $request, $id)
     {
         if (!$this->checkAdmin($request)) {
@@ -447,16 +499,11 @@ class AdminController extends Controller
             return response()->json(['success' => false, 'message' => 'Žanrs nav atrasts'], 404);
         }
 
-        $booksCount = Gramata::where('Zanra_ID', $id)->count();
-        
-        if ($booksCount > 0) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Nevar dzēst žanru, kam piesaistītas grāmatas'
-            ], 409);
-        }
+      
 
         try {
+            Gramata::where('Zanra_ID', $id)->update(['Zanra_ID' => null]);
+
             $genre->delete();
             
             return response()->json([
@@ -471,7 +518,11 @@ class AdminController extends Controller
         }
     }
 
-   
+    /** 
+     * Iegūst grāmatas statistiku pēc ISBN
+     * Kas dara: Skaita grāmatas skatījumus un lejupielādes
+     * Kad izmantojas: Admin paneli, grāmatu statistikas funkcija
+    */
     public function bookStats(Request $request, $isbn)
     {
         if (!$this->checkAdmin($request)) {
@@ -507,8 +558,11 @@ class AdminController extends Controller
        
     }
 
-   
-    public function userStats(Request $request)
+    /**
+     * Iegūst lietotāju statistiku
+     * Kas dara: Skaita kopējo lietotāju skaitu, aktīvos, bloķētos, adminus, reģistrētos klientus un viesus
+    */
+   public function userStats(Request $request)
     {
         if (!$this->checkAdmin($request)) {
             return response()->json(['success' => false, 'message' => 'Piekļuve liegta'], 403);
@@ -530,7 +584,11 @@ class AdminController extends Controller
         ]);
     }
 
-   
+   /**
+    * Atjaunina žanra grāmatu skaitu
+    * Kas dara: Skaita grāmatas pēc žanra un atjaunina gramatu_skaits lauku
+    * Kad izmantojas: Pēc grāmatu pievienošanas, dzēšanas vai rediģēšanas
+    */
     private function updateGenreBookCount($genreId)
     {
         if (!$genreId) return;
@@ -538,6 +596,11 @@ class AdminController extends Controller
         Zanrs::where('Zanra_ID', $genreId)->update(['gramatu_skaits' => $count]);
     }
 
+    /** 
+     * Ieraksta lejupielādi datu bāzē
+     * Kas dara: Ieraksta lejupielādi tabulā Lejupielade ar grāmatas ISBN un lietotāja ID
+     * Kad izmantojas: Kad lietotājs lejupielādē grāmatu
+    */
     public function trackDownload(Request $request, $isbn)
     {
         try {

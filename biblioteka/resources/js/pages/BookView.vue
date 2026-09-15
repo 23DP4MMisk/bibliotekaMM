@@ -17,7 +17,15 @@
                 rounded
                 v-bind="props"
               >
-                <span class="user-initial">{{ userInitial }}</span>
+              <v-avatar size="40" color="#003D3A">
+                <v-img
+                  v-if="user?.foto"
+                  :src="user.foto"
+                  cover
+                ></v-img>
+                <span v-else class="user-initial">{{ userInitial }}</span>
+              </v-avatar>
+
               </v-btn>
             </template>
             <v-list>
@@ -37,6 +45,12 @@
                   <v-icon>mdi-book-multiple</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Mana bibliotēka</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="goToProfile">
+                <v-list-item-icon>
+                  <v-icon>mdi-account</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Mans profils</v-list-item-title>
               </v-list-item>
               <v-divider></v-divider>
               <v-list-item @click="logout">
@@ -235,39 +249,20 @@
                   </div>
 
                  <div v-else-if="reviews.length > 0" class="reviews-list">
-                    <div
+                    <CommentItem
                       v-for="review in reviews"
                       :key="review.Atsauksmes_ID"
+                      :comment="review"
+                      :level="0"
+                      :reply-form="replyForm"
+                      :submitting-reply="submittingReply"
+                      @reply="openReplyForm"
+                      @submit-reply="submitReply"
+                      @cancel-reply="replyForm = null"
                       class="review-item"
-                    >
-                      <div class="review-header">
-                        <div class="reviewer-info">
-                          <v-avatar color="#003D3A" size="40" class="mr-3">
-                            <span class="reviewer-initial">{{ getUserInitial(review.lietotaja_vards) }}</span>
-                          </v-avatar>
-                          <div>
-                            <div class="reviewer-name">{{ review.lietotaja_vards }}</div>
-                            <div class="review-date">{{ formatDate(review.created_at) }}</div>
-                          </div>
-                        </div>
-                        <div class="review-rating">
-                          <v-icon
-                            v-for="star in 5"
-                            :key="star"
-                            :color="star <= review.vertejums ? '#FFD700' : '#C0C0C0'"
-                            size="18"
-                          >
-                            mdi-star
-                          </v-icon>
-                          <span class="rating-value">({{ review.vertejums }}/5)</span>
-                        </div>
-                      </div>
-                      <p class="review-text">{{ review.komentārs }}</p>
-                    </div>
-                  </div>
-
-
-                
+                    />
+                     
+                </div>                
                 <div v-else  class="reviews-card">
                   <div class="reviews-icon">
                     <v-icon size="48" color="#003D3A">mdi-chat-outline</v-icon>
@@ -295,8 +290,11 @@
 
 <script>
 import '../../css/book-view.css';
+import CommentItem from '../components/CommentItem.vue';
 export default {
-  
+  components: {
+    CommentItem
+  },
   name: 'BookView',
   data() {
     return {
@@ -318,6 +316,9 @@ export default {
 
       reviews: [],
       reviewsLoading: true,
+
+      replyForm: null,                      
+      submittingReply: false, 
     };
   },
   computed: {
@@ -367,6 +368,11 @@ export default {
       this.isLoggedIn = false;
       this.user = null;
     }
+
+   
+
+   
+
     await this.loadBookDetails();
     await this.loadBookReviews();
   },
@@ -388,7 +394,7 @@ export default {
           this.reviews = [];
         }
       } catch (error) {
-        console.error('❌ Kļūda ielādējot atsauksmes:', error);
+        console.error('Kļūda ielādējot atsauksmes:', error);
         this.reviews = [];
       }finally {
        this.reviewsLoading = false;
@@ -501,6 +507,8 @@ export default {
          this.$router.push('/library');
         }
     },
+
+   
         
         
       
@@ -545,7 +553,7 @@ export default {
         }
         
       } catch (error) {
-        console.error('❌ Kļūda:', error.message);
+        console.error('Kļūda:', error.message);
         this.error = true;
         this.errorMessage = 'Neizdevās ielādēt grāmatas informāciju';
       } finally {
@@ -705,17 +713,17 @@ export default {
           this.book.in_library = true;
           this.book.book_status = 'vel nelasiju';
             
-          this.showNotification('add', '✅ Grāmata pievienota jūsu bibliotēkai!', true);
+          this.showNotification('add', 'Grāmata pievienota jūsu bibliotēkai!', true);
           
           
        
 
         } else {
-          this.showNotification('add', '❌ ' + (data?.message || 'Kļūda pievienojot grāmatu'), false);
+          this.showNotification('add', 'Kļūda pievienojot grāmatu: ' + (data?.message || 'Nezināma kļūda'), false);
         }
         
       } catch (error) {
-        console.error('❌ Kļūda:', error);
+        console.error(' Kļūda:', error);
         this.showNotification('add', 'Neizdevās pievienot grāmatu: ' + error.message, false);
       } finally {
         this.addingToLibrary = false;
@@ -758,6 +766,56 @@ export default {
       };
       return types[status] || 'info';
     },
+
+    openReplyForm(reviewId) {
+      if (!this.isLoggedIn) {
+        this.goToLogin();
+        return;
+      }
+      this.replyForm = reviewId;
+      this.replyText = '';
+    },
+
+    async submitReply(parentId, text) {
+        if (!text || text.trim() === '') {
+            this.showNotification('add', 'Lūdzu, uzrakstiet atbildi!', false);
+            return;
+        }
+
+        this.submittingReply = true;
+
+        try {
+            const response = await fetch('/api/reviews', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': 'Bearer ' + this.authToken
+                },
+                body: JSON.stringify({
+                    gramatas_id: this.book.isbn,
+                    vertejums: null,
+                    komentars:  text,  
+                    vecakais_komentars: parentId
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.showNotification('add', 'Atbilde pievienota!', true);
+                this.replyForm = null;
+                await this.loadBookReviews();
+            } else {
+                this.showNotification('add', data.message || 'Kļūda pievienojot atbildi', false);
+            }
+        } catch (error) {
+            console.error('Error submitting reply:', error);
+            this.showNotification('add', 'Kļūda savienojumā ar serveri', false);
+        } finally {
+            this.submittingReply = false;
+        }
+    },
   
    
     
@@ -793,15 +851,19 @@ export default {
     },
 
     goToReviewPage() {
-    this.$router.push({
-      path: `/review/${this.book.isbn}`,
-      query: {
-        title: this.book.nosaukums,
-        author: this.book.autors,
-        cover: this.book.vaku_attels
-      }
-    });
-},
+      this.$router.push({
+        path: `/review/${this.book.isbn}`,
+        query: {
+          title: this.book.nosaukums,
+          author: this.book.autors,
+          cover: this.book.vaku_attels
+        }
+      });
+    },
+
+    goToProfile() {
+      this.$router.push('/profile');
+    }
   }
 }
 </script>

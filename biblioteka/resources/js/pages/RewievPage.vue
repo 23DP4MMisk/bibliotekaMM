@@ -20,7 +20,14 @@
                 rounded
                 v-bind="props"
               >
-                <span class="user-initial">{{ userInitial }}</span>
+                <v-avatar size="40" color="#003D3A">
+                  <v-img
+                    v-if="user?.foto"
+                    :src="user.foto"
+                    cover
+                  ></v-img>
+                  <span v-else class="user-initial">{{ userInitial }}</span>
+                </v-avatar>
               </v-btn>
             </template>
             <v-list>
@@ -40,6 +47,12 @@
                   <v-icon>mdi-book-multiple</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Mana bibliotēka</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="goToProfile">
+                <v-list-item-icon>
+                  <v-icon>mdi-account</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Mans profils</v-list-item-title>
               </v-list-item>
               <v-divider></v-divider>
               <v-list-item @click="logout">
@@ -253,6 +266,17 @@ export default {
       this.$router.push('/login');
       return;
     }
+
+    const savedUser = localStorage.getItem('user');
+    if (savedUser && this.user) {
+        try {
+            const parsedUser = JSON.parse(savedUser);
+            this.user.foto = parsedUser.foto;
+            console.log('Foto:', this.user.foto);
+        } catch (e) {
+            console.error('Kļūda:', e);
+        }
+    }
     
     await this.loadBookDetails();
     await this.checkExistingReview();
@@ -294,7 +318,7 @@ export default {
         }
         
       } catch (error) {
-        console.error('❌ Kļūda ielādējot grāmatu:', error.message);
+        console.error('Kļūda ielādējot grāmatu:', error.message);
         this.error = true;
         this.errorMessage = 'Neizdevās ielādēt grāmatas informāciju';
       } finally {
@@ -371,6 +395,7 @@ export default {
         if (data.authenticated && data.lietotajs) {
           this.isLoggedIn = true;
           this.user = data.lietotajs;
+          localStorage.setItem('user', JSON.stringify(data.lietotajs));
         } else {
           this.isLoggedIn = false;
           this.user = null;
@@ -477,6 +502,10 @@ export default {
         path: '/library',
         query: { tab: 'my-library' }
       });
+    },
+
+    goToProfile() {
+      this.$router.push('/profile');
     }
   }
 }

@@ -1,4 +1,4 @@
-<!--PieslLibrary-->
+
 <template>
   <v-app>
     
@@ -195,12 +195,12 @@ export default {
           
 
           } else {
-          console.error('❌ Kļūda:', data);
+          console.error(' Kļūda:', data);
           this.errorMessage = data.message || 'Pieslēgšanās neizdevās';
         }
         
       } catch (error) {
-        console.error('❌ Tīkla kļūda:', error);
+        console.error(' Tīkla kļūda:', error);
         this.errorMessage = 'Tīkla kļūda. Pārbaudiet savienojumu ar serveri.';
       } finally {
         this.loading = false;
