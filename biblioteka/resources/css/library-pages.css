@@ -1,4 +1,4 @@
-/* resources/css/library-page.css */
+
 
 .library-name {
   font-size: 2.2rem;
@@ -281,7 +281,7 @@
   padding-top: 20px;
 }
 
-/* В library-pages.css добавьте: */
+
 .user-info {
   padding: 8px 0;
   min-width: 180px;
@@ -299,7 +299,7 @@
   word-break: break-all;
 }
 
-/* Стили для пунктов меню */
+
 .v-list-item {
   min-height: 40px !important;
   padding: 0 16px !important;
@@ -508,7 +508,7 @@
   background-color: #d32f2f !important;
 }
 
-/* Stili priekš paziņojumam */
+
 .notification-alert {
   margin-top: 10px !important;
   width: 100%;

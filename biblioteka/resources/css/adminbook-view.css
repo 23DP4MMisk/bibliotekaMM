@@ -45,6 +45,17 @@
   margin-right: 5px;
 }
 
+.admin-avatar-text {
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.admin-btn .v-avatar {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
 .main-content {
   background-color: #fafafa;
   min-height: calc(100vh - 80px);

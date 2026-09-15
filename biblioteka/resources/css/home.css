@@ -37,7 +37,7 @@
   color: #002522 !important;
 }
 
-/* Sekcija 1: Hero - pievienojam atstarpi uz fiksēto navigāciju */
+
 .hero-section {
   min-height: 100vh;
   position: relative;
@@ -95,7 +95,7 @@
   box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* Sekcija 2: Nodaļas */
+
 .nodala-section {
   background-color: #FDFBED;
   padding: 100px 0;
@@ -155,7 +155,7 @@
   line-height: 1.6;
 }
 
-/* Sekcija 3: Par biblioteku */
+
 .about-section {
   background-color: #FDFBED;
   padding: 100px 0;
@@ -183,7 +183,7 @@
   line-height: 1.8;
 }
 
-/* Adaptacija */
+
 @media (max-width: 960px) {
   .hero-title {
     font-size: 3rem;
