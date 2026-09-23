@@ -237,3 +237,5 @@ Route::get('/debug-token', function(Request $request) {
 
     
     Route::delete('/profile', [AuthController::class, 'deleteAccount']);
+
+    Route::get('/recommendations', [BookController::class, 'recommendations']);

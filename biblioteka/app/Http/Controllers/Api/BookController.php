@@ -341,4 +341,145 @@ class BookController extends Controller
 
     }
 
+    /**
+     * IETEICAMĀS GRĀMATAS (personalizētas)
+     * 
+     * Kas dara: Analizē lietotāja bibliotēku un iesaka grāmatas no tām pašām nodaļām
+     * Kad izmantojas: Galvenajā lapā, virs grāmatu saraksta
+    */
+    public function recommendations(Request $request)
+    {
+        try {
+            
+            $user = $this->getUserFromToken($request);
+
+           
+            if (!$user) {
+                return $this->popularRecommendations();
+            }
+
+            
+            $userBookIsbns = DB::table('LietotajGramatas')
+                ->where('Lietotajs', $user->kodsID)
+                ->pluck('Gramatas')
+                ->toArray();
+
+           
+            if (empty($userBookIsbns)) {
+                return $this->popularRecommendations();
+            }
+
+            
+            $nodalaCounts = DB::table('Gramata')
+                ->whereIn('ISBN', $userBookIsbns)
+                ->select('Nodala_ID', DB::raw('count(*) as count'))
+                ->groupBy('Nodala_ID')
+                ->orderBy('count', 'desc')
+                ->get();
+
+            
+            $preferredNodalas = [];
+            $maxCount = $nodalaCounts->first()->count ?? 0;
+            
+            foreach ($nodalaCounts as $nc) {
+                if ($nc->count === $maxCount) {
+                    $preferredNodalas[] = $nc->Nodala_ID;
+                }
+            }
+
+            
+            $books = Gramata::with('nodala')
+                ->whereIn('Nodala_ID', $preferredNodalas)
+                ->whereNotIn('ISBN', $userBookIsbns)
+                ->get();
+
+            
+            if ($books->count() < 6) {
+                $additional = Gramata::with('nodala')
+                    ->whereNotIn('ISBN', $userBookIsbns)
+                    ->whereNotIn('ISBN', $books->pluck('ISBN')->toArray())
+                    ->get();
+
+                $books = $books->merge($additional);
+            }
+
+            
+            $recommendations = $books->map(function($book) {
+                $views = Parskata::where('Gramatas', $book->ISBN)->sum('parskatas_skaits');
+                $downloads = Lejupielade::where('Gramatas_ID', $book->ISBN)->count();
+                $score = $views + ($downloads * 3);
+
+                return [
+                    'isbn' => $book->ISBN,
+                    'nosaukums' => $book->nosaukums,
+                    'autors' => $book->autors,
+                    'vaku_attels' => $book->vaku_attels,
+                    'nodala_id' => $book->Nodala_ID,
+                    'zanra_id' => $book->Zanra_ID,
+                    'views' => $views,
+                    'downloads' => $downloads,
+                    'score' => $score
+                ];
+            })
+            ->sortByDesc('score')
+            ->take(6)
+            ->values();
+
+            return response()->json([
+                'success' => true,
+                'data' => $recommendations
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in recommendations: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Kļūda ielādējot ieteikumus'
+            ], 500);
+        }
+    }
+
+    /**
+     * Populārākās grāmatas (bez personalizācijas)
+     * Izmanto, ja lietotājs nav ielogojies vai bibliotēka tukša
+     */
+    private function popularRecommendations()
+    {
+        try {
+            $books = Gramata::with('nodala')->get();
+
+            $recommendations = $books->map(function($book) {
+                $views = Parskata::where('Gramatas', $book->ISBN)->sum('parskatas_skaits');
+                $downloads = Lejupielade::where('Gramatas_ID', $book->ISBN)->count();
+                $score = $views + ($downloads * 3);
+
+                return [
+                    'isbn' => $book->ISBN,
+                    'nosaukums' => $book->nosaukums,
+                    'autors' => $book->autors,
+                    'vaku_attels' => $book->vaku_attels,
+                    'nodala_id' => $book->Nodala_ID,
+                    'zanra_id' => $book->Zanra_ID,
+                    'views' => $views,
+                    'downloads' => $downloads,
+                    'score' => $score
+                ];
+            })
+            ->sortByDesc('score')
+            ->take(6)
+            ->values();
+
+            return response()->json([
+                'success' => true,
+                'data' => $recommendations
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in popularRecommendations: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Kļūda ielādējot ieteikumus'
+            ], 500);
+        }
+    }
 }

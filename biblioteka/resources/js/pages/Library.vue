@@ -167,7 +167,68 @@
           </v-col>
         </v-row>
 
-         <v-row class="mb-6" v-if="selectedNodala">
+                
+         
+        <v-row 
+          class="mb-8 recommendations-section" 
+          v-if="!recommendationsLoading && recommendations.length > 0 && activeCategory === 'all' && !searchQuery"
+        >
+          <v-col cols="12">
+            
+            
+            <div class="recommendations-header mb-4">
+              <v-icon color="#003D3A" size="28" class="mr-2">mdi-star-circle</v-icon>
+              <h2 class="recommendations-title">Ieteicamās grāmatas</h2>
+            </div>
+            
+            
+            <v-row>
+              <v-col
+                cols="6"
+                sm="4"
+                md="3"
+                lg="2"
+                v-for="rec in recommendations"
+                :key="rec.isbn"
+              >
+                <v-card 
+                  class="rec-book-card" 
+                  elevation="0"
+                  @click="viewBook(rec.isbn)"
+                >
+                 
+                  <div class="rec-cover-wrapper">
+                    <v-img
+                      :src="getBookCover(rec)"
+                      :alt="rec.nosaukums"
+                      cover
+                      class="rec-cover-image"
+                    >
+                      <template v-slot:placeholder>
+                        <div class="d-flex align-center justify-center fill-height">
+                          <v-icon size="48" color="#003D3A">mdi-book-open-variant</v-icon>
+                        </div>
+                      </template>
+                    </v-img>
+                    
+                    
+                    <div class="rec-badge">
+                      <v-icon small color="white">mdi-fire</v-icon>
+                    </div>
+                  </div>
+                  
+                  
+                  <div class="rec-info pa-2 text-center">
+                    <div class="rec-title">{{ rec.nosaukums }}</div>
+                    <div class="rec-author">{{ rec.autors }}</div>
+                  </div>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
+
+        <v-row class="mb-6" v-if="selectedNodala">
           <v-col cols="12">
             <div class="genre-menu">
               <v-btn
@@ -526,7 +587,10 @@ export default {
        show: false,
        bookId: null,
        bookTitle: ''
-      }
+      },
+
+      recommendations: [],
+      recommendationsLoading: true
     };
   },
   computed: {
@@ -654,6 +718,7 @@ export default {
      await this.checkAuth();
      await this.fetchGenres();
      await this.fetchBooks();
+     await this.fetchRecommendations();
     }
   },
   methods: { 
@@ -786,6 +851,31 @@ export default {
       } catch (error) {
         console.error(' Kļūda ielādējot žanrus:', error);
       }
+    },
+
+    
+    async fetchRecommendations() {
+        this.recommendationsLoading = true;
+        try {
+            const response = await fetch('/api/recommendations', {
+                headers: {
+                    'Authorization': 'Bearer ' + this.authToken,
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await response.json();
+            
+            if (data.success && data.data) {
+                this.recommendations = data.data;
+            } else {
+                this.recommendations = [];
+            }
+        } catch (error) {
+            console.error('Kļūda ielādējot ieteikumus:', error);
+            this.recommendations = [];
+        } finally {
+            this.recommendationsLoading = false;
+        }
     },
 
     selectNodala(nodala) {
