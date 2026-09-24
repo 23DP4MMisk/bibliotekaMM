@@ -249,7 +249,7 @@ Atsauksmju sistēma atbalsta bezgalīgu atbilžu iegulstību. Katrs lietotājs v
 
 ### Failu glabāšana
 
-PDF faili un attēli tiek glabāti Cloudflare R2 krātuvē, nodrošinot ātru piekļuvi un mērogojamību.
+PDF faili tiek glabāti Cloudflare R2 krātuvē, nodrošinot ātru piekļuvi un mērogojamību.
 
 ---
 
