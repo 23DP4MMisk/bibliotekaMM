@@ -127,6 +127,14 @@ class AuthController extends Controller
             ], 401);
         }
 
+        if ($user->status !== 'aktivs') {
+            Log::warning('Bloķēts lietotājs mēģina pieslēgties: ' . $request->epasts);
+            return response()->json([
+                'success' => false,
+                'message' => 'Jūsu konts ir bloķēts. Sazinieties ar administratoru.'
+            ], 403);
+        }
+
          
             $token = $user->kodsID . '_' . time();
     
@@ -259,6 +267,14 @@ class AuthController extends Controller
                     'success' => false,
                     'message' => 'Lietotājs nav autentificēts'
                 ], 401);
+            }
+
+            // 2. Konts bloķēts → 403
+            if ($user->status !== 'aktivs') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Jūsu konts ir bloķēts'
+                ], 403);
             }
 
             return response()->json([
@@ -510,7 +526,9 @@ class AuthController extends Controller
             return null;
         }
         
-        return Lietotajs::where('kodsID', $userId)->first();
+        $user = Lietotajs::where('kodsID', $userId)->first();
+
+       return Lietotajs::where('kodsID', $userId)->first();
     }
 
 
