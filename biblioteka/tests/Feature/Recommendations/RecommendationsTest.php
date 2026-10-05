@@ -15,6 +15,12 @@ class RecommendationsTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Šis tests pārbauda, ka viesis saņem populārākās grāmatas ieteikumus.
+     * $this->createBook('Dienas grāmata'); - izveido grāmatas, no kurām veidot ieteikumus.
+     * $this->getJson('/api/recommendations') - izsauc ieteikumu endpointu bez autorizācijas.
+     * Tiek gaidīts 200 un atbildē jābūt "success = true" un grāmatu datiem.
+     */
     public function test_guest_gets_popular_recommendations(): void
     {
         $this->createBook('Dienas grāmata');
@@ -30,6 +36,12 @@ class RecommendationsTest extends TestCase
             ]);
     }
 
+    /**
+     * Šis tests pārbauda, ka autentificēts lietotājs bez bibliotēkas saņem standarta populāros ieteikumus.
+     * $user = $this->createUser(); - izveido reālu lietotāju.
+     * $this->withHeaders(...)->getJson('/api/recommendations') - pieprasa ieteikumus ar Bearer tokenu.
+     * Jo lietotājam nav grāmatu bibliotēkā, API jāatgriež populārie ieteikumi.
+     */
     public function test_authenticated_user_without_library_gets_popular_recommendations(): void
     {
         $user = $this->createUser();
@@ -47,6 +59,14 @@ class RecommendationsTest extends TestCase
             ]);
     }
 
+    /**
+     * Šis tests pārbauda personalizētos ieteikumus lietotājam, kuram ir bibliotēka.
+     * $user = $this->createUser(); - izveido lietotāju.
+     * $bookInLibrary = Gramata::create(...) - izveido grāmatu, kas jau atrodas lietotāja bibliotēkā.
+     * $recommended = Gramata::create(...) - izveido grāmatu, kas jāieteiks kā ieteikums.
+     * $this->withHeaders(...)->getJson('/api/recommendations') - lūdz ieteikumus.
+     * Tiek gaidīts, ka atgrieztajā sarakstā būs ieteiktā grāmata, bet nevis jau esošā grāmata bibliotēkā.
+     */
     public function test_authenticated_user_with_library_gets_personalized_recommendations(): void
     {
         $user = $this->createUser();
@@ -92,6 +112,13 @@ class RecommendationsTest extends TestCase
             ->assertJsonMissing(['nosaukums' => $bookInLibrary->nosaukums]);
     }
 
+    /**
+     * Šis tests pārbauda, ka reģistrētam lietotājam ar tukšu bibliotēku API atkāpjas uz populāriem ieteikumiem.
+     * $user = $this->createUser(); - izveido lietotāju.
+     * $popularTitle = 'Populārākā grāmata...' - pievieno zināmu grāmatu.
+     * $this->withHeaders(...)->getJson('/api/recommendations') - pieprasa ieteikumus.
+     * Tiek gaidīts, ka atgriezīs tādu populāro grāmatu kā rezultātu.
+     */
     public function test_registered_user_with_empty_library_falls_back_to_popular_recommendations(): void
     {
         $user = $this->createUser();
@@ -105,6 +132,13 @@ class RecommendationsTest extends TestCase
             ->assertJsonFragment(['nosaukums' => $popularTitle]);
     }
 
+    /**
+     * Šis tests pārbauda, ka lietotājs saņem grāmatas no tās nodaļas, kuru viņam ir visvairāk bibliotēkā.
+     * $preferredNodala un $otherNodala - izveido divas nodaļas ar dažādiem grāmatu komplektiem.
+     * $recommendedPreferredBook - izveido grāmatu, kas pieder lietotāja iecienītajai nodaļai.
+     * $this->withHeaders(...)->getJson('/api/recommendations') - pieprasa ieteikumus.
+     * Tiek gaidīts, ka atgriezīsies grāmata no iecienītākās nodaļas un nevis grāmata no citas nodaļas.
+     */
     public function test_registered_user_prefers_books_from_their_most_common_nodala(): void
     {
         $user = $this->createUser();
