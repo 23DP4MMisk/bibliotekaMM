@@ -170,7 +170,7 @@ class AdminController extends Controller
             
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda ielādējot lietotājus: ' . $e->getMessage(),
+                'message' => 'Lietotājus neizdevās ielādēt. Mēģiniet vēlreiz.',
                 'your_loma' => $user->loma
             ], 500);
         }
@@ -221,7 +221,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda: ' . $e->getMessage()
+                'message' => 'Lietotāja statusu neizdevās atjaunināt. Mēģiniet vēlreiz.'
             ], 500);
         }
     }
@@ -267,7 +267,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda: ' . $e->getMessage()
+                'message' => 'Grāmatu neizdevās pievienot. Mēģiniet vēlreiz.'
             ], 500);
         }
     }
@@ -324,7 +324,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda: ' . $e->getMessage()
+                'message' => 'Grāmatas informāciju neizdevās atjaunināt. Mēģiniet vēlreiz.'
             ], 500);
         }
     }
@@ -360,7 +360,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda: ' . $e->getMessage()
+                'message' => 'Grāmatu neizdevās dzēst. Mēģiniet vēlreiz.'
             ], 500);
         }
     }
@@ -400,7 +400,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda: ' . $e->getMessage()
+                'message' => 'Žanru neizdevās pievienot. Mēģiniet vēlreiz.'
             ], 500);
         }
     }
@@ -477,7 +477,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda: ' . $e->getMessage()
+                'message' => 'Žanra informāciju neizdevās atjaunināt. Mēģiniet vēlreiz.'
             ], 500);
         }
     }
@@ -513,7 +513,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda: ' . $e->getMessage()
+                'message' => 'Žanru neizdevās dzēst. Mēģiniet vēlreiz.'
             ], 500);
         }
     }
@@ -646,13 +646,13 @@ class AdminController extends Controller
             
             return response()->json([
                 'success' => true,
-                'message' => 'Download tracked successfully'
+                'message' => 'Lejupielāde reģistrēta.'
             ]);
         } catch (\Exception $e) {
             Log::error('Error tracking download: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error tracking download'
+                'message' => 'Lejupielādi neizdevās reģistrēt.'
             ], 500);
         }
     }

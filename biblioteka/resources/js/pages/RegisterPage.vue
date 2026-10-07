@@ -10,14 +10,14 @@
             <v-card class="register-card" elevation="0">
              
               <div class="register-header text-center pa-6">
-                <div class="register-title">REGISTRACIJA</div>
+                <div class="register-title">Reģistrācija</div>
               </div>
               
             
               <v-form ref="form">
                
                 <div class="input-field pa-4 pt-0">
-                  <div class="input-label mb-2">e-mail</div>
+                  <div class="input-label mb-2">E-pasts</div>
                   <v-text-field
                     v-model="email"
                     placeholder=""
@@ -30,7 +30,7 @@
                 
                
                 <div class="input-field pa-4 pt-0">
-                  <div class="input-label mb-2">username</div>
+                  <div class="input-label mb-2">Lietotājvārds</div>
                   <v-text-field
                     v-model="username"
                     placeholder=""
@@ -43,7 +43,7 @@
                 
               
                 <div class="input-field pa-4 pt-0">
-                  <div class="input-label mb-2">password</div>
+                  <div class="input-label mb-2">Parole</div>
                   <v-text-field
                     v-model="password"
                     placeholder=""
@@ -57,7 +57,7 @@
                 
                
                 <div class="role-selection pa-4">
-                  <div class="role-label mb-3 text-center">IZVELIETIES LOMU</div>
+                  <div class="role-label mb-3 text-center">Izvēlieties lomu</div>
                   
                   <div class="role-buttons d-flex justify-space-between">
                    
@@ -68,7 +68,7 @@
                       height="48"
                       width="48%"
                     >
-                      <span class="role-button-text">admins</span>
+                      <span class="role-button-text">Administrators</span>
                     </v-btn>
                     
                    
@@ -79,7 +79,7 @@
                       height="48"
                       width="48%"
                     >
-                      <span class="role-button-text">klients</span>
+                      <span class="role-button-text">Klients</span>
                     </v-btn>
                   </div>
                 </div>
@@ -92,7 +92,7 @@
                     height="56"
                     @click="handleRegister"
                   >
-                    <span class="button-text">REGISTRETIES</span>
+                    <span class="button-text">Reģistrēties</span>
                   </v-btn>
                 </div>
 
@@ -137,6 +137,7 @@
 
 <script>
 import '../../css/register-pages.css';
+import { ERROR_MESSAGES, getApiErrorMessage } from '../utils/errorMessages.js';
 export default {
   name: 'RegisterPage',
   data() {
@@ -153,26 +154,26 @@ export default {
   async handleRegister() {
   
   if (!this.email || !this.username || !this.password) {
-    this.errorMessage = 'Lūdzu, aizpildiet visus laukus';
+    this.errorMessage = ERROR_MESSAGES.missingFields;
     return;
   }
   
   
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(this.email)) {
-    this.errorMessage = 'Lūdzu, ievadiet derīgu e-pasta adresi';
+    this.errorMessage = ERROR_MESSAGES.invalidEmail;
     return;
   }
   
  
   if (this.username.length > 10) {
-    this.errorMessage = 'Lietotājvārdam jābūt ne vairāk kā 10 rakstzīmes garam';
+    this.errorMessage = ERROR_MESSAGES.usernameTooLong;
     return;
   }
   
 
   if (this.password.length < 6) {
-    this.errorMessage = 'Parolei jābūt vismaz 6 rakstzīmes garai';
+    this.errorMessage = ERROR_MESSAGES.passwordTooShort;
     return;
   }
   this.loading = true;
@@ -195,7 +196,7 @@ export default {
     const checkData = await checkResponse.json();
     
     if (checkData.exists) {
-      this.errorMessage = 'Lietotājs ar šo e-pasta adresi jau eksistē';
+      this.errorMessage = ERROR_MESSAGES.emailAlreadyRegistered;
       this.loading = false;
       return;
     }
@@ -243,12 +244,12 @@ export default {
       });
        } else {
           console.error(' Kļūda:', data);
-          this.errorMessage = data.message || 'Reģistrācija neizdevās';
+          this.errorMessage = getApiErrorMessage(data, ERROR_MESSAGES.registrationFailed);
         }
         
       } catch (error) {
         console.error('Tīkla kļūda:', error);
-        this.errorMessage = 'Tīkla kļūda. Pārbaudiet savienojumu ar serveri.';
+        this.errorMessage = ERROR_MESSAGES.network;
       } finally {
         this.loading = false;
       }

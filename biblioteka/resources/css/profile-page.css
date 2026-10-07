@@ -1,0 +1,91 @@
+.profile-card,
+.settings-card {
+  border-radius: 16px !important;
+}
+
+.profile-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+  padding: 16px 24px !important;
+}
+
+.profile-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #003D3A;
+}
+
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar-wrapper {
+  position: relative;
+}
+
+.profile-avatar {
+  border: 4px solid #003D3A;
+  box-shadow: 0 4px 12px rgba(0, 61, 58, 0.2);
+}
+
+.avatar-text {
+  font-size: 4rem;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+}
+
+.avatar-upload-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  min-width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background-color: #003D3A !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(0, 61, 58, 0.3);
+}
+
+.profile-file-input {
+  display: none;
+}
+
+.role-chip {
+  font-weight: 600;
+}
+
+.settings-header {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffebee 100%) !important;
+  padding: 16px 24px !important;
+}
+
+.danger-title {
+  color: #b71c1c !important;
+}
+
+.danger-text {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.password-dialog-header {
+  background-color: #003D3A !important;
+  color: white !important;
+}
+
+.delete-dialog-header {
+  background-color: #b71c1c !important;
+  color: white !important;
+}
+
+.profile-page .v-col {
+  padding: 6px 12px;
+}
+
+@media (max-width: 600px) {
+  .profile-title {
+    font-size: 1.2rem;
+  }
+}

@@ -66,7 +66,7 @@
       </v-container>
     </v-app-bar>
 
-    <v-main style="margin-top: 80px;">
+    <v-main class="header-offset-main">
       <v-container fluid class="main-content pa-8">
         <div v-if="loading" class="text-center py-12">
           <v-progress-circular indeterminate color="#003D3A" size="64"></v-progress-circular>
@@ -187,7 +187,7 @@
                  <template v-else>
                    
                     <div class="action-buttons-row">
-                      <div style="position: relative; width: 100%;">
+                      <div class="action-alert-wrapper">
                       <v-btn
                         color="#003D3A"
                         class="action-btn"
@@ -208,7 +208,7 @@
                           {{ notifications.download.message }}
                       </v-alert>
                     </div>
-                    <div style="position: relative; width: 100%;">
+                    <div class="action-alert-wrapper">
                       <v-btn
                         color="#003D3A"
                         class="action-btn"
@@ -291,6 +291,7 @@
 <script>
 import '../../css/book-view.css';
 import CommentItem from '../components/CommentItem.vue';
+import { ERROR_MESSAGES, getApiErrorMessage, getValidationMessages } from '../utils/errorMessages.js';
 export default {
   components: {
     CommentItem
@@ -555,7 +556,7 @@ export default {
       } catch (error) {
         console.error('Kļūda:', error.message);
         this.error = true;
-        this.errorMessage = 'Neizdevās ielādēt grāmatas informāciju';
+        this.errorMessage = ERROR_MESSAGES.loadBook;
       } finally {
         this.loading = false;
       }
@@ -614,7 +615,7 @@ export default {
         document.body.removeChild(link);
         this.showNotification('download', 'Lejupielāde sākta!', true);
       } else {
-        this.showNotification('download', 'PDF fails nav pieejams', false);
+        this.showNotification('download', ERROR_MESSAGES.noPdf, false);
       }
     },
 
@@ -628,13 +629,13 @@ export default {
       
       
       if (!token) {
-        this.showNotification('add', 'Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.', false);
+        this.showNotification('add', ERROR_MESSAGES.sessionExpired, false);
         this.goToLogin();
         return;
       }
 
       if (!this.book?.isbn) {
-        this.showNotification('add', 'Grāmatas ISBN nav atrasts', false);
+        this.showNotification('add', ERROR_MESSAGES.invalidData, false);
         return;
       }
 
@@ -668,7 +669,7 @@ export default {
           
         } catch (e) {
           console.error('Kļuda no parsinga:', e);
-          this.showNotification('add', 'Servera atbilde nav JSON formātā', false);
+          this.showNotification('add', ERROR_MESSAGES.notJson, false);
           return;
         }
 
@@ -678,7 +679,7 @@ export default {
           this.user = null;
           localStorage.removeItem('auth_token');
           localStorage.removeItem('user');
-          this.showNotification('add', 'Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.', false);
+          this.showNotification('add', ERROR_MESSAGES.sessionExpired, false);
           this.goToLogin();
           return;
         }
@@ -686,24 +687,13 @@ export default {
         if (response.status === 422) {
           
           
-          let errorMessage = 'Validācijas kļūda:\n';
-          if (data?.errors) {
-            for (let field in data.errors) {
-              errorMessage += `${field}: ${data.errors[field].join(', ')}\n`;
-            }
-          } else if (data?.message) {
-            errorMessage = data.message;
-          } else {
-            errorMessage = 'Nezināma validācijas kļūda';
-          }
-          
-          this.showNotification('add', errorMessage, false);
+          this.showNotification('add', getValidationMessages(data?.errors).join(' ') || getApiErrorMessage(data, ERROR_MESSAGES.validation), false);
           return;
         }
 
         if (response.status === 500) {
           
-          this.showNotification('add', 'Servera kļūda. Lūdzu, mēģiniet vēlāk.', false);
+          this.showNotification('add', ERROR_MESSAGES.server, false);
           return;
         }
 
@@ -719,12 +709,12 @@ export default {
        
 
         } else {
-          this.showNotification('add', 'Kļūda pievienojot grāmatu: ' + (data?.message || 'Nezināma kļūda'), false);
+          this.showNotification('add', getApiErrorMessage(data, ERROR_MESSAGES.addToLibrary), false);
         }
         
       } catch (error) {
         console.error(' Kļūda:', error);
-        this.showNotification('add', 'Neizdevās pievienot grāmatu: ' + error.message, false);
+        this.showNotification('add', ERROR_MESSAGES.network, false);
       } finally {
         this.addingToLibrary = false;
       }
@@ -778,7 +768,7 @@ export default {
 
     async submitReply(parentId, text) {
         if (!text || text.trim() === '') {
-            this.showNotification('add', 'Lūdzu, uzrakstiet atbildi!', false);
+            this.showNotification('add', ERROR_MESSAGES.replyRequired, false);
             return;
         }
 
@@ -807,11 +797,11 @@ export default {
                 this.replyForm = null;
                 await this.loadBookReviews();
             } else {
-                this.showNotification('add', data.message || 'Kļūda pievienojot atbildi', false);
+                this.showNotification('add', getApiErrorMessage(data, ERROR_MESSAGES.addReply), false);
             }
         } catch (error) {
             console.error('Error submitting reply:', error);
-            this.showNotification('add', 'Kļūda savienojumā ar serveri', false);
+            this.showNotification('add', ERROR_MESSAGES.network, false);
         } finally {
             this.submittingReply = false;
         }

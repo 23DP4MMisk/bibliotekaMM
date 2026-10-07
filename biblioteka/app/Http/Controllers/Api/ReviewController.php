@@ -168,7 +168,7 @@ class ReviewController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'exists' => false,
-                'error' => $e->getMessage()
+                'message' => 'Atsauksmes statusu neizdevās pārbaudīt. Mēģiniet vēlreiz.'
             ], 500);
         }
     }
@@ -318,7 +318,7 @@ class ReviewController extends Controller
             
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda saglabājot atsauksmi: ' . $e->getMessage()
+                'message' => 'Atsauksmi neizdevās saglabāt. Mēģiniet vēlreiz.'
             ], 500);
         }
     }

@@ -41,6 +41,7 @@
 
      
       <v-btn
+        v-if="!readOnly"
         small
         text
         color="#003D3A"
@@ -52,7 +53,7 @@
       </v-btn>
 
       
-      <div v-if="replyForm === comment.Atsauksmes_ID" class="reply-form">
+      <div v-if="!readOnly && replyForm === comment.Atsauksmes_ID" class="reply-form">
         <v-textarea
           v-model="replyTextLocal"
           placeholder="Rakstiet atbildi..."
@@ -87,6 +88,7 @@
           :level="level + 1"
           :reply-form="replyForm"
           :submitting-reply="submittingReply"
+          :read-only="readOnly"
           @reply="$emit('reply', $event)"
           @submit-reply="(id, text) => $emit('submit-reply', id, text)"
           @cancel-reply="$emit('cancel-reply')"
@@ -97,6 +99,8 @@
 </template>
 
 <script>
+import '../../css/comment-item.css';
+
 export default {
   name: 'CommentItem',
   // props — ko komponents saņem no ārpuses
@@ -104,7 +108,8 @@ export default {
     comment: { type: Object, required: true },
     level: { type: Number, default: 0 },
     replyForm: { type: [Number, null], default: null },
-    submittingReply: { type: Boolean, default: false }
+    submittingReply: { type: Boolean, default: false },
+    readOnly: { type: Boolean, default: false }
   },
   // emits - kādus notikumus komponents nosūta uz saiti
   emits: ['reply', 'submit-reply', 'cancel-reply'],
@@ -140,107 +145,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.comment-wrapper {
-  margin-bottom: 16px;
-}
-
-.comment-wrapper.is-reply {
- 
-  border-left: 2px solid #e0e0e0;
-  padding-left: 16px;
-  margin-left: 8px;
-  margin-top: 12px;
-}
-
-.comment-content {
-  padding: 4px 0;
-}
-
-.comment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 8px;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.reviewer-info {
-  display: flex;
-  align-items: center;
-}
-
-.reviewer-initial,
-.reviewer-initial-small {
-  color: white;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.reviewer-initial {
-  font-size: 1rem;
-}
-
-.reviewer-initial-small {
-  font-size: 0.85rem;
-}
-
-.reviewer-name {
-  font-weight: 600;
-  color: #003D3A;
-  font-size: 1rem;
-}
-
-
-.reply-to {
-  color: #888;
-  font-weight: 400;
-  font-size: 0.9rem;
-  font-style: italic;
-  margin-left: 4px;
-}
-
-.review-date {
-  font-size: 0.8rem;
-  color: #888;
-}
-
-.review-rating {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.rating-value {
-  margin-left: 8px;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-
-.comment-text {
-  color: #333;
-  line-height: 1.6;
-  margin: 0 0 8px 0;
-  font-size: 1rem;
-}
-
-.reply-btn {
-  font-size: 0.85rem !important;
-}
-
-.reply-form {
-  margin-top: 12px;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-}
-
-
-.replies-container {
-  margin-top: 8px;
-}
-</style>

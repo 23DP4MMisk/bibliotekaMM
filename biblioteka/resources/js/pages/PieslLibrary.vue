@@ -10,7 +10,7 @@
             <v-card class="login-card" elevation="0">
              
               <div class="login-header text-center pa-6">
-                <div class="login-title">Pieslegties</div>
+                <div class="login-title">Pieslēgties</div>
               </div>
               
               <v-alert
@@ -29,7 +29,7 @@
               <v-form ref="form">
                 
                 <div class="input-field pa-4 pt-0">
-                  <div class="input-label mb-2">e-mail</div>
+                  <div class="input-label mb-2">E-pasts</div>
                   <v-text-field
                     v-model="email"
                     placeholder=""
@@ -42,7 +42,7 @@
                 
                
                 <div class="input-field pa-4 pt-0">
-                  <div class="input-label mb-2">password</div>
+                  <div class="input-label mb-2">Parole</div>
                   <v-text-field
                     v-model="password"
                     placeholder=""
@@ -72,7 +72,7 @@
                     height="56"
                     @click="handleLogin"
                   >
-                    <span class="button-text">Iejiet</span>
+                    <span class="button-text">Pieslēgties</span>
                   </v-btn>
                 </div>
                 
@@ -84,7 +84,7 @@
                     height="56"
                     @click="goToRegister"
                   >
-                    <span class="button-text">REGISTRACIJA</span>
+                    <span class="button-text">Reģistrēties</span>
                   </v-btn>
                 </div>
               </v-form>
@@ -105,6 +105,7 @@
 
 <script>
 import '../../css/piesl-pages.css';
+import { ERROR_MESSAGES, getApiErrorMessage } from '../utils/errorMessages.js';
 export default {
   name: 'PieslLibrary',
   data() {
@@ -142,7 +143,7 @@ export default {
     async handleLogin() {
      
       if (!this.email || !this.password) {
-        this.errorMessage = 'Lūdzu, aizpildiet visus laukus';
+        this.errorMessage = ERROR_MESSAGES.missingFields;
         return;
       }
       
@@ -167,7 +168,7 @@ export default {
         
 
         if (data.lietotajs && data.lietotajs.status !== 'aktivs') {
-          this.errorMessage = 'Jūsu konts ir bloķēts. Sazinieties ar administratoru.';
+          this.errorMessage = ERROR_MESSAGES.accountBlocked;
           this.loading = false;
           return; 
         }
@@ -196,12 +197,12 @@ export default {
 
           } else {
           console.error(' Kļūda:', data);
-          this.errorMessage = data.message || 'Pieslēgšanās neizdevās';
+          this.errorMessage = getApiErrorMessage(data, ERROR_MESSAGES.login);
         }
         
       } catch (error) {
         console.error(' Tīkla kļūda:', error);
-        this.errorMessage = 'Tīkla kļūda. Pārbaudiet savienojumu ar serveri.';
+        this.errorMessage = ERROR_MESSAGES.network;
       } finally {
         this.loading = false;
       }

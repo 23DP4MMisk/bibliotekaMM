@@ -219,6 +219,11 @@
   flex-wrap: wrap;
 }
 
+.action-alert-wrapper {
+  position: relative;
+  width: 100%;
+}
+
 .action-btn {
   min-width: 200px !important;
   height: 56px !important;

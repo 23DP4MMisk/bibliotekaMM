@@ -74,8 +74,7 @@ class BookController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda ielādējot žanrus',
-                'error' => env('APP_DEBUG') ? $e->getMessage() : null
+                'message' => 'Žanrus neizdevās ielādēt. Mēģiniet vēlreiz.'
             ], 500);
         }
     }
@@ -118,8 +117,7 @@ class BookController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda ielādējot grāmatas',
-                'error' => env('APP_DEBUG') ? $e->getMessage() : null,
+                'message' => 'Grāmatas neizdevās ielādēt. Mēģiniet vēlreiz.',
             ], 500);
         }
     }
@@ -162,8 +160,7 @@ class BookController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda meklējot grāmatas',
-                'error' => env('APP_DEBUG') ? $e->getMessage() : null,
+                'message' => 'Grāmatas neizdevās atrast. Mēģiniet vēlreiz.',
             ], 500);
         }
     }
@@ -256,8 +253,7 @@ class BookController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda ielādējot grāmatu',
-                'error' => env('APP_DEBUG') ? $e->getMessage() : null,
+                'message' => 'Grāmatas informāciju neizdevās ielādēt. Mēģiniet vēlreiz.',
             ], 500);
         }
     }
@@ -292,8 +288,7 @@ class BookController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda ielādējot grāmatas galvenajai lapai',
-                'error' => env('APP_DEBUG') ? $e->getMessage() : null,
+                'message' => 'Sākumlapas grāmatas neizdevās ielādēt. Mēģiniet vēlreiz.',
             ], 500);
         }
     }

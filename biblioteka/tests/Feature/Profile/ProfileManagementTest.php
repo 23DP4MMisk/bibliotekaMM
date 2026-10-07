@@ -84,7 +84,8 @@ class ProfileManagementTest extends TestCase
                 'dzim_datums' => '2099-01-01',
             ])
             ->assertStatus(422)
-            ->assertJsonPath('success', false);
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('errors.dzim_datums.0', 'Dzimšanas datumam jābūt pagātnē.');
     }
 
     /**

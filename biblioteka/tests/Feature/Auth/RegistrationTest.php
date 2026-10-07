@@ -68,7 +68,8 @@ class RegistrationTest extends TestCase
             'loma' => 'registretajsklients',
         ]);
 
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJsonPath('errors.epasts.0', 'Laukam e-pasts jābūt derīgai e-pasta adresei.');
     }
 
     

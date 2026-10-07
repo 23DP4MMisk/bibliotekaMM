@@ -64,7 +64,7 @@ class AuthController extends Controller
             Log::error(' Kļūda:', ['message' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => 'Servera kļūda: ' . $e->getMessage()
+                 'message' => 'Reģistrācija neizdevās servera kļūdas dēļ. Mēģiniet vēlreiz.'
             ], 500);
         }
     }
@@ -142,7 +142,7 @@ class AuthController extends Controller
             
             return response()->json([
                 'success' => true,
-                'message' => 'Ieja veiksmīga!',
+                'message' => 'Pieslēgšanās veiksmīga!',
                 'token' => $token,
                 'lietotajs' => [
                     'kodsID' => $user->kodsID,
@@ -167,7 +167,7 @@ class AuthController extends Controller
         if (!$token) {
             return response()->json([
                 'authenticated' => false,
-                'message' => 'No token provided'
+                'message' => 'Nav norādīts autentifikācijas tokens.'
             ]);
         }
         
@@ -196,16 +196,14 @@ class AuthController extends Controller
 
           return response()->json([
             'authenticated' => false,
-            'message' => 'Invalid token'
+            'message' => 'Nederīgs autentifikācijas tokens.'
         ]);
         
     } catch (\Exception $e) {
         
         return response()->json([
             'authenticated' => false,
-            'error' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine()
+             'message' => 'Neizdevās pārbaudīt autentifikāciju. Mēģiniet vēlreiz.'
         ]);
     }
  }
@@ -251,8 +249,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda: ' . $e->getMessage(),
-                'error' => $e->getTraceAsString()
+                 'message' => 'Testa lietotāju neizdevās izveidot.'
             ], 500);
         }
     }

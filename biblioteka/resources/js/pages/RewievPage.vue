@@ -68,7 +68,7 @@
       </v-container>
     </v-app-bar>
 
-    <v-main style="margin-top: 80px;">
+    <v-main class="header-offset-main">
       <v-container fluid class="main-content pa-8">
         
         <div v-if="loadingBook" class="text-center py-12">
@@ -212,6 +212,7 @@
 
 <script>
 import '../../css/rewiev-page.css';
+import { ERROR_MESSAGES, getApiErrorMessage } from '../utils/errorMessages.js';
 export default {
   name: 'RewievPage',
   data() {
@@ -320,7 +321,7 @@ export default {
       } catch (error) {
         console.error('Kļūda ielādējot grāmatu:', error.message);
         this.error = true;
-        this.errorMessage = 'Neizdevās ielādēt grāmatas informāciju';
+        this.errorMessage = ERROR_MESSAGES.loadBook;
       } finally {
         this.loadingBook = false;
       }
@@ -432,7 +433,7 @@ export default {
     
     async submitReview() {
       if (this.rating === 0) {
-        this.showNotification('Lūdzu, izvēlieties vērtējumu!', 'error');
+        this.showNotification(ERROR_MESSAGES.ratingRequired, 'error');
         return;
       }
       
@@ -467,11 +468,11 @@ export default {
             this.$router.push(`/book/${this.bookId}`);
           }, 2000);
         } else {
-          this.showNotification(data.message || 'Kļūda publicējot atsauksmi', 'error');
+          this.showNotification(getApiErrorMessage(data, ERROR_MESSAGES.addReview), 'error');
         }
       } catch (error) {
         console.error('Error submitting review:', error);
-        this.showNotification('Kļūda savienojumā ar serveri', 'error');
+        this.showNotification(ERROR_MESSAGES.network, 'error');
       } finally {
         this.submitting = false;
       }

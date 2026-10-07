@@ -43,7 +43,7 @@
                 ></v-img>
                 <span v-else class="admin-avatar-text">{{ userInitial }}</span>
               </v-avatar>
-                <span class="admin-text">ADMINS</span>
+                <span class="admin-text">Administrators</span>
                 <v-icon right color="white">mdi-chevron-down</v-icon>
               </v-btn>
             </template>
@@ -56,7 +56,7 @@
                   </v-list-item-title>
                   <v-list-item-subtitle>
                     {{ userEmail }}
-                    <v-chip x-small color="error" class="ml-2">ADMIN</v-chip>
+                    <v-chip x-small color="error" class="ml-2">Administrators</v-chip>
                   </v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
@@ -99,7 +99,7 @@
     </v-app-bar>
 
     
-    <v-main style="margin-top: 80px;">
+    <v-main class="header-offset-main">
       <v-container fluid class="main-content pa-8">
         
         
@@ -124,7 +124,7 @@
                 <v-list class="py-0">
                   <v-list-item @click="selectNodala('academic')">
                     <v-list-item-title class="text-left">
-                      Akademiskas grāmatas
+                      Akadēmiskās grāmatas
                     </v-list-item-title>
                   </v-list-item>
                   <v-divider></v-divider>
@@ -666,7 +666,7 @@
 
     <v-dialog v-model="showAddGenreForm" max-width="500" persistent>
       <v-card>
-        <v-card-title class="headline" style="background-color: #003D3A; color: white;">
+        <v-card-title class="headline admin-dialog-title">
           Pievienot jaunu žanru
           <v-spacer></v-spacer>
           <v-btn icon dark @click="showAddGenreForm = false">
@@ -713,7 +713,7 @@
 
     <v-dialog v-model="showEditGenreForm" max-width="500" persistent>
       <v-card>
-        <v-card-title class="headline" style="background-color: #003D3A; color: white;">
+        <v-card-title class="headline admin-dialog-title">
           Rediģēt žanru
           <v-spacer></v-spacer>
           <v-btn icon dark @click="showEditGenreForm = false">
@@ -761,7 +761,7 @@
 
     <v-dialog v-model="deleteGenreConfirmation.show" max-width="500" persistent>
       <v-card>
-        <v-card-title class="headline" style="background-color: #003D3A; color: white;">
+        <v-card-title class="headline admin-dialog-title">
           Žanra dzēšana
           <v-spacer></v-spacer>
           <v-btn icon dark @click="deleteGenreConfirmation.show = false">
@@ -795,6 +795,7 @@
 
 <script>
 import '../../css/admin-library.css'; 
+import { ERROR_MESSAGES, getApiErrorMessage, getValidationErrorsByField, getValidationMessages } from '../utils/errorMessages.js';
 
 export default {
   name: 'AdminLibraryPage',
@@ -946,7 +947,7 @@ export default {
     },
     
     userName() {
-      return this.user?.lietotaja_vards || 'Admins';
+      return this.user?.lietotaja_vards || 'Administrators';
     },
     
     userEmail() {
@@ -1151,7 +1152,7 @@ export default {
 
     async addGenre() {
       if (!this.newGenre.nosaukums.trim()) {
-        this.showNotification('add', 'Lūdzu, ievadiet žanra nosaukumu!', false);
+        this.showNotification('add', ERROR_MESSAGES.genreNameRequired, false);
         return;
       }
 
@@ -1184,32 +1185,32 @@ export default {
           await this.fetchGenres();
           
         } else {
-          this.showNotification('add', data.message || 'Kļūda pievienojot žanru', false);
+          this.showNotification('add', getApiErrorMessage(data, ERROR_MESSAGES.addGenre), false);
         }
       } catch (error) {
         console.error('Kļūda pievienojot žanru:', error);
-        this.showNotification('add', 'Kļūda pievienojot žanru', false);
+        this.showNotification('add', ERROR_MESSAGES.addGenre, false);
       }
     },
 
     async updateGenre() {
 
       if (!this.editingGenre) {
-        this.showNotification('add', 'Kļūda: žanrs nav atrasts', false);
+        this.showNotification('add', ERROR_MESSAGES.genreNotFound, false);
         return;
       }
 
       const genreId = this.editingGenre.Zanra_ID || this.editingGenre.id;
       if (!genreId) {
         console.error('updateGenre: genre ID is undefined', this.editingGenre);
-        this.showNotification('add', 'Kļūda: žanra ID nav atrasts', false);
+        this.showNotification('add', ERROR_MESSAGES.genreIdMissing, false);
         return;
       }
 
       const genreName = this.editingGenre.nosaukums || this.editingGenre.name;
       
       if (!genreName || !genreName.trim()) {
-        this.showNotification('add', 'Lūdzu, ievadiet žanra nosaukumu!', false);
+        this.showNotification('add', ERROR_MESSAGES.genreNameRequired, false);
         return;
       }
 
@@ -1241,11 +1242,11 @@ export default {
           ('12. Name in DB after refresh:', updatedGenre?.name);
           
         } else {
-          this.showNotification('add', data.message || 'Kļūda atjauninot žanru', false);
+          this.showNotification('add', getApiErrorMessage(data, ERROR_MESSAGES.saveGenre), false);
         }
       } catch (error) {
         console.error('Kļūda atjauninot žanru:', error);
-        this.showNotification('add', 'Kļūda atjauninot žanru', false);
+        this.showNotification('add', ERROR_MESSAGES.saveGenre, false);
       }
     },
 
@@ -1253,7 +1254,7 @@ export default {
     
       if (!genre) {
         console.error('deleteGenre: genre is undefined');
-        this.showNotification('add', 'Kļūda: žanrs nav atrasts', false);
+        this.showNotification('add', ERROR_MESSAGES.genreNotFound, false);
         return;
       }
 
@@ -1261,7 +1262,7 @@ export default {
       const genreId = genre.Zanra_ID || genre.id;
       if (!genreId) {
         console.error('deleteGenre: genre ID is undefined', genre);
-        this.showNotification('add', 'Kļūda: žanra ID nav atrasts', false);
+        this.showNotification('add', ERROR_MESSAGES.genreIdMissing, false);
         return;
       }
       this.deleteGenreConfirmation.genre = genre;
@@ -1295,11 +1296,11 @@ export default {
           await this.fetchGenres();
           await this.fetchBooks();
         } else {
-          this.showNotification('add', data.message || 'Kļūda dzēšot žanru', false);
+          this.showNotification('add', getApiErrorMessage(data, ERROR_MESSAGES.deleteGenre), false);
         }
       } catch (error) {
         console.error('Kļūda dzēšot žanru:', error);
-        this.showNotification('add', 'Kļūda dzēšot žanru', false);
+        this.showNotification('add', ERROR_MESSAGES.deleteGenre, false);
       } finally {
         
         this.deleteGenreConfirmation.show = false;
@@ -1338,7 +1339,7 @@ export default {
       
       if (!genre) {
         console.error('Invalid genre object');
-        this.showNotification('add', 'Kļūda: nederīgs žanra objekts', false);
+        this.showNotification('add', ERROR_MESSAGES.invalidData, false);
         return;
       }
       
@@ -1346,7 +1347,7 @@ export default {
       const genreId = genre.Zanra_ID || genre.id;
       if (!genreId) {
         console.error('Genre has no ID:', genre);
-        this.showNotification('add', 'Kļūda: žanra ID nav atrasts', false);
+        this.showNotification('add', ERROR_MESSAGES.genreIdMissing, false);
         return;
       }
 
@@ -1431,7 +1432,7 @@ export default {
       } catch (error) {
         console.error('Kļūda:', error);
         this.error = true;
-        this.errorMessage = 'Neizdevās ielādēt grāmatas';
+        this.errorMessage = ERROR_MESSAGES.loadBooks;
       } finally {
         this.loading = false;
       }
@@ -1569,18 +1570,14 @@ export default {
           
           console.error('Server error on delete:', data);
           
-          let errorMsg = data.message || 'Nezināma kļūda';
-          if (errorMsg.includes('Kļūda:')) {
-            errorMsg = errorMsg.replace('Kļūda: ', '');
-          }
-          this.showNotification('add', 'Kļūda dzēšot grāmatu: ' + errorMsg, false);
+          this.showNotification('add', getApiErrorMessage(data, ERROR_MESSAGES.deleteBook), false);
         } 
         else {
-          this.showNotification('add', data.message || 'Kļūda dzēšot grāmatu', false);
+          this.showNotification('add', getApiErrorMessage(data, ERROR_MESSAGES.deleteBook), false);
         }
       } catch (error) {
         console.error('Kļūda dzēšot grāmatu:', error);
-        this.showNotification('add', 'Servera kļūda (500)', false);
+        this.showNotification('add', ERROR_MESSAGES.server, false);
       }
 
     },
@@ -1626,24 +1623,18 @@ export default {
          } else if (response.status === 422) {
 
           this.handleValidationErrors(data.errors);
-          this.showNotification('add', 'Lūdzu, izlabojiet atzīmētās kļūdas', false);
+          this.showNotification('add', getValidationMessages(data.errors).join(' ') || ERROR_MESSAGES.validation, false);
           
           console.error('Validation errors:', data.errors || data);
           
-          let errorText = 'Validācijas kļūda: ';
-          if (data.errors) {
-            errorText += Object.values(data.errors).flat().join(' | ');
-          } else if (data.message) {
-            errorText += data.message;
-          }
-          this.showNotification('add', errorText, false);
+          this.showNotification('add', getApiErrorMessage(data, ERROR_MESSAGES.addBook), false);
         } 
         else {
-          this.showNotification('add', data.message || 'Kļūda pievienojot grāmatu', false);
+          this.showNotification('add', getApiErrorMessage(data, ERROR_MESSAGES.addBook), false);
         }
       } catch (error) {
         console.error('Kļūda pievienojot grāmatu:', error);
-        this.showNotification('add', 'Servera kļūda', false);
+        this.showNotification('add', ERROR_MESSAGES.server, false);
       }
     },
 
@@ -1674,7 +1665,7 @@ export default {
       for (let [serverField, messages] of Object.entries(errors)) {
         const frontendField = fieldMapping[serverField] || serverField;
         if (this.validationErrors[frontendField]) {
-          this.validationErrors[frontendField] = messages;
+          this.validationErrors[frontendField] = getValidationErrorsByField({ [serverField]: messages })[serverField];
         }
       }
     }

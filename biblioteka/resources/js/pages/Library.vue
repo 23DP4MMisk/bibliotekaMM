@@ -108,7 +108,7 @@
     </v-app-bar>
 
    
-    <v-main style="margin-top: 80px;">
+    <v-main class="header-offset-main">
       <v-container fluid class="main-content pa-8">
        
         <v-row class="mb-6">
@@ -139,7 +139,7 @@
                       class="menu-item"
                     >
                       <v-list-item-title class="text-left">
-                        Akademiskas grāmatas
+                        Akadēmiskās grāmatas
                       </v-list-item-title>
                     </v-list-item>
                     <v-divider></v-divider>
@@ -254,7 +254,7 @@
               <span v-else-if = "selectedGenreName">{{ selectedGenreName }}</span>
               <span v-else-if="selectedNodalaName">{{ selectedNodalaName }}</span>
               <span v-else-if="searchQuery">Meklēšanas rezultāti: "{{ searchQuery }}"</span>
-              <span v-else>Mana biblioteka</span>
+              <span v-else>Visas grāmatas</span>
             </h2>
           </v-col>
         </v-row>
@@ -541,6 +541,7 @@
 
 <script>
 import '../../css/library-pages.css'; 
+import { ERROR_MESSAGES, getApiErrorMessage, getValidationMessages } from '../utils/errorMessages.js';
 
 export default {
   name: 'LibraryPage',
@@ -1066,7 +1067,7 @@ export default {
      
 
       if (!token) {
-       this.showNotification('status', userBook.LietotajGramatas_ID, 'Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.', false);
+      this.showNotification('status', userBook.LietotajGramatas_ID, ERROR_MESSAGES.sessionExpired, false);
        this.goToLogin();
        return;
       }
@@ -1102,32 +1103,32 @@ export default {
         
         } catch (e) {
          console.error('Kļūda parsējot JSON:', e);
-         this.showNotification('status', userBook.LietotajGramatas_ID, 'Servera atbilde nav JSON formātā', false);
+         this.showNotification('status', userBook.LietotajGramatas_ID, ERROR_MESSAGES.notJson, false);
          return;
         }
 
         if (response.status === 401) {
          
-         this.showNotification('status', userBook.LietotajGramatas_ID, 'Jūsu sesija ir beigusies. Lūdzu, pieslēdzieties vēlreiz.', false);
+         this.showNotification('status', userBook.LietotajGramatas_ID, ERROR_MESSAGES.sessionExpired, false);
          this.goToLogin();
          return;
         }
 
         if (response.status === 404) {
          
-         this.showNotification('status', userBook.LietotajGramatas_ID, 'Grāmata nav atrasta jūsu bibliotēkā', false);
+         this.showNotification('status', userBook.LietotajGramatas_ID, ERROR_MESSAGES.invalidData, false);
          return;
         }
 
         if (response.status === 422) {
         
-         alert('Validācijas kļūda: ' + JSON.stringify(data.errors));
+         this.showNotification('status', userBook.LietotajGramatas_ID, getValidationMessages(data.errors).join(' ') || ERROR_MESSAGES.validation, false);
          return;
         }
 
         if (response.status === 500) {
          
-         this.showNotification('status', userBook.LietotajGramatas_ID, 'Servera kļūda. Lūdzu, mēģiniet vēlāk.', false);
+         this.showNotification('status', userBook.LietotajGramatas_ID, ERROR_MESSAGES.server, false);
          return;
         }
 
@@ -1140,12 +1141,12 @@ export default {
          this.showNotification('status', userBook.LietotajGramatas_ID, 'Statuss veiksmīgi mainīts!', true);
         } else {
          ('Kļūda no servera:', data.message);
-         this.showNotification('status', userBook.LietotajGramatas_ID, data.message || 'Neizdevās mainīt statusu', false);
+         this.showNotification('status', userBook.LietotajGramatas_ID, getApiErrorMessage(data, ERROR_MESSAGES.changeStatus), false);
         }
     
       } catch (error) {
        console.error('Kļūda fetch:', error);
-       this.showNotification('status', userBook.LietotajGramatas_ID, 'Neizdevās mainīt statusu: ' + error.message, false);
+      this.showNotification('status', userBook.LietotajGramatas_ID, ERROR_MESSAGES.network, false);
       } 
     },
 
@@ -1182,11 +1183,11 @@ export default {
            
             this.showNotification('delete', bookId, 'Grāmata veiksmīgi dzēsta!', true);
           } else {
-            this.showNotification('delete', bookId, 'Kļūda dzēšot grāmatu', false);
+            this.showNotification('delete', bookId, getApiErrorMessage(data, ERROR_MESSAGES.deleteBook), false);
           }
         } catch (error) {
           console.error('Kļūda dzēšot grāmatu:', error);
-          this.showNotification('delete', bookId, 'Kļūda dzēšot grāmatu', false);
+          this.showNotification('delete', bookId, ERROR_MESSAGES.network, false);
         }
       },
 
@@ -1230,7 +1231,7 @@ export default {
         );
         this.showNotification('download', userBook.LietotajGramatas_ID, 'Lejupielāde sākta!', true);
       } else {
-        this.showNotification('download', userBook.LietotajGramatas_ID, 'PDF fails nav pieejams', false);
+        this.showNotification('download', userBook.LietotajGramatas_ID, ERROR_MESSAGES.noPdf, false);
       }
     },
     
@@ -1287,11 +1288,11 @@ export default {
     
     getErrorMessage(error) {
       if (error.message.includes('404')) {
-        return 'API nav atrasts. Lūdzu, pārbaudiet vai Laravel serveris darbojas (php artisan serve)';
+        return ERROR_MESSAGES.server;
       } else if (error.message.includes('Failed to fetch')) {
-        return 'Nav savienojuma ar serveri. Pārbaudiet savienojumu.';
+        return ERROR_MESSAGES.network;
       }
-      return error.message;
+      return ERROR_MESSAGES.loadBooks;
     },
     
     getBookCover(book) {

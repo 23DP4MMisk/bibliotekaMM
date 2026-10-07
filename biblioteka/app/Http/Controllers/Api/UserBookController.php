@@ -210,7 +210,7 @@ class UserBookController extends Controller
             Log::error('Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Servera kļūda: ' . $e->getMessage()
+                'message' => 'Grāmatas statusu neizdevās atjaunināt. Mēģiniet vēlreiz.'
             ], 500);
         }
     }
@@ -275,7 +275,7 @@ class UserBookController extends Controller
         Log::error('Error deleting book: ' . $e->getMessage());
         return response()->json([
             'success' => false,
-            'message' => 'Servera kļūda: ' . $e->getMessage()
+            'message' => 'Grāmatu neizdevās dzēst no bibliotēkas. Mēģiniet vēlreiz.'
         ], 500);
     }
   }

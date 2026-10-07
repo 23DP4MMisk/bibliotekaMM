@@ -25,7 +25,7 @@
                 ></v-img>
                 <span v-else class="admin-avatar-text">{{ userInitial }}</span>
               </v-avatar>
-                <span class="admin-text">ADMINS</span>
+                <span class="admin-text">Administrators</span>
                 <v-icon right color="white">mdi-chevron-down</v-icon>
               </v-btn>
             </template>
@@ -38,7 +38,7 @@
                   </v-list-item-title>
                   <v-list-item-subtitle>
                     {{ userEmail }}
-                    <v-chip x-small color="error" class="ml-2">ADMIN</v-chip>
+                    <v-chip x-small color="error" class="ml-2">Administrators</v-chip>
                   </v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
@@ -72,7 +72,7 @@
       </v-container>
     </v-app-bar>
 
-    <v-main style="margin-top: 80px;">
+    <v-main class="header-offset-main">
       <v-container fluid class="main-content pa-8">
         <div v-if="loading" class="text-center py-12">
           <v-progress-circular indeterminate color="#003D3A" size="64"></v-progress-circular>
@@ -183,35 +183,14 @@
                 </div>
 
                 <div v-else-if="reviews.length > 0" class="reviews-list">
-                  <div
+                  <CommentItem
                     v-for="review in reviews"
                     :key="review.Atsauksmes_ID"
+                    :comment="review"
+                    :level="0"
+                    :read-only="true"
                     class="review-item"
-                  >
-                    <div class="review-header">
-                      <div class="reviewer-info">
-                        <v-avatar color="#003D3A" size="40" class="mr-3">
-                          <span class="reviewer-initial">{{ getUserInitial(review.lietotaja_vards) }}</span>
-                        </v-avatar>
-                        <div>
-                          <div class="reviewer-name">{{ review.lietotaja_vards }}</div>
-                          <div class="review-date">{{ formatDate(review.created_at) }}</div>
-                        </div>
-                      </div>
-                      <div class="review-rating">
-                        <v-icon
-                          v-for="star in 5"
-                          :key="star"
-                          :color="star <= review.vertejums ? '#FFD700' : '#C0C0C0'"
-                          size="18"
-                        >
-                          mdi-star
-                        </v-icon>
-                        <span class="rating-value">({{ review.vertejums }}/5)</span>
-                      </div>
-                    </div>
-                    <p class="review-text">{{ review.komentārs }}</p>
-                  </div>
+                  />
                 </div>
 
                 <div v-else class="reviews-card">
@@ -380,8 +359,11 @@
 
 <script>
 import '../../css/adminbook-view.css';
+import { ERROR_MESSAGES, getApiErrorMessage } from '../utils/errorMessages.js';
+import CommentItem from '../components/CommentItem.vue';
 export default {
   name: 'AdminBookView',
+  components: { CommentItem },
   data() {
     return {
       // Gramatas dati
@@ -415,7 +397,7 @@ export default {
   },
   computed: {
     userName() {
-      return this.user?.lietotaja_vards || 'Admins';
+      return this.user?.lietotaja_vards || 'Administrators';
     },
     
     userEmail() {
@@ -541,7 +523,7 @@ export default {
       } catch (error) {
         console.error(' Kļūda:', error.message);
         this.error = true;
-        this.errorMessage = 'Neizdevās ielādēt grāmatas informāciju';
+        this.errorMessage = ERROR_MESSAGES.loadBook;
       } finally {
         this.loading = false;
       }
@@ -653,15 +635,15 @@ export default {
           this.showEditForm = false;
         } else {
           console.error(' Kļūda atjauninot grāmatu:', data);
-          const validationErrors = data.errors ? Object.values(data.errors).flat() : [];
           this.showNotification(
-            validationErrors.length ? validationErrors.join(' | ') : (data.message || 'Kļūda saglabājot izmaiņas'),
+            getApiErrorMessage(data, ERROR_MESSAGES.saveBook),
             false
           );
         }
         
       } catch (error) {
         console.error('Error updating book:', error);
+        this.showNotification(ERROR_MESSAGES.saveBook, false);
       }
     },
 

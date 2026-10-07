@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app class="profile-page">
     
     <v-app-bar app flat height="80" class="top-nav-bar" fixed>
       <v-container class="d-flex align-center justify-space-between px-8">
@@ -39,7 +39,7 @@
                   </v-list-item-title>
                   <v-list-item-subtitle>
                     {{ userEmail }}
-                    <v-chip v-if="isAdmin" x-small color="error" class="ml-2">ADMIN</v-chip>
+                    <v-chip v-if="isAdmin" x-small color="error" class="ml-2">Administrators</v-chip>
                   </v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
@@ -96,7 +96,7 @@
     </v-app-bar>
 
    
-    <v-main style="margin-top: 80px;">
+    <v-main class="header-offset-main">
       <v-container fluid class="main-content pa-8">
         <v-row class="justify-center">
           <v-col cols="12" md="10" lg="8">
@@ -106,7 +106,7 @@
                 <div class="d-flex align-center">
                   <v-icon size="32" color="#003D3A" class="mr-3">mdi-account-cog</v-icon>
                   <span class="profile-title">Mans profils</span>
-                  <v-chip v-if="isAdmin" class="ml-3" color="error" small>ADMIN</v-chip>
+                  <v-chip v-if="isAdmin" class="ml-3" color="error" small>Administrators</v-chip>
                 </div>
               </v-card-title>
 
@@ -157,7 +157,7 @@
                             ref="fileInput"
                             type="file"
                             accept="image/*"
-                            style="display: none"
+                            class="profile-file-input"
                             @change="uploadAvatar"
                           />
                         </div>
@@ -399,7 +399,8 @@
 </template>
 
 <script>
-
+import '../../css/profile-page.css';
+import { ERROR_MESSAGES, getApiErrorMessage, getValidationErrorsByField, getValidationMessages } from '../utils/errorMessages.js';
 
 export default {
   name: 'ProfilePage',
@@ -560,13 +561,13 @@ export default {
           }
         
         } else {
-          this.errorMessage = data.message || 'Kļūda ielādējot profilu';
+          this.errorMessage = getApiErrorMessage(data, ERROR_MESSAGES.loadProfile);
           this.error = true;
         }
       } catch (error) {
         console.error('Error loading profile:', error);
         this.error = true;
-        this.errorMessage = error.message || 'Kļūda ielādējot profilu';
+        this.errorMessage = ERROR_MESSAGES.loadProfile;
       } finally {
         this.loading = false;
       }
@@ -605,11 +606,11 @@ export default {
           this.user.lietotaja_vards = this.profile.lietotaja_vards;
           localStorage.setItem('user', JSON.stringify(this.user));
         } else {
-          this.showNotification(data.message || 'Kļūda saglabājot profilu', 'error');
+          this.showNotification(getApiErrorMessage(data, ERROR_MESSAGES.saveProfile), 'error');
         }
       } catch (error) {
         console.error('Error saving profile:', error);
-        this.showNotification('Kļūda savienojumā ar serveri', 'error');
+        this.showNotification(ERROR_MESSAGES.network, 'error');
       } finally {
         this.saving = false;
       }
@@ -639,11 +640,11 @@ export default {
           localStorage.setItem('user', JSON.stringify(this.user));
           this.showNotification('Avatar veiksmīgi augšupielādēts!', 'success');
         } else {
-          this.showNotification(data.message || 'Kļūda augšupielādējot avataru', 'error');
+          this.showNotification(getApiErrorMessage(data, ERROR_MESSAGES.uploadAvatar), 'error');
         }
       } catch (error) {
         console.error('Error uploading avatar:', error);
-        this.showNotification('Kļūda savienojumā ar serveri', 'error');
+        this.showNotification(ERROR_MESSAGES.network, 'error');
       }
       
       event.target.value = '';
@@ -675,14 +676,14 @@ export default {
             new_password_confirmation: ''
           };
         } else if (data.errors) {
-          this.passwordErrors = data.errors;
-          this.showNotification('Lūdzu, izlabojiet kļūdas', 'error');
+          this.passwordErrors = getValidationErrorsByField(data.errors);
+          this.showNotification(getValidationMessages(data.errors).join(' ') || ERROR_MESSAGES.validation, 'error');
         } else {
-          this.showNotification(data.message || 'Kļūda mainot paroli', 'error');
+          this.showNotification(getApiErrorMessage(data, ERROR_MESSAGES.changePassword), 'error');
         }
       } catch (error) {
         console.error('Error changing password:', error);
-        this.showNotification('Kļūda savienojumā ar serveri', 'error');
+        this.showNotification(ERROR_MESSAGES.network, 'error');
       } finally {
         this.changingPassword = false;
       }
@@ -690,7 +691,7 @@ export default {
 
     async deleteAccount() {
       if (!this.deletePassword) {
-        this.showNotification('Lūdzu, ievadiet paroli', 'error');
+        this.showNotification(ERROR_MESSAGES.passwordRequired, 'error');
         return;
       }
 
@@ -719,11 +720,11 @@ export default {
             this.$router.push('/login');
           }, 1500);
         } else {
-          this.showNotification(data.message || 'Kļūda dzēšot profilu', 'error');
+          this.showNotification(getApiErrorMessage(data, ERROR_MESSAGES.deleteAccount), 'error');
         }
       } catch (error) {
         console.error('Error deleting account:', error);
-        this.showNotification('Kļūda savienojumā ar serveri', 'error');
+        this.showNotification(ERROR_MESSAGES.network, 'error');
       } finally {
         this.deletingAccount = false;
         this.showDeleteDialog = false;
@@ -782,93 +783,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.profile-card,
-.settings-card {
-  border-radius: 16px !important;
-}
-
-.profile-header {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
-  padding: 16px 24px !important;
-}
-
-.profile-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #003D3A;
-}
-
-.avatar-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.avatar-wrapper {
-  position: relative;
-}
-
-.profile-avatar {
-  border: 4px solid #003D3A;
-  box-shadow: 0 4px 12px rgba(0, 61, 58, 0.2);
-}
-
-.avatar-text {
-  font-size: 4rem;
-  font-weight: 700;
-  color: white;
-  text-transform: uppercase;
-}
-
-.avatar-upload-btn {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  min-width: 36px !important;
-  height: 36px !important;
-  border-radius: 50% !important;
-  background-color: #003D3A !important;
-  color: white !important;
-  box-shadow: 0 2px 8px rgba(0, 61, 58, 0.3);
-}
-
-.role-chip {
-  font-weight: 600;
-}
-
-.settings-header {
-  background: linear-gradient(135deg, #fff5f5 0%, #ffebee 100%) !important;
-  padding: 16px 24px !important;
-}
-
-.danger-title {
-  color: #b71c1c !important;
-}
-
-.danger-text {
-  color: #666;
-  font-size: 0.95rem;
-}
-
-.password-dialog-header {
-  background-color: #003D3A !important;
-  color: white !important;
-}
-
-.delete-dialog-header {
-  background-color: #b71c1c !important;
-  color: white !important;
-}
-
-.v-col {
-  padding: 6px 12px;
-}
-
-@media (max-width: 600px) {
-  .profile-title {
-    font-size: 1.2rem;
-  }
-}
-</style>

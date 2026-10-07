@@ -69,6 +69,7 @@
 .hero-image {
   width: 100%;
   height: 100%;
+  background: url('/images/bookshelf.jpg') center / cover no-repeat;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -93,6 +94,10 @@
 .hero-btn:hover {
   transform: translateY(-3px) !important;
   box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4) !important;
+}
+
+.category-card-row {
+  gap: 40px;
 }
 
 
@@ -139,6 +144,14 @@
   height: 100%;
   border-radius: 10px;
   background-color: #002522; 
+}
+
+.academic-book-gif {
+  background: url('/images/academikbook.gif') center / contain no-repeat;
+}
+
+.leisure-book-gif {
+  background: url('/images/funnybook.gif') center / contain no-repeat;
 }
 
 .category-title {

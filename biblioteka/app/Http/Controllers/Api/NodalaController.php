@@ -22,8 +22,7 @@ class NodalaController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda ielādējot nodaļas',
-                'error' => env('APP_DEBUG') ? $e->getMessage() : null,
+                'message' => 'Nodaļas neizdevās ielādēt. Mēģiniet vēlreiz.',
             ], 500);
         }
     }
@@ -60,8 +59,7 @@ class NodalaController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda ielādējot grāmatas nodaļā',
-                'error' => env('APP_DEBUG') ? $e->getMessage() : null,
+                    'message' => 'Šīs nodaļas grāmatas neizdevās ielādēt. Mēģiniet vēlreiz.',
             ], 500);
         }
     }
@@ -93,8 +91,7 @@ class NodalaController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda ielādējot visas grāmatas',
-                'error' => env('APP_DEBUG') ? $e->getMessage() : null,
+                'message' => 'Grāmatas neizdevās ielādēt. Mēģiniet vēlreiz.',
             ], 500);
         }
     }
@@ -130,8 +127,7 @@ class NodalaController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kļūda meklējot grāmatas',
-                'error' => env('APP_DEBUG') ? $e->getMessage() : null,
+                'message' => 'Grāmatas neizdevās atrast. Mēģiniet vēlreiz.',
             ], 500);
         }
     }

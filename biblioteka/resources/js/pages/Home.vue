@@ -10,9 +10,9 @@
       fixed
     >
       <v-container class="d-flex align-center justify-center px-8">
-        <v-btn @click="scrollToSection('hero')" variant="text" class="nav-btn">MyLibrary</v-btn>
+        <v-btn @click="scrollToSection('hero')" variant="text" class="nav-btn">MYLIBRARY</v-btn>
         <v-btn @click="scrollToSection('nodalas')" variant="text" class="nav-btn ml-8">Nodaļas</v-btn>
-        <v-btn @click="scrollToSection('about')" variant="text" class="nav-btn ml-8">Par biblioteku</v-btn>
+        <v-btn @click="scrollToSection('about')" variant="text" class="nav-btn ml-8">Par bibliotēku</v-btn>
       </v-container>
     </v-app-bar>
 
@@ -21,20 +21,12 @@
       <section id="hero" class="hero-section">
         
         <div class="hero-top">
-          <h1 class="hero-title">MyLibrary</h1>
+          <h1 class="hero-title">MYLIBRARY</h1>
         </div>
         
        
         <div class="hero-bottom">
-          <div 
-            class="hero-image"
-            :style="{ 
-              backgroundImage: 'url(/images/bookshelf.jpg)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat'
-            }"
-          >
+          <div class="hero-image">
             <v-btn color="#003D3A" size="x-large" class="hero-btn" @click="goToLibrary">
               Ieiet bibliotekā
             </v-btn>
@@ -45,23 +37,15 @@
       
       <section id="nodalas" class="nodala-section">
         <v-container>
-          <h2 class="section-title mb-12 text-center">Nodaļas MyLibrary</h2>
-          <div class="d-flex justify-center flex-wrap" style="gap: 40px;">
+          <h2 class="section-title mb-12 text-center">MYLIBRARY nodaļas</h2>
+          <div class="d-flex justify-center flex-wrap category-card-row">
             
             <v-card class="category-card" width="400">
               <div class="gif-container">
-                <div 
-                  class="gif-display"
-                  :style="{ 
-                    backgroundImage: 'url(/images/academikbook.gif)',
-                    backgroundSize: 'contain',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat'
-                  }"
-                ></div>
+                <div class="gif-display academic-book-gif"></div>
               </div>
               <v-card-text class="text-center pt-6">
-                <h3 class="category-title">Akademiskas grāmatas</h3>
+                <h3 class="category-title">Akadēmiskās grāmatas</h3>
                 <p class="category-description mt-4">
                   Zinātniskā literatūra, mācību grāmatas un pētījumi studentiem un akadēmiķiem
                 </p>
@@ -71,15 +55,7 @@
            
             <v-card class="category-card" width="400">
               <div class="gif-container">
-                <div 
-                  class="gif-display"
-                  :style="{ 
-                    backgroundImage: 'url(/images/funnybook.gif)',
-                    backgroundSize: 'contain',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat'
-                  }"
-                ></div>
+                <div class="gif-display leisure-book-gif"></div>
               </div>
               <v-card-text class="text-center pt-6">
                 <h3 class="category-title">Grāmatas atpūtai</h3>
@@ -95,7 +71,7 @@
       
       <section id="about" class="about-section">
         <v-container>
-          <h2 class="section-title mb-8 text-center">Par biblioteku</h2>
+            <h2 class="section-title mb-8 text-center">Par bibliotēku</h2>
           <v-card class="about-card">
             <v-card-text class="text-center pa-8">
               <p class="about-text mb-4">Laipni lūdzam tiešsaistes bibliotēkā MyLibrary!</p>
