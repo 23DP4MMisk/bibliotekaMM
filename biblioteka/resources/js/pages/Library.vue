@@ -858,7 +858,9 @@ export default {
         this.recommendationsLoading = true;
         try {
             const response = await fetch('/api/recommendations', {
+              cache: 'no-store',
                 headers: {
+                'Cache-Control': 'no-cache',
                     'Authorization': 'Bearer ' + this.authToken,
                     'Accept': 'application/json'
                 }
@@ -1374,6 +1376,7 @@ export default {
       this.searchQuery = '';
 
       await this.fetchBooks();
+      await this.fetchRecommendations();
     },
     
    

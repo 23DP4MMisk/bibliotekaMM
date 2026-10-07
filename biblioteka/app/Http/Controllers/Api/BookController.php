@@ -370,60 +370,71 @@ class BookController extends Controller
             }
 
             
-            $nodalaCounts = DB::table('Gramata')
-                ->whereIn('ISBN', $userBookIsbns)
-                ->select('Nodala_ID', DB::raw('count(*) as count'))
-                ->groupBy('Nodala_ID')
-                ->orderBy('count', 'desc')
+            $sectionCounts = DB::table('LietotajGramatas as library')
+                ->join('Gramata as book', 'book.ISBN', '=', 'library.Gramatas')
+                ->join('Nodala as section', 'section.Nodala_ID', '=', 'book.Nodala_ID')
+                ->where('library.Lietotajs', $user->kodsID)
+                ->select('section.tips as section_type', DB::raw('COUNT(DISTINCT book.ISBN) as book_count'))
+                ->groupBy('section.tips')
                 ->get();
 
-            
-            $preferredNodalas = [];
-            $maxCount = $nodalaCounts->first()->count ?? 0;
-            
-            foreach ($nodalaCounts as $nc) {
-                if ($nc->count === $maxCount) {
-                    $preferredNodalas[] = $nc->Nodala_ID;
-                }
+            if ($sectionCounts->isEmpty()) {
+                return $this->popularRecommendations();
             }
 
-            
-            $books = Gramata::with('nodala')
-                ->whereIn('Nodala_ID', $preferredNodalas)
-                ->whereNotIn('ISBN', $userBookIsbns)
-                ->get();
-
-            
-            if ($books->count() < 6) {
-                $additional = Gramata::with('nodala')
-                    ->whereNotIn('ISBN', $userBookIsbns)
-                    ->whereNotIn('ISBN', $books->pluck('ISBN')->toArray())
-                    ->get();
-
-                $books = $books->merge($additional);
-            }
-
-            
-            $recommendations = $books->map(function($book) {
-                $views = Parskata::where('Gramatas', $book->ISBN)->sum('parskatas_skaits');
-                $downloads = Lejupielade::where('Gramatas_ID', $book->ISBN)->count();
-                $score = $views + ($downloads * 3);
+            $totalLibraryBooks = $sectionCounts->sum('book_count');
+            $sectionQuotas = $sectionCounts->map(function ($section) use ($totalLibraryBooks) {
+                $exactQuota = 6 * $section->book_count / $totalLibraryBooks;
 
                 return [
-                    'isbn' => $book->ISBN,
-                    'nosaukums' => $book->nosaukums,
-                    'autors' => $book->autors,
-                    'vaku_attels' => $book->vaku_attels,
-                    'nodala_id' => $book->Nodala_ID,
-                    'zanra_id' => $book->Zanra_ID,
-                    'views' => $views,
-                    'downloads' => $downloads,
-                    'score' => $score
+                    'section_type' => $section->section_type,
+                    'quota' => (int) floor($exactQuota),
+                    'remainder' => $exactQuota - floor($exactQuota),
                 ];
-            })
-            ->sortByDesc('score')
-            ->take(6)
-            ->values();
+            })->all();
+
+            $remainingSlots = 6 - array_sum(array_column($sectionQuotas, 'quota'));
+            usort($sectionQuotas, function ($first, $second) {
+                return ($second['remainder'] <=> $first['remainder'])
+                    ?: strcmp($first['section_type'], $second['section_type']);
+            });
+
+            for ($index = 0; $index < $remainingSlots; $index++) {
+                $sectionQuotas[$index % count($sectionQuotas)]['quota']++;
+            }
+
+            $recommendations = collect();
+            foreach ($sectionQuotas as $sectionQuota) {
+                if ($sectionQuota['quota'] === 0) {
+                    continue;
+                }
+
+                $sectionBooks = Gramata::with('nodala')
+                    ->whereHas('nodala', function ($query) use ($sectionQuota) {
+                        $query->where('tips', $sectionQuota['section_type']);
+                    })
+                    ->get();
+
+                $recommendations = $recommendations->merge(
+                    $this->formatRecommendationBooks($sectionBooks)
+                        ->sortBy([['views', 'desc'], ['isbn', 'asc']])
+                        ->take($sectionQuota['quota'])
+                );
+            }
+
+            if ($recommendations->count() < 6) {
+                $additionalBooks = Gramata::with('nodala')
+                    ->whereNotIn('ISBN', $recommendations->pluck('isbn')->all())
+                    ->get();
+
+                $recommendations = $recommendations->merge(
+                    $this->formatRecommendationBooks($additionalBooks)
+                        ->sortBy([['views', 'desc'], ['isbn', 'asc']])
+                        ->take(6 - $recommendations->count())
+                );
+            }
+
+            $recommendations = $recommendations->take(6)->values();
 
             return response()->json([
                 'success' => true,
@@ -448,24 +459,8 @@ class BookController extends Controller
         try {
             $books = Gramata::with('nodala')->get();
 
-            $recommendations = $books->map(function($book) {
-                $views = Parskata::where('Gramatas', $book->ISBN)->sum('parskatas_skaits');
-                $downloads = Lejupielade::where('Gramatas_ID', $book->ISBN)->count();
-                $score = $views + ($downloads * 3);
-
-                return [
-                    'isbn' => $book->ISBN,
-                    'nosaukums' => $book->nosaukums,
-                    'autors' => $book->autors,
-                    'vaku_attels' => $book->vaku_attels,
-                    'nodala_id' => $book->Nodala_ID,
-                    'zanra_id' => $book->Zanra_ID,
-                    'views' => $views,
-                    'downloads' => $downloads,
-                    'score' => $score
-                ];
-            })
-            ->sortByDesc('score')
+            $recommendations = $this->formatRecommendationBooks($books)
+            ->sortBy([['views', 'desc'], ['isbn', 'asc']])
             ->take(6)
             ->values();
 
@@ -481,5 +476,25 @@ class BookController extends Controller
                 'message' => 'Kļūda ielādējot ieteikumus'
             ], 500);
         }
+    }
+
+    private function formatRecommendationBooks($books)
+    {
+        return $books->map(function ($book) {
+            $views = Parskata::where('Gramatas', $book->ISBN)->sum('parskatas_skaits');
+            $downloads = Lejupielade::where('Gramatas_ID', $book->ISBN)->count();
+
+            return [
+                'isbn' => $book->ISBN,
+                'nosaukums' => $book->nosaukums,
+                'autors' => $book->autors,
+                'vaku_attels' => $book->vaku_attels,
+                'nodala_id' => $book->Nodala_ID,
+                'zanra_id' => $book->Zanra_ID,
+                'views' => $views,
+                'downloads' => $downloads,
+                'score' => $views,
+            ];
+        });
     }
 }

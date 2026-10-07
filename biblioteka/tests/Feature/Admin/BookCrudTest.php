@@ -112,7 +112,20 @@ class BookCrudTest extends TestCase
         $this->withHeaders($this->headersFor($admin))
             ->postJson('/api/admin/books', $data)
             ->assertStatus(422)
-            ->assertJsonValidationErrors('nosaukums');
+            ->assertJsonValidationErrors('nosaukums')
+            ->assertJsonPath('errors.nosaukums.0', 'Lauks grāmatas nosaukums ir obligāts.');
+    }
+
+    public function test_admin_book_update_validation_errors_are_in_latvian(): void
+    {
+        $admin = $this->createUser();
+        $book = $this->createBook();
+
+        $this->withHeaders($this->headersFor($admin))
+            ->putJson('/api/admin/books/' . $book->ISBN, ['autors' => 'John123'])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('autors')
+            ->assertJsonPath('errors.autors.0', 'Autora vārds nedrīkst saturēt ciparus.');
     }
 
     private function createUser(string $loma = 'admins', string $status = 'aktivs'): Lietotajs

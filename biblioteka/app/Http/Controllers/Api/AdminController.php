@@ -248,7 +248,7 @@ class AdminController extends Controller
             'Nodala_ID' => 'required|integer|exists:Nodala,Nodala_ID',
             'faila_pdf' => 'nullable|string|max:250',
             'vaku_attels' => 'nullable|string|max:250'
-        ]);
+        ], $this->bookValidationMessages(), $this->bookValidationAttributes());
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
@@ -291,7 +291,7 @@ class AdminController extends Controller
 
         $validator = Validator::make($request->all(), [
             'nosaukums' => 'sometimes|required|string|max:50',
-            'autors' => 'sometimes|required|string|max:255',
+            'autors' => ['sometimes', 'required', 'string', 'max:255', 'regex:/^[^\d]*$/'],
             'gads' => 'nullable|string|size:4',
             'lapu_skaits' => 'nullable|integer|min:1',
             'apraksts' => 'nullable|string|max:1000',
@@ -299,7 +299,7 @@ class AdminController extends Controller
             'Nodala_ID' => 'sometimes|required|integer|exists:Nodala,Nodala_ID',
             'faila_pdf' => 'nullable|string|max:250',
             'vaku_attels' => 'nullable|string|max:250'
-        ]);
+        ], $this->bookValidationMessages(), $this->bookValidationAttributes());
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
@@ -594,6 +594,38 @@ class AdminController extends Controller
         if (!$genreId) return;
         $count = Gramata::where('Zanra_ID', $genreId)->count();
         Zanrs::where('Zanra_ID', $genreId)->update(['gramatu_skaits' => $count]);
+    }
+
+    private function bookValidationMessages(): array
+    {
+        return [
+            'required' => 'Lauks :attribute ir obligāts.',
+            'integer' => 'Laukam :attribute jābūt veselam skaitlim.',
+            'unique' => 'Lauks :attribute jau tiek izmantots.',
+            'string' => 'Laukam :attribute jābūt tekstam.',
+            'max.string' => 'Lauks :attribute nedrīkst pārsniegt :max rakstzīmes.',
+            'size.string' => 'Laukam :attribute jābūt tieši :size rakstzīmēm garam.',
+            'min.numeric' => 'Laukam :attribute jābūt vismaz :min.',
+            'exists' => 'Izvēlētais :attribute nav atrasts.',
+            'regex' => 'Lauka :attribute vērtība nav derīga.',
+            'autors.regex' => 'Autora vārds nedrīkst saturēt ciparus.',
+        ];
+    }
+
+    private function bookValidationAttributes(): array
+    {
+        return [
+            'ISBN' => 'ISBN',
+            'nosaukums' => 'grāmatas nosaukums',
+            'autors' => 'autors',
+            'gads' => 'izdošanas gads',
+            'lapu_skaits' => 'lapu skaits',
+            'apraksts' => 'apraksts',
+            'Zanra_ID' => 'žanrs',
+            'Nodala_ID' => 'nodaļa',
+            'faila_pdf' => 'PDF fails',
+            'vaku_attels' => 'vāka attēls',
+        ];
     }
 
     /** 

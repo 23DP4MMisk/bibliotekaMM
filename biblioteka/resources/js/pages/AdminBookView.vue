@@ -653,7 +653,11 @@ export default {
           this.showEditForm = false;
         } else {
           console.error(' Kļūda atjauninot grāmatu:', data);
-          this.showNotification(data.message || 'Kļūda saglabājot izmaiņas', false);
+          const validationErrors = data.errors ? Object.values(data.errors).flat() : [];
+          this.showNotification(
+            validationErrors.length ? validationErrors.join(' | ') : (data.message || 'Kļūda saglabājot izmaiņas'),
+            false
+          );
         }
         
       } catch (error) {
