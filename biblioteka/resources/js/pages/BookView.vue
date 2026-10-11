@@ -256,9 +256,16 @@
                       :level="0"
                       :reply-form="replyForm"
                       :submitting-reply="submittingReply"
+                      :current-user-id="currentUserId"
+                      :editing-comment-id="editingCommentId"
+                      :submitting-edit="submittingEdit"
                       @reply="openReplyForm"
                       @submit-reply="submitReply"
                       @cancel-reply="replyForm = null"
+                      @edit="openEditForm"
+                      @submit-edit="submitEdit"
+                      @cancel-edit="cancelEdit"
+                      @delete-comment="deleteComment"
                       class="review-item"
                     />
                      
@@ -318,11 +325,18 @@ export default {
       reviews: [],
       reviewsLoading: true,
 
-      replyForm: null,                      
-      submittingReply: false, 
+      replyForm: null,
+      submittingReply: false,
+
+      editingCommentId: null,
+      submittingEdit: false,
     };
   },
   computed: {
+    currentUserId() {
+      return this.user?.kodsID ?? null;
+    },
+
     userName() {
       return this.user?.lietotaja_vards || '';
     },
@@ -809,6 +823,90 @@ export default {
   
    
     
+    openEditForm(reviewId) {
+      this.replyForm = null;
+      this.editingCommentId = reviewId;
+    },
+
+    cancelEdit() {
+      this.editingCommentId = null;
+    },
+
+    async submitEdit({ id, text, rating }) {
+      if (!text || text.trim() === '') {
+        this.showNotification('add', ERROR_MESSAGES.commentRequired, false);
+        return;
+      }
+
+      this.submittingEdit = true;
+
+      try {
+        const response = await fetch(`/api/reviews/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + this.authToken
+          },
+          body: JSON.stringify({
+            komentars: text,
+            vertejums: rating
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          this.showNotification('add', data.message || 'Komentārs atjaunināts!', true);
+          this.editingCommentId = null;
+          await this.loadBookReviews();
+        } else {
+          this.showNotification('add', getApiErrorMessage(data, ERROR_MESSAGES.editReview), false);
+        }
+      } catch (error) {
+        console.error('Error updating comment:', error);
+        this.showNotification('add', ERROR_MESSAGES.network, false);
+      } finally {
+        this.submittingEdit = false;
+      }
+    },
+
+    countReplies(comment) {
+      if (!comment.atbildes) return 0;
+      return comment.atbildes.reduce((total, reply) => total + 1 + this.countReplies(reply), 0);
+    },
+
+    async deleteComment(comment) {
+      const repliesCount = this.countReplies(comment);
+      const question = repliesCount > 0
+        ? `Vai tiešām dzēst šo komentāru? Kopā ar to tiks dzēstas arī ${repliesCount} atbildes.`
+        : 'Vai tiešām dzēst šo komentāru?';
+
+      if (!window.confirm(question)) return;
+
+      try {
+        const response = await fetch(`/api/reviews/${comment.Atsauksmes_ID}`, {
+          method: 'DELETE',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + this.authToken
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          this.showNotification('add', data.message || 'Komentārs dzēsts!', true);
+          await this.loadBookReviews();
+        } else {
+          this.showNotification('add', getApiErrorMessage(data, ERROR_MESSAGES.deleteReview), false);
+        }
+      } catch (error) {
+        console.error('Error deleting comment:', error);
+        this.showNotification('add', ERROR_MESSAGES.network, false);
+      }
+    },
+
     goToLibrary() {
       this.$router.push('/library');
     },

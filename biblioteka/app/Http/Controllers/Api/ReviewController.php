@@ -322,4 +322,127 @@ class ReviewController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Komentāra vai atsauksmes rediģēšana
+     * Kas dara: Atjaunina komentāra tekstu (un vērtējumu, ja tā ir galvenā atsauksme), ja lietotājs ir autors
+     * Kad izmantojas: Kad lietotājs rediģē savu atsauksmi vai atbildi
+    */
+    public function update(Request $request, $id)
+    {
+        try {
+            $user = $this->getUserFromToken($request);
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lietotājs nav autentificēts'
+                ], 401);
+            }
+
+            $review = DB::table('Atsauksmes')->where('Atsauksmes_ID', $id)->first();
+
+            if (!$review) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Komentārs nav atrasts'
+                ], 404);
+            }
+
+            if ($review->Lietotaja_ID != $user->kodsID) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Varat rediģēt tikai savus komentārus'
+                ], 403);
+            }
+
+            $validator = Validator::make($request->all(), [
+                'komentars' => 'required|string|max:500',
+                'vertejums' => 'nullable|integer|min:1|max:5',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $updateData = [
+                'komentārs' => $request->komentars,
+                'updated_at' => now()
+            ];
+
+            if ($review->vecakais_komentars === null && $request->filled('vertejums')) {
+                $updateData['vertejums'] = $request->vertejums;
+            }
+
+            DB::table('Atsauksmes')
+                ->where('Atsauksmes_ID', $id)
+                ->update($updateData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Komentārs atjaunināts!'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Review update failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Komentāru neizdevās atjaunināt. Mēģiniet vēlreiz.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Komentāra vai atsauksmes dzēšana
+     * Kas dara: Dzēš komentāru, ja lietotājs ir autors; atbildes tiek dzēstas kopā ar vecāko komentāru (cascade)
+     * Kad izmantojas: Kad lietotājs dzēš savu atsauksmi vai atbildi
+    */
+    public function destroy(Request $request, $id)
+    {
+        try {
+            $user = $this->getUserFromToken($request);
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lietotājs nav autentificēts'
+                ], 401);
+            }
+
+            $review = DB::table('Atsauksmes')->where('Atsauksmes_ID', $id)->first();
+
+            if (!$review) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Komentārs nav atrasts'
+                ], 404);
+            }
+
+            if ($review->Lietotaja_ID != $user->kodsID) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Varat dzēst tikai savus komentārus'
+                ], 403);
+            }
+
+            DB::table('Atsauksmes')->where('Atsauksmes_ID', $id)->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Komentārs dzēsts!'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Review delete failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Komentāru neizdevās dzēst. Mēģiniet vēlreiz.'
+            ], 500);
+        }
+    }
 }

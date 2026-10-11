@@ -16,6 +16,8 @@ Route::get('/check-auth', [AuthController::class, 'checkAuth']);
 Route::post('/check-user', [AuthController::class, 'checkUser']);
 
 Route::post('/reviews', [ReviewController::class, 'store']);
+Route::put('/reviews/{id}', [ReviewController::class, 'update']);
+Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
 Route::get('/reviews/check/{bookId}', [ReviewController::class, 'check']);
 Route::get('/books/{isbn}/reviews', [ReviewController::class, 'bookReviews']);
 
