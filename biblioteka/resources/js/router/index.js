@@ -8,6 +8,7 @@ import RewievPage from '../pages/RewievPage.vue';
 import AdminLibrary from '../pages/AdminLibrary.vue';
 import AdminBookView from  '../pages/AdminBookView.vue';
 import ProfilePage from '../pages/ProfilePage.vue';
+import AdminStatistics from '../pages/AdminStatistics.vue';
 
 
 const routes = [
@@ -56,6 +57,11 @@ const routes = [
         name: 'ProfilePage',
         component: ProfilePage,
         meta: { requiresAuth: true }
+    },
+    {
+        path: '/admin/statistics',
+        name: 'AdminStatistics',
+       component: AdminStatistics
     }
 
 ];

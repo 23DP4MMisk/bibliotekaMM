@@ -657,6 +657,49 @@ class AdminController extends Controller
         }
     }
 
+        
+    public function getChartsData(Request $request)
+    {
+        if (!$this->checkAdmin($request)) {
+            return response()->json(['success' => false, 'message' => 'Piekļuve liegta'], 403);
+        }
+
+       
+        $days = $request->input('days', 30);
+
+       
+        $downloadsLastXDays = \DB::table('Lejupielade')
+            ->select(\DB::raw('DATE(Datums) as date'), \DB::raw('count(*) as count'))
+            ->where('Datums', '>=', now()->subDays($days)->toDateString())
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+       
+        $booksByGenre = \DB::table('Gramata')
+            ->join('Zanrs', 'Gramata.Zanra_ID', '=', 'Zanrs.Zanra_ID')
+            ->select('Zanrs.nosaukums as genre', \DB::raw('count(*) as count'))
+            ->groupBy('Zanrs.nosaukums')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->get();
+
+        
+        $usersByMonth = \DB::table('Lietotajs')
+            ->select(\DB::raw('DATE_FORMAT(registresanas_datums, "%Y-%m") as month'), \DB::raw('count(*) as count'))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->limit(6)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'downloads' => $downloadsLastXDays,
+            'genres' => $booksByGenre,
+            'users' => $usersByMonth
+        ]);
+    }
+
  
 
 

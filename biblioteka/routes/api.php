@@ -155,6 +155,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/stats/users', [AdminController::class, 'userStats']);
     Route::get('/admin/stats', [AdminController::class, 'getStats']);
     Route::get('/stats', [AdminController::class, 'getStats']);
+
+    Route::get('/charts-data', [AdminController::class, 'getChartsData']);
     
 });
 

@@ -82,6 +82,13 @@
                 </v-list-item-icon>
                 <v-list-item-title>Statistika</v-list-item-title>
               </v-list-item>
+
+              <v-list-item @click="$router.push('/admin/statistics')">
+                <v-list-item-icon>
+                  <v-icon>mdi-chart-line</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Analītika (Grafiki)</v-list-item-title>
+              </v-list-item>
               
               <v-divider></v-divider>
               
