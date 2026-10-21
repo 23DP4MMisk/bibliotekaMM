@@ -149,5 +149,6 @@ return new class extends Migration
         Schema::dropIfExists('Zanrs');
         Schema::dropIfExists('Lietotajs');
         Schema::dropIfExists('Nodala');
+        Schema::dropIfExists('ai_summaries');
     }
 };

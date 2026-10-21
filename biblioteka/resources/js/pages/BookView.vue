@@ -242,6 +242,26 @@
             <v-col cols="12">
               <div class="reviews-section">
                 <h2 class="reviews-title">Atsauksmes</h2>
+                 <div v-if="aiSummary || aiSummaryLoading" class="ai-summary-block mb-6 pa-4 rounded-lg" style="background-color: #f4f9f9; border-left: 4px solid #003D3A;">
+                    <div class="d-flex align-center mb-2">
+                      <v-icon color="#003D3A" class="mr-2">mdi-robot</v-icon>
+                      <h3 class="text-subtitle-1 font-weight-bold" style="color: #003D3A; margin: 0;">AI Kopsavilkums par atsauksmēm</h3>
+                    </div>
+                    
+                    
+                    <div v-if="aiSummaryLoading" class="d-flex align-center">
+                      <v-progress-circular indeterminate size="20" width="2" color="#003D3A" class="mr-2"></v-progress-circular>
+                      <span class="text-caption text-grey">Ģenerē kopsavilkumu...</span>
+                    </div>
+                    
+                   
+                    <p v-else style="font-style: italic; color: #333; margin-bottom: 0; font-size: 0.95rem;">
+                      {{ aiSummary }}
+                    </p>
+                  </div>
+                
+                  
+                 
 
                   <div v-if="reviewsLoading" class="text-center py-4">
                     <v-progress-circular indeterminate color="#003D3A" size="40"></v-progress-circular>
@@ -290,6 +310,7 @@
             </v-col>
           </v-row>
         </div>
+      
       </v-container>
     </v-main>
   </v-app>
@@ -330,6 +351,9 @@ export default {
 
       editingCommentId: null,
       submittingEdit: false,
+
+      aiSummary: null,
+      aiSummaryLoading: false
     };
   },
   computed: {
@@ -390,6 +414,8 @@ export default {
 
     await this.loadBookDetails();
     await this.loadBookReviews();
+
+    await this.fetchAiSummary();
   },
   methods: {
 
@@ -413,6 +439,32 @@ export default {
         this.reviews = [];
       }finally {
        this.reviewsLoading = false;
+      }
+    },
+
+    async fetchAiSummary() {
+     
+      
+      this.aiSummaryLoading = true;
+      try {
+        const isbn = this.$route.params.isbn;
+       
+        const response = await fetch(`/api/books/${isbn}/reviews/summary`);
+
+        if (response.status === 429) {
+          this.aiSummary = "AI kopsavilkums šobrīd nav pieejams (dienas limits ir izsmelts). Lūdzu, mēģiniet vēlāk.";
+          return;
+        }
+        const data = await response.json();
+       
+        
+        if (data.summary) {
+          this.aiSummary = data.summary;
+        }
+      } catch (error) {
+        console.error('Kļūda ielādējot AI kopsavilkumu:', error);
+      } finally {
+        this.aiSummaryLoading = false;
       }
     },
 

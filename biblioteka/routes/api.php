@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserBookController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\ChatController;
 use Illuminate\Http\Request;
 
 Route::post('/register', [AuthController::class, 'register']); 
@@ -117,7 +118,6 @@ Route::get('/books', [BookController::class, 'index']);
 Route::get('/books/search/{query}', [BookController::class, 'search']);
 Route::get('/homepage-books', [BookController::class, 'homepage']);
 Route::get('/books/{isbn}', [BookController::class, 'show']);
-
 Route::get('/genres', [BookController::class, 'genres']);
 
 Route::get('/nodalas', [NodalaController::class, 'index']);
@@ -226,18 +226,15 @@ Route::get('/debug-token', function(Request $request) {
 
 
     
-    Route::get('/profile', [AuthController::class, 'getProfile']);
+Route::get('/profile', [AuthController::class, 'getProfile']);
+Route::put('/profile', [AuthController::class, 'updateProfile']);
+Route::post('/profile/avatar', [AuthController::class, 'uploadAvatar']);
+Route::post('/profile/change-password', [AuthController::class, 'changePassword']);
+Route::delete('/profile', [AuthController::class, 'deleteAccount']);
+Route::get('/recommendations', [BookController::class, 'recommendations']);
 
-   
-    Route::put('/profile', [AuthController::class, 'updateProfile']);
+Route::middleware(['throttle:5,1'])->group(function () {
+    Route::post('/chat', [ChatController::class, 'askAdvisor']);
+});
 
-    
-    Route::post('/profile/avatar', [AuthController::class, 'uploadAvatar']);
-
-    
-    Route::post('/profile/change-password', [AuthController::class, 'changePassword']);
-
-    
-    Route::delete('/profile', [AuthController::class, 'deleteAccount']);
-
-    Route::get('/recommendations', [BookController::class, 'recommendations']);
+Route::get('/books/{isbn}/reviews/summary', [ChatController::class, 'summarizeReviews']);
