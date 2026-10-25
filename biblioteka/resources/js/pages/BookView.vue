@@ -242,7 +242,7 @@
             <v-col cols="12">
               <div class="reviews-section">
                 <h2 class="reviews-title">Atsauksmes</h2>
-                 <div v-if="aiSummary || aiSummaryLoading" class="ai-summary-block mb-6 pa-4 rounded-lg" style="background-color: #f4f9f9; border-left: 4px solid #003D3A;">
+                 <div v-if="(aiSummary || aiSummaryLoading) && !isAdmin" class="ai-summary-block mb-6 pa-4 rounded-lg" style="background-color: #f4f9f9; border-left: 4px solid #003D3A;">
                     <div class="d-flex align-center mb-2">
                       <v-icon color="#003D3A" class="mr-2">mdi-robot</v-icon>
                       <h3 class="text-subtitle-1 font-weight-bold" style="color: #003D3A; margin: 0;">AI Kopsavilkums par atsauksmēm</h3>
