@@ -385,6 +385,18 @@
               :error-messages="validationErrors.nosaukums"
               @input="validationErrors.nosaukums = []"
             ></v-text-field>
+
+            <v-btn
+              color="#003D3A"
+              block
+              class="mb-4 text-white"
+              @click="generateBookData"
+              :loading="isGeneratingBook"
+              depressed
+            >
+              <v-icon left>mdi-robot</v-icon>
+              Aizpildīt datus ar AI (Autors, Gads, Apraksts)
+            </v-btn>
             
             <v-text-field
               v-model="newBook.autors"
@@ -832,6 +844,8 @@ export default {
       showUsersList: false,
       showStatistics: false,
       usersList: [],
+
+      isGeneratingBook: false,
       
       
       newBook: {
@@ -1645,6 +1659,47 @@ export default {
       }
     },
 
+        async generateBookData() {
+      if (!this.newBook.nosaukums.trim()) {
+        this.showNotification('add', 'Lūdzu, vispirms ievadiet grāmatas nosaukumu!', false);
+        return;
+      }
+
+      this.isGeneratingBook = true;
+      try {
+        const response = await fetch('/api/admin/ai-generate-book', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + this.authToken
+          },
+          body: JSON.stringify({
+            nosaukums: this.newBook.nosaukums
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.data) {
+          
+          this.newBook.autors = data.data.autors || this.newBook.autors;
+          this.newBook.gads = data.data.gads || this.newBook.gads;
+          this.newBook.lapu_skaits = data.data.lapu_skaits || this.newBook.lapu_skaits;
+          this.newBook.apraksts = data.data.apraksts || this.newBook.apraksts;
+          
+          this.showNotification('add', 'AI veiksmīgi aizpildīja datus!', true);
+        } else {
+          this.showNotification('add', data.error || 'Kļūda ģenerējot datus', false);
+        }
+      } catch (error) {
+        console.error('AI Generation Error:', error);
+        this.showNotification('add', 'Servera kļūda sazinoties ar AI', false);
+      } finally {
+        this.isGeneratingBook = false;
+      }
+    },
+
+    
     clearValidationErrors() {
       for (let field in this.validationErrors) {
         this.validationErrors[field] = [];

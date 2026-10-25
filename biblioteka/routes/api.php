@@ -157,6 +157,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/stats', [AdminController::class, 'getStats']);
 
     Route::get('/charts-data', [AdminController::class, 'getChartsData']);
+    Route::post('/ai-generate-book', [ChatController::class, 'generateBookData']);
     
 });
 
